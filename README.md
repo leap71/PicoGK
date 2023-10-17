@@ -30,7 +30,7 @@ We encourage other software vendors to support the PicoGKRuntime API and release
 
 **PicoGK**, the C# code, which you have open right now, provides rich functionality based on the PicoGKRuntime interface. It makes it as simple as possible to build computational geometry.
 
-You will, however, ususally not use PicoGK directly to build Computational Engineering Models. We encourage you to look at our other open-source project, the [LEAP 71 ShapeKernel](https://github.com/leap71/ShapeKernel), which was written by Josefine Lissner, and forms the basis of all objects we create at LEAP 71 and uses PicoGK as the foundation.
+You will, however, ususally not use PicoGK directly to build Computational Engineering Models. We encourage you to look at our other open-source project, the [LEAP 71 ShapeKernel](https://github.com/leap71/LEAP71ShapeKernel), which was written by Josefine Lissner, and forms the basis of all objects we create at LEAP 71 and uses PicoGK as the foundation.
 
 [Please head over to our documentation, for how to get started with PicoGK.](Documentation/README.md)
 
