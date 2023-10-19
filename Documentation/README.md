@@ -51,6 +51,6 @@ Check out the other examples from the Examples subdirectory of PicoGK. A fun way
 
 If you look at the code, you will see that it's super simple to create interesting things, even with the basic PicoGK functions.
 
-If you want to seriously dive in, [you should work using the LEAP 71 Shape Kernel.](https://github.com/leap71/LEAP71ShapeKernel) and build your [Computational Engineering Models](https://leap71.com/computationalengineering/) on top.
+If you want to seriously dive in, [you should work using the LEAP 71 Shape Kernel.](https://github.com/leap71/LEAP71_ShapeKernel) and build your [Computational Engineering Models](https://leap71.com/computationalengineering/) on top.
 
 If you'd like to jump into the details of compiling and developing the [PicoGKRuntime, you will find a setup guide here](Compiling_PicoGKRuntime.md).
