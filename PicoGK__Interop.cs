@@ -39,11 +39,6 @@ using System.Text;
 
 namespace PicoGK
 {
-    public partial class Config
-    {
-        public const string strPicoGKLib = strPicoGKLibPath + "picogk.1.0.dylib";
-    }
-
     // private interfaces to external PicoGK Runtime library
 
     public partial class Library
