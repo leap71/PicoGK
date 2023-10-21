@@ -37,15 +37,15 @@ namespace PicoGK
 {
     public partial class Config
     {
-        // Path to the PicoGK Runtime
-        // If you want to load the runtime from a specific path, for example
-        // during development, you can specify it here.
+        // PicoGK Runtime to load
 
-        // Make sure the path ends in / unless it's empty
+        public const string strPicoGKLib = "picogk.1.0"; // dll or dylib
 
-        public const string strPicoGKLibPath = "";
-
-        // Example:
-        // public const string strPicoGKLibPath = "/Users/myuser/PicoGKRuntime/"
+        // if you want to load it from a specific location instead of
+        // a standard system path, you can specify it as well
+        // You need to include the full path, filename and extension such as:
+        //
+        // public const string strPicoGKLib = "/Users/myuser/PicoGKRuntime/picogk.1.0.dylib"
+        //
     }
 }
