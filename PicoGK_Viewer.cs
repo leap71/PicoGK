@@ -118,6 +118,18 @@ namespace PicoGK
                 }
             }
 
+            lock (m_oTLLock)
+            {
+                if (m_oTimeLapse != null)
+                {
+                    if (m_oTimeLapse.bDue(out string strScreenShotPath))
+                    {
+                        _RequestScreenShot(m_hThis, strScreenShotPath);
+                        bUpdateNeeded = true;
+                    }
+                }
+            }
+
             if (bUpdateNeeded)
                 _RequestUpdate(m_hThis);
 
