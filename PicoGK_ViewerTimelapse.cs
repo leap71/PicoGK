@@ -43,14 +43,16 @@ namespace PicoGK
         public void StartTimeLapse( float   fIntervalInMilliseconds,
                                     string  strPath,
                                     string  strFileName = "frame_",
-                                    uint    nStartFrame = 0)
+                                    uint    nStartFrame = 0,
+                                    bool    bPaused = false)
         {
             lock (m_oTLLock)
             {
                 m_oTimeLapse = new( fIntervalInMilliseconds,
                                     strPath,
                                     strFileName,
-                                    nStartFrame);      
+                                    nStartFrame,
+                                    bPaused);      
             }
         }
 
@@ -85,15 +87,17 @@ namespace PicoGK
 
         class TimeLapse
         {
-            public TimeLapse(   float fIntervalInMilliseconds,
-                                string strPath,
-                                string strFileName,
-                                uint nStartFrame)
+            public TimeLapse(   float   fIntervalInMilliseconds,
+                                string  strPath,
+                                string  strFileName,
+                                uint    nStartFrame,
+                                bool    bPaused = false)
             {
-                m_fInterval = fIntervalInMilliseconds;
-                m_strPath = strPath;
-                m_strFileName = strFileName;
+                m_fInterval     = fIntervalInMilliseconds;
+                m_strPath       = strPath;
+                m_strFileName   = strFileName;
                 m_nCurrentFrame = nStartFrame;
+                m_bPaused       = bPaused;
                 
                 m_oStopwatch.Start();
                 UpdateInterval();
@@ -132,14 +136,14 @@ namespace PicoGK
                 m_fNextTime = m_oStopwatch.ElapsedMilliseconds + m_fInterval;
             }
 
-            float m_fInterval;
-            float m_fNextTime;
+            float   m_fInterval;
+            float   m_fNextTime;
 
-            string m_strPath;
-            string m_strFileName;
-            uint m_nCurrentFrame;
+            string  m_strPath;
+            string  m_strFileName;
+            uint    m_nCurrentFrame;
+            bool    m_bPaused;
 
-            bool m_bPaused = false;
             Stopwatch m_oStopwatch = new();
         }
     }

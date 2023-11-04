@@ -351,14 +351,14 @@ namespace PicoGK
 
                 Animation.IAction xAction
                     = new AnimViewRotate(   oViewer,
-                                            new Vector2(oViewer.m_fOrbit,
+                                            new Vector2(    oViewer.m_fOrbit,
                                                             oViewer.m_fElevation),
                                             vecTo);
 
                 Animation oAnim
                     = new Animation(    xAction, 0.7f,
                                         Animation.EType.Once,
-                                        Animation.EEasing.EaseOut);
+                                        Easing.EEasing.CUBIC_OUT);
 
                 oViewer.AddAnimation(oAnim);
             }

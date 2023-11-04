@@ -47,12 +47,10 @@ namespace PicoGK
 
         public enum EType   { Once, Repeat, Wiggle };
 
-        public enum EEasing { Linear, EaseOut, EaseIn, EaseInOut };
-
-        public Animation(   IAction xAction,
-                            float fDurationInSeconds,
-                            EType eType,
-                            EEasing eEasing)
+        public Animation(   IAction         xAction,
+                            float           fDurationInSeconds,
+                            EType           eType,
+                            Easing.EEasing  eEasing)
         {
             m_xAction = xAction;
             m_fDuration = fDurationInSeconds;
@@ -67,6 +65,7 @@ namespace PicoGK
 
         public bool bAnimate(float fCurrentTime)
         {
+            Library.Log($"Animation t={fCurrentTime}");
             if (m_fStartTime == 0.0f)
             {
                 // Start
@@ -100,45 +99,21 @@ namespace PicoGK
             if (m_bReverse)
                 fPos = 1.0f - fPos;
 
-            if (m_eEasing == EEasing.Linear)
-            {
-                m_xAction.Do(fPos);
-            }
-            else
-            {
-                float fStep0 = 0.2f;
-                float fStep1 = 0.8f;
+            float fInterpolated = Easing.fEasingFunction(fPos, m_eEasing);
 
-                if (m_eEasing == EEasing.EaseIn)
-                {
-                    fStep0 = 0.5f;
-                    fStep1 = 1.1f;
-                }
-                else if (m_eEasing == EEasing.EaseOut)
-                {
-                    fStep0 = -0.1f;
-                    fStep1 = 0.5f;
-                }
-
-                m_xAction.Do(fSmoothStep(fStep0, fStep1, fPos));
-            }
-
+            Library.Log($"Animation ti={fInterpolated}");
+            m_xAction.Do(fInterpolated);
+            
             return true;
         }
 
         float m_fStartTime = 0.0f;
         bool m_bReverse = false;
 
-        IAction m_xAction;
-        float m_fDuration;
-        EType m_eType;
-        EEasing m_eEasing;
-
-        public static float fSmoothStep(float edge0, float edge1, float x)
-        {
-            x = Math.Clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-            return x * x * (3 - 2 * x);
-        }
+        IAction         m_xAction;
+        float           m_fDuration;
+        EType           m_eType;
+        Easing.EEasing  m_eEasing;
     }
 
     public class AnimationQueue
