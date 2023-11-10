@@ -65,7 +65,6 @@ namespace PicoGK
 
         public bool bAnimate(float fCurrentTime)
         {
-            Library.Log($"Animation t={fCurrentTime}");
             if (m_fStartTime == 0.0f)
             {
                 // Start
@@ -101,7 +100,6 @@ namespace PicoGK
 
             float fInterpolated = Easing.fEasingFunction(fPos, m_eEasing);
 
-            Library.Log($"Animation ti={fInterpolated}");
             m_xAction.Do(fInterpolated);
             
             return true;
