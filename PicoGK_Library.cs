@@ -187,14 +187,26 @@ namespace PicoGK
 
                         if (strSrcFolder == "")
                         {
+                            strLightsFile = Path.Combine(Utils.strDocumentsFolder(), "PicoGKDefaultEnv.zip");
+                        }
+                        else
+                        {
                             strLightsFile = Path.Combine(strSrcFolder, "PicoGKDefaultEnv.zip");
+                        }
+
+                        if (!File.Exists(strLightsFile))
+                        {
+                            strSearched += strLightsFile + "\n";
+
+                            strLightsFile = Path.Combine(Utils.strExecutableFolder(), "ViewerEnvironment.zip");
+
                             if (!File.Exists(strLightsFile))
                             {
                                 strSearched += strLightsFile + "\n";
-                            }
-                            else
-                            {
-                                Log($"Could not find a lights file - your viewer will look quite dark.\nSearched in\n{strSearched}\n");
+
+                                Log($"Could not find a lights file - your viewer will look quite dark.");
+                                Log($"Searched in:");
+                                Log($"{strSearched}");
                                 Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
                                 Log("or providing the file as a parameter at Library.Go()");
                             }
