@@ -151,9 +151,29 @@ namespace PicoGK
 
                 Log("Welcome to PicoGK");
 
-                // Create a config using physical coordinates
-                _Init(fVoxelSizeMM);
-                // Done creating C++ Library
+                try
+                {
+                    // Create a config using physical coordinates
+                    _Init(fVoxelSizeMM);
+                    // Done creating C++ Library
+                }
+
+                catch (Exception e)
+                {
+                    Log($"-----------------------------------------");
+                    Log($"-- Could not initialize PicoGK Library --");
+                    Log($"-----------------------------------------");
+                    Log($"Most likely cause is that the PicoGK runtime library wasn't found");
+                    Log($"Make sure {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.");
+                    Log($"See PicoGK documentation on GitHub for troubleshooting info");
+                    Log($"Terribly long error string follows (usually devoid of real information):");
+                    Log($"--------------------------------");
+                    Log($"-");
+                    Log($"{e}\n");
+                    Log($"-");
+                    Log($"--------------------------------");
+                    throw new Exception("Failed to load PicoGK Library");
+                }
 
                 if (strLightsFile == "")
                 {
