@@ -98,6 +98,16 @@ namespace PicoGK
             return str;
         }
 
+        /// <summary>
+        /// Returns the path to the source folder of PicoGK, making the following
+        /// Assumptions:
+        /// - PicoGK is contained in a subfolder named "PicoGK" inside your
+        ///   main project, so your path is MyProject/PicoGK
+        /// - The executable .NET DLL is in its usual place
+        /// This function is used mainly to load the viewer environment and
+        /// test files used in the PicoGK examples
+        /// </summary>
+        /// <returns>The assumed path to the PicoGK source code</returns>
         static public string strPicoGKSourceCodeFolder()
         {
             string strPath = Environment.CommandLine;
@@ -109,6 +119,16 @@ namespace PicoGK
             strPath = Path.Combine(strPath, "PicoGK");
 
             return strPath;     
+        }
+
+        /// <summary>
+        /// Returns the path in which your current executable resides
+        /// </summary>
+        /// <returns>The folder in which your executable resides</returns>
+        static public string strExecutableFolder()
+        {
+            string strExePath = System.Reflection.Assembly.GetExecutingAssembly().Location ?? "";
+            return System.IO.Path.GetDirectoryName(strExePath) ?? "";
         }
 
         /// <summary>
