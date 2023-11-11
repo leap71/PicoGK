@@ -60,7 +60,7 @@ namespace PicoGK
         /// <param name="fPostScale">Scale parameter to be applied before offset</param>
         /// <param name="vecPostOffsetMM">Offset parameter to be applied last</param>
         /// <returns>Returns a valid mesh in any case. If file was invalid, the mesh may be empty.</returns>
-        public static Mesh mshFromStlFile( string strFilePath,
+        public static Mesh mshFromStlFile(  string strFilePath,
                                             EStlUnit eLoadUnit = EStlUnit.AUTO, // use units from file, or mm when not spec'd
                                             float fPostScale = 1.0f,
                                             Vector3? vecPostOffsetMM = null)
@@ -69,7 +69,7 @@ namespace PicoGK
 
             using (FileStream oFile = new FileStream(strFilePath, FileMode.Open, FileAccess.Read))
             {
-                oMesh = oFromStlFile(   oFile,
+                oMesh = mshFromStlFile( oFile,
                                         eLoadUnit,
                                         fPostScale,
                                         vecPostOffsetMM);
@@ -79,10 +79,10 @@ namespace PicoGK
         }
 
 
-        public static Mesh oFromStlFile(    FileStream fileStream,
-                                            EStlUnit eLoadUnit = EStlUnit.AUTO, // use units from file, or mm when not spec'd
-                                            float fPostScale = 1.0f,
-                                            Vector3? vecPostOffsetMM = null)
+        public static Mesh mshFromStlFile(  FileStream  oFile,
+                                            EStlUnit    eLoadUnit       = EStlUnit.AUTO, // use units from file, or mm when not spec'd
+                                            float       fPostScale      = 1.0f,
+                                            Vector3?    vecPostOffsetMM = null)
         {
             string strHeader = "";
 
@@ -90,9 +90,8 @@ namespace PicoGK
 
             if (vecPostOffsetMM is not null)
                 vecOffset = (Vector3)vecPostOffsetMM;
-
             
-            using (BinaryReader oReader = new BinaryReader(fileStream, Encoding.ASCII))
+            using (BinaryReader oReader = new BinaryReader(oFile, Encoding.ASCII))
             {
                 byte[] byHeader = new byte[80];
                 oReader.Read(byHeader, 0, 80);
@@ -270,7 +269,7 @@ namespace PicoGK
             }
         }
 
-        void DoReadMeshFromAsciiStl(BinaryReader oReader,
+        void DoReadMeshFromAsciiStl(    BinaryReader oReader,
                                         EStlUnit eLoadUnit,
                                         float fPostScale,
                                         Vector3 vecPostOffsetMM)
@@ -296,7 +295,7 @@ namespace PicoGK
             public ushort AttributeByteCount;
         }
 
-        void DoReadMeshFromBinaryStl(BinaryReader oReader,
+        void DoReadMeshFromBinaryStl(   BinaryReader oReader,
                                         EStlUnit eLoadUnit,
                                         float fPostScale,
                                         Vector3 vecPostOffsetMM)
