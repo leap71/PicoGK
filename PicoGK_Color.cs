@@ -160,6 +160,14 @@ namespace PicoGK
             A = clr.A / 255.0f;
         }
 
+        public ColorFloat(ColorFloat clr, float fAlphaOverride)
+        {
+            R = clr.R;
+            G = clr.G;
+            B = clr.B;
+            A = fAlphaOverride;
+        }
+
         /// <summary>
         /// Return a random color
         /// </summary>
@@ -168,7 +176,7 @@ namespace PicoGK
         {
             Random oRandom = oRand ?? new Random();
 
-            return new ColorFloat(oRandom.NextSingle(),
+            return new ColorFloat(  oRandom.NextSingle(),
                                     oRandom.NextSingle(),
                                     oRandom.NextSingle());
         }
