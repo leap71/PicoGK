@@ -8,7 +8,7 @@ On Windows, you need **Visual Studio 2022 Community Edition** (or higher) with C
 
 On Mac, you need the latest version of **XCode** with C++ support, and the XCode command line tools.
 
-In addition you need a current version of **CMake** (Download at https://cmake.org/) 
+In addition you need a current version of **CMake** (Download at https://cmake.org/) and **Git** (Download at https://git-scm.com/downloads) — install both with the default settings, on Windows you need to restart so that Git can be found when using the command line.
 
 ## Installing dependent libraries
 
@@ -23,7 +23,6 @@ To facilitate the installation of these dependencies, we have provided you with 
 On Mac, please run **PicoGKRuntime/Install_Dependencies/Mac.sh**
 
 On Windows, please run **PicoGKRuntime/Install_Dependencies/Win.bat** 
-Note: you may have to run Win.bat twice, due to a bug we haven't found yet. It works after the second time.
 
 The installation of the dependencies may take a while, especially on Windows.
 
