@@ -39,6 +39,16 @@ namespace PicoGK
 {
     public class Utils
     {
+        static string strStripQuotesFromPath(string strPath)
+        {
+            if (strPath.StartsWith("\"") && strPath.EndsWith("\""))
+            {
+                return strPath.Substring(1, strPath.Length - 2);
+            }
+
+            return strPath;
+        }
+
         /// <summary>
         /// Returns the path to the home folder (cross platform compatible)
         /// </summary>
@@ -110,7 +120,8 @@ namespace PicoGK
         /// <returns>The assumed path to the PicoGK source code</returns>
         static public string strPicoGKSourceCodeFolder()
         {
-            string strPath = Environment.CommandLine;
+            string strPath = strStripQuotesFromPath(Environment.CommandLine);
+
             for (int n = 0; n < 4; n++)
             {
                 strPath = Path.GetDirectoryName(strPath) ?? "";
