@@ -1,6 +1,8 @@
 # Compiling the PicoGK Runtime
 
-We compiled and tested PicoGKRuntime on Windows 64 bit and MacOS 14 Sonoma. Since Mac is our primary work environnment, we have tested it on Mac significantly more than on Windows. There is, however, nothing fundamentally platform-specific about PicoGK. The main platform dependencies are well-established libraries like OpenVDB. Our code is very straightforward and mostly header-only C++ code.
+We compiled and tested PicoGKRuntime on Windows 64 bit and MacOS 14 Sonoma on ARM-based Macs. Since Mac is our primary work environment, we have tested it on Mac significantly more than on Windows. There is, however, nothing fundamentally platform-specific about PicoGK. The main platform dependencies are well-established libraries like OpenVDB. [CorrieVS has forked PicoGK and made a docker environment for LINUX, check it out here.](https://github.com/CorrieVS/PicoGK)
+
+Our code is very straightforward and mostly header-only C++ code.
 
 ## What you need
 
@@ -8,17 +10,29 @@ On Windows, you need **Visual Studio 2022 Community Edition** (or higher) with C
 
 On Mac, you need the latest version of **XCode** with C++ support, and the XCode command line tools.
 
-In addition you need a current version of **CMake** (Download at https://cmake.org/) and **Git** (Download at https://git-scm.com/downloads) — install both with the default settings, on Windows you need to restart so that Git can be found when using the command line.
+In addition you need a current version of **CMake** (Download at https://cmake.org/) and **Git** (Download at https://git-scm.com/downloads) — install both with the default settings. 
 
-## Installing dependent libraries
+**On Windows you need to restart so that Git can be found when using the command line.**
 
-First clone the **PicoGKRuntime** repository to your machine. 
+## Preparing the project
 
-Make sure to initialize the submodules (**git submodule update --init --recursive**), so that the OpenVDB submodule is properly initialized.
+First clone the **[PicoGKRuntime](https://github.com/leap71/PicoGKRuntime)** repository to your machine. The Git path is:
+
+```
+https://github.com/leap71/PicoGKRuntime
+```
+
+Make sure to initialize the submodules, so that the OpenVDB submodule is properly initialized.
+
+```
+git submodule update --init --recursive
+```
 
 PicoGKRuntime has no dependencies besides **OpenVDB** and **GLFW** (which is fetched automatically), but those libraries have plenty of dependencies (boost, blosc, etc).
 
 To facilitate the installation of these dependencies, we have provided you with two scripts that download and install everything needed.
+
+## Installing OpenVDB dependencies
 
 On Mac, please run **PicoGKRuntime/Install_Dependencies/Mac.sh**
 
@@ -28,7 +42,7 @@ The installation of the dependencies may take a while, especially on Windows.
 
 After you have done this, you can move onto compiling the PicoGK Runtime.
 
-## Preparing the PicoGK Runtime Build Environment
+## Preparing the PicoGKRuntime build environment
 
 Start the CMake GUI client and specify the path to the PicoGKRuntime repository in **"Where is the source code"**.
 
@@ -44,24 +58,34 @@ Now you can compile PicoGKRuntime on your system.
 
 ## Compiling
 
-On Mac, go to the **Build** subdirectory in **Terminal** and type **make** [enter] to run the make tool. The build process should start and you will get the compiled picogk.1.0.dylib in the Dist subfolder of PicoGKRuntime.
+On Mac, go to the **Build** subdirectory in **Terminal** and type **make** [enter] to run the make tool. The build process should start and you will get the compiled picogk.*version*.dylib in the Dist subfolder of PicoGKRuntime.
 
 On Windows, open the resulting project in Visual Studio and compile (use the release version).
 
-## Using the compiled Runtime
+## Using the compiled runtime
 
 You either copy the resulting library to /usr/local/lib on Mac or the System32 folder on Windows (or any other folder that is in your system path).
 
-A cleaner way, when you are still testing is to modify the path in the PicoGK C# library. You do this by opening PicoGK__Config.cs and pointing the path to your compiled library:
+If you don't want to copy to your system folders, you can adjust the path that PicoGK loads it from in the PicoGK/PicoGK__Config.cs file in your PicoGK submodule:
 
-<img src="images/image-20231014185209784.png" alt="image-20231017164620416" style="zoom:50%;" />
+```C#
+public const string strPicoGKLib = "picogk.1.1"; // dll or dylib
+```
 
-One last thing — on Mac, you may have to sign the library using the **codesign** tool. Otherwise the library may not load. 
+You can change this constant to load it from a specific location. However make sure to include the .dylib or .dll extension, as otherwise it will not work:
+
+```C#
+public const string strPicoGKLib = "/Users/myuser/GitHub/PicoGKRuntime/Dist/picogk.1.1.0.dylib";
+```
+
+On Windows, make sure all the DLLs from the OpenVDB dependencies are also in the same folder as the picogk.*version*.dll (or in Windows/System32). At this time these are **blosc.dll** and **lz4.dll**. You will find them in **Install_Dependencies\vcpkg\installed\x64-windows\bin**. These files were created when you ran Win.bat before you built PicoGKRuntime.
 
 ## Code signing on the Mac
 
-The necessary command line is **codesign -s LEAP71 picogk.1.0.dylib** — you need to have a valid code signing certificate for this (we used one we named LEAP71 — you can self issue this certificate, but it's a few steps).
+One last thing — on Mac, you may have to sign the library using the **codesign** tool. Otherwise the library may not load. 
+
+The necessary command line is **codesign -s LEAP71 picogk.*version*.dylib** — you need to have a valid code signing certificate for this (we used one we named LEAP71 — you can self issue this certificate, but it's a few steps).
 
 Here is a relevant Apple article how to create self-signed certificates: https://support.apple.com/en-ae/guide/keychain-access/kyca8916/mac
 
-[You may have to adjust your security settings as described here.](../Runtime/readme.md)
+[You may have to adjust your security settings as described here.](MacSecurity.md)
