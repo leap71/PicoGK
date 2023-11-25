@@ -1,8 +1,8 @@
-# Installing on MacOS X
+# Installing on macOS X
 
 ## Installing the PicoGK Runtime
 
-At this time, we have installers for MacOS X on ARM (Apple M1 upwards). There is no Intel support yet (you can compile on an Intel Mac, but we do not have Intel machines.).
+At this time, we have installers for macOS X on ARM (Apple M1 upwards). There is no Intel support yet (you can compile on an Intel Mac, but we do not have Intel machines.).
 
 [Download the MacOS X installer disk image of the latest release.](https://github.com/leap71/PicoGK/releases)
 
