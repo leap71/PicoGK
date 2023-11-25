@@ -1,56 +1,138 @@
 # PicoGK Documentation
 
-![PicoGKSketched](images/PicoGKSketched.jpg)
+![PicoGK](images/PicoGK.jpg)
 
 ## Getting Started
 
-**PicoGK is available and tested on MacOS X at this time. A Windows release will follow in the coming weeks.**
-
 As a Computational Engineer, you write code to create sophisticated geometry. If you don't know how to code, there are many good tutorials available online. 
 
-PicoGK uses the C# language, a modern, fast, expressive and strongly-typed language that allow you to build complex algorithms using a simple syntax. If you are new to coding, don't despair! We have tried to make it as simple as possible to get started.
+PicoGK uses the C# language, a modern, fast, expressive and strongly-typed language that allows you to build complex algorithms using a simple syntax. If you are new to coding, don't despair! We have tried to make it as simple as possible to get started.
 
-To install PicoGK, [follow this link](installation.md) for installation instructions.
+The easiest way to get started [is to use the installers to install PicoGK on your machine](https://github.com/leap71/PicoGK/releases). At this time, our installers are not yet signed, which causes security warnings when you install on Mac. [Here is how](MacSecurity.md) to work around this issue. ([If you don't trust us, you can always compile yourself](Compiling_PicoGKRuntime.md)).
 
-Now let's dive in.
+You also need either [Visual Studio](https://visualstudio.microsoft.com/vs/getting-started/) or [Visual Studio Code](https://code.visualstudio.com/) — generally speaking Visual Studio is a bit easier to set up (it has been discontinued on Mac, but will work for another year or so).
 
-## Your first PicoGK App
+## Folder structure of a PicoGK project
 
-For experts, here are the quick steps: In your **Program.cs** you call **PicoGK.Library.Go** with the voxel size and the task you want to execute. There are many example tasks in the **Examples** subfolder of the PicoGK repository.
+Generally speaking, your PicoGK projects will look like this:
 
-**For detailed steps, read on.**
+<img src="images/image-20231125165618361.png" alt="image-20231125165618361" style="zoom: 50%;" />
 
-We assume you have followed the [Installation Guide](installation.md) and have created an empty Console application in Visual Studio.
+/**PicoGK Example** (your project folder)
 
-Open your Visual Studio project. **Program.cs** should already be open.
+- **Program.cs** (your main execution code)
+- ... other files (for example the Visual Studio project file)
+   - **/PicoGK** (contains the PicoGK submodule)
+   - **/ShapeKernel** (contains the LEAP71_ShapeKernel submodule)
+   - **/LatticeLibrary** (contains the LEAP71_Lattice submodule)
+   - ... other submodules
 
-It should look something like this
+**Program.cs** contains the code that executes your program. The PicoGK subfolder contains the source code of the PicoGK library. Under the hood PicoGK's C# code calls the PicoGK C++ runtime library for the heavy lifting. As many functions as possible are implemented directly in C# code, to make it as simple as possible to understand what is actually going on. Feel free to step into all functions using the debugger.
 
-<img src="images/image-20231014161615187.png" alt="image-20231014161615187" style="zoom:50%;" />
+If you have installed PicoGK using the installer, it you already have an example project in your **Documents** folder named **PicoGK Example**, which is ready to run.
 
-Replace the text there with the following:
+## Running your first PicoGK App
+
+Opening and running your first PicoGK app looks a bit different between VisualStudio Code and VisualStudio. If you are new to this, here are detailed steps:
+
+- Running PicoGK Example on [VisualStudio](VisualStudio_FirstTime.md)
+- Running PicoGK Example on [VisualStudio Code](VisualStudioCode_FirstTime.md)
+
+Open **Program.cs** and you will see the following code.
 
 ```c#
-PicoGK.Library.Go(  0.5f, 
-                  	PicoGKExamples.BooleanShowCase.Task);
+try
+{
+	PicoGK.Library.Go(0.5f, PicoGKExamples.BooleanShowCase.Task);
+}
+
+catch (Exception e)
+{
+	// Apparently something went wrong, output here
+	Console.WriteLine(e);
+}
 ```
 
-<img src="images/image-20231014184822502.png" alt="image-20231014184822502" style="zoom:50%;" />
+Inside the **try** block is the call to the PicoGK Library to run the task **PicoGKExamples.BooleanShowCase.Task** with the voxel size 0.5mm. 
 
-And run it.
+If something goes wrong in this task, an exception (an error) is thrown. The error will then be printed to the console output, so you can understand what went wrong.
 
-![image-20231014184919894](images/image-20231014184919894.png)If everything is right, a window will open, showing you a few spheres that are combined using Boolean operations. You can click and drag in the viewer to rotate, scroll to zoom, and use the cursor keys to rotate by 15º. The viewer is basic but functional.
+You can run your first project by pressing the F5 key (or choosing Run). If everything goes right, this is what you see. 
 
-If you are not seeing this window, you can check out the console window at the bottom of Visual Studio to see any error messages. These messages are also written to **PicoGK.log** in your Documents folder (you can change the location if you don't like that). One thing you may have to do on [Mac is adjust the security settings](../Runtime/README.md), so PicoGK can load the pre-compiled PicoGKRuntime. [If you want to compile it yourself, here are the instructions](Compiling_PicoGKRuntime.md).
+<img src="images/image-20231014184919894.png" alt="image-20231014184919894" style="zoom:33%;" />
 
-[Drop us a note in the discussion section of this repository](https://github.com/leap71/PicoGK/discussions), if you have any issues, and we will do our best to help. The most common problem is that the PicoGK Runtime library cannot be found. Double check if you copied it to the right system folder.
+The example showcases a few boolean operations. 
 
-Congratulations, you can now code in PicoGK!
+**If it looks like that, congratulations, you are up and running!**
 
-Check out the other examples from the Examples subdirectory of PicoGK. A fun way to work your way through is by simply typing a dot behind the PicoGKExamples namespace ID, as below, and you will see all the options. Just don't forget to add "Task" at the end.
+You can browse to the [PicoGK/Examples/Ex_BooleanShowCase.cs](https://github.com/leap71/PicoGK/blob/main/Examples/Ex_BooleanShowCase.cs) file and check out the code. 
+
+On Mac, you will get a few **security warnings** that are a tedious, because our libraries are unsigned. [Here is how to solve this](MacSecurity.md).
+
+What you have on screen is the **PicoGK Viewer**. You can click and drag in the viewer to rotate, scroll to zoom, and use the cursor keys to rotate by 15º. The viewer seems basic but has many powerful functions, including the ability to show objects in multiple colors, animate the view, save screenshots and even create timelapse animations. If you like to test this out, check out the the [PicoGKExamples.TimeLapseAnimation.Task](https://github.com/leap71/PicoGK/blob/main/Examples/Ex_TimelapseAnimation.cs). We have animated entire gear trains and other moving objects in the viewer.
+
+## Creating your own app
+
+One of the easiest ways to get set up, is to simply copy the example to a new directory and rename the project file. Alternatively, If you know how to use Git/GitHub, here are the steps to create a new app:
+
+- [Create a new **C# Console Project**](VisualStudio_CreateConsole.md) and add it to Git
+- **Add PicoGK as submodule** using Git, and initialize it
+- Add [LEAP71_ShapeKernel](https://github.com/leap71/LEAP71_ShapeKernel) and other [modules](https://github.com/leap71?tab=repositories) as needed.
+- In your Program.cs, call **Library.Go()** with the appropriate parameters
+
+## What's next?
+
+Check out the other examples from the Examples subdirectory of PicoGK. A fun way to work your way through is by simply typing a **dot** behind the **PicoGKExamples** namespace ID, as below, and you will see all the options. Just don't forget to add **Task** at the end.
+
+<img src="images/image-20231125184538276.png" alt="image-20231125184538276" style="zoom:50%;" />
 
 If you look at the code, you will see that it's super simple to create interesting things, even with the basic PicoGK functions.
 
-If you want to seriously dive in, [you should work using the LEAP 71 Shape Kernel.](https://github.com/leap71/LEAP71_ShapeKernel) and build your [Computational Engineering Models](https://leap71.com/computationalengineering/) on top.
+If you want to seriously dive in, **[you should work using the LEAP 71 Shape Kernel.](https://github.com/leap71/LEAP71_ShapeKernel)** and build your [Computational Engineering Models](https://leap71.com/computationalengineering/) on top.
+
+[Check out the main LEAP 71 GitHub page for more modules and links to articles.](https://github.com/leap71)
 
 If you'd like to jump into the details of compiling and developing the [PicoGKRuntime, you will find a setup guide here](Compiling_PicoGKRuntime.md).
+
+## Troubleshooting
+
+### Cannot install on Mac, because of security warnings
+
+At this time, both our installers and our libraries are not signed. So MacOS X will refuse to run the installer. [You can solve this by following these steps.](MacSecurity.md)
+
+### First time I run on Mac, I get multiple security warnings
+
+Same as above, this is because our runtime libraries and their dependencies are not signed (yet). [Here's how to fix this.](MacSecurity.md)
+
+### PicoGK.log
+
+### PicoGK.log
+
+PicoGK writes a detailed log of what is going on into **PicoGK.log**, which, by default, is located in your **Documents** folder. If you don't want us to spam your Documents folder, simply provide the path as the third parameter like this:
+
+```c#
+PicoGK.Library.Go(0.5f, PicoGKExamples.BooleanShowCase.Task, "/Users/username/Documents/LogMeHere");
+```
+
+ It must be an existing folder, though.
+
+### I get a salad of errors and nothing works
+
+The most likely issue is that the PicoGKRuntime library is not installed on your system. Unfortunately the error message that VisualStudio shows looks like this and is barely decipherable:
+
+<img src="images/image-20231125170514595.png" alt="image-20231125170514595" style="zoom:50%;" />
+
+If you installed from the installers, this should not happen. If you compiled yourself, either the library or one of the dependencies is missing, or the library is not signed and thus not loadable.
+
+### My viewer is dark
+
+<img src="images/image-20231125171044858.png" alt="image-20231125171044858" style="zoom: 33%;" />
+
+If your viewer looks like this, then the PicoGK Viewer did not find the textures for the image-based lighting environment. The most likely case is that your folder structure is different from what we described in the first steps of this document. **PicoGK Viewer assumes that PicoGK is in a subfolder named PicoGK** directly in your main project directory. If this isn't the case, it cannot find the file **PicoGK/ViewerEnvironment/PicoGKDefaultEnv.zip** and the scene is unlit. The easiest way to solve this is to follow the folder structure we described. Alternatively, you can provide a path to the ViewerEnvironment in a parameter to Library.Go.
+
+### Where can I get help
+
+PicoGK is open source and there is no support or dedicated team to answer questions. But [drop us a note in the discussion section of the PicoGK repository](https://github.com/leap71/PicoGK/discussions), if you have any issues, and we will do our best to help.
+
+![9CF66413-8BA1-4E18-9BA7-F5254235B44A](images/9CF66413-8BA1-4E18-9BA7-F5254235B44A.jpeg)
+
