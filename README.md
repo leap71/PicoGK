@@ -1,3 +1,5 @@
+# ![PicoGK](Documentation/images/PicoGK.jpg)
+
 # Welcome to PicoGK
 
 PicoGK ("peacock") is a compact, robust, and fast geometry kernel for Computational Engineering. 
@@ -9,6 +11,10 @@ For more information, please visit https://PicoGK.org
 We believe that [Computational Engineering](https://leap71.com/computationalengineering/) will profoundly change the way we design physical objects in the years to come. But it needs a neutral, transparent and free and open-source platform in order to be adopted widely.
 
 By developing and maintaining PicoGK, we hope to make a contribution to accelerate the progress of invention.
+
+**To get started with PicoGK, please jump over to the [documentation](documentation/readme.md).**
+
+To understand what can be done with PicoGK, what other modules we have, we recommend checking out the [LEAP 71 Github Overview Page](https://github.com/leap71) — this also has pointers to articles about the fundamentals of Computational Engineering.
 
 ![9CF66413-8BA1-4E18-9BA7-F5254235B44A](Documentation/images/9CF66413-8BA1-4E18-9BA7-F5254235B44A.jpeg)
 
