@@ -8,7 +8,11 @@ As a Computational Engineer, you write code to create sophisticated geometry. If
 
 PicoGK uses the C# language, a modern, fast, expressive and strongly-typed language that allows you to build complex algorithms using a simple syntax. If you are new to coding, don't despair! We have tried to make it as simple as possible to get started.
 
-The easiest way to get started [is to use the installers to install PicoGK on your machine](https://github.com/leap71/PicoGK/releases). At this time, our installers are not yet signed, which causes security warnings when you install on Mac. [Here is how](MacSecurity.md) to work around this issue. ([If you don't trust us, you can always compile yourself](Compiling_PicoGKRuntime.md)).
+The easiest way to get started [is to use the installers to install PicoGK on your machine](https://github.com/leap71/PicoGK/releases). 
+
+- [Here is how to install on MacOS X](Install_Mac.md)
+
+- [Here is how to install on Windows](Install_Windows.md)
 
 You also need either [Visual Studio](https://visualstudio.microsoft.com/vs/getting-started/) or [Visual Studio Code](https://code.visualstudio.com/) — generally speaking Visual Studio is a bit easier to set up (it has been discontinued on Mac, but will work for another year or so).
 
