@@ -12,7 +12,7 @@ We believe that [Computational Engineering](https://leap71.com/computationalengi
 
 By developing and maintaining PicoGK, we hope to make a contribution to accelerate the progress of invention.
 
-**To get started with PicoGK, please jump over to the [documentation](documentation/readme.md).**
+**To get started with PicoGK, please jump over to the [documentation](Documentation/README.md).**
 
 To understand what can be done with PicoGK, what other modules we have, we recommend checking out the [LEAP 71 Github Overview Page](https://github.com/leap71) — this also has pointers to articles about the fundamentals of Computational Engineering.
 
