@@ -12,8 +12,6 @@ Agree to the licensing terms and wait for the download of the installation packa
 
 <img src="images/VisualStudio2022GettingInstallerReady.png" style="zoom:50%;" />
 
-
-
 Select .NET desktop development and accept the defaults by clicking on Install.
 
 <img src="images/VisualStudio2022Options.png" style="zoom:50%;" />
@@ -24,7 +22,7 @@ Wait for the installation to finish.
 
 After VisualStudio 2022 is installed, click the Launch button.
 
-*Also, close the installer after you launched Visual Studio. Sometimes Visual Studio needs to install additional packages, and it fails, if the installer is still running.*
+*Also, close the installer after you launched Visual Studio. Sometimes Visual Studio needs to install additional packages, and this process fails, if the installer is still running in the background.*
 
 <img src="images/VisualStudio2022Launch.png" style="zoom:50%;" />
 
@@ -32,7 +30,7 @@ Congratulations, you have Visual Studio up and running.
 
 ## Running the PicoGK Example Project
 
-After you launched VisualStudio 2022, you the welcome screen is shown. **Choose Open a project or solution**
+After you launched VisualStudio, you the welcome screen is shown. **Choose Open a project or solution**
 
 <img src="images/VisualStudio2022Welcome.png" style="zoom:50%;" />
 

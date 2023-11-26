@@ -17,13 +17,14 @@ The easiest way to get started [is to use the installers to install PicoGK on yo
 You also need either [Visual Studio](https://visualstudio.microsoft.com/vs/getting-started/) or [Visual Studio Code](https://code.visualstudio.com/) — generally speaking Visual Studio is a bit easier to set up (it has been discontinued on Mac, but will work for another year or so).
 
 - [Installing Visual Studio](VisualStudio_FirstTime.md)
+
 - [Installing Visual Studio Code](VisualStudioCode_FirstTime.md)
 
 ## Folder structure of a PicoGK project
 
 Generally speaking, your PicoGK projects will look like this:
 
-<img src="images/image-20231125165618361.png" alt="image-20231125165618361" style="zoom: 50%;" />
+<img src="images/image-20231125165618361.png" style="zoom: 33%;" />
 
 /**PicoGK Example** (your project folder)
 
@@ -43,7 +44,7 @@ If you have installed PicoGK using the installer, it you already have an example
 Opening and running your first PicoGK app looks a bit different between VisualStudio Code and VisualStudio. If you are new to this, here are detailed steps:
 
 - Running PicoGK Example on [VisualStudio](VisualStudio_FirstTime.md#Running-the-PicoGK-Example-Project)
-- Running PicoGK Example on [VisualStudio Code](VisualStudioCode_FirstTime.md#Opening-and-running the-PicoGK-test-project-in-Visual-Studio-Code)
+- Running PicoGK Example on [VisualStudio Code](VisualStudioCode_FirstTime.md#Opening-and-running-the-PicoGK-test-project-in-Visual-Studio-Code)
 
 Open **Program.cs** and you will see the following code.
 
@@ -60,13 +61,13 @@ catch (Exception e)
 }
 ```
 
-Inside the **try** block is the call to the PicoGK Library to run the task **PicoGKExamples.BooleanShowCase.Task** with the voxel size 0.5mm. 
+Inside the **try** block is the call to the PicoGK Library to run the task **PicoGKExamples.BooleanShowCase.Task** with a voxel size 0.5mm. 
 
 If something goes wrong in this task, an exception (an error) is thrown. The error will then be printed to the console output, so you can understand what went wrong.
 
 You can run your first project by pressing the F5 key (or choosing Run). If everything goes right, this is what you see. 
 
-<img src="images/image-20231014184919894.png" alt="image-20231014184919894" style="zoom:33%;" />
+<img src="images/image-20231014184919894.png" style="zoom:33%;" />
 
 The example showcases a few boolean operations. 
 
@@ -76,7 +77,7 @@ You can browse to the [PicoGK/Examples/Ex_BooleanShowCase.cs](https://github.com
 
 On Mac, you will get a few **security warnings** that are a tedious, because our libraries are unsigned. [Here is how to solve this](MacSecurity.md).
 
-What you have on screen is the **PicoGK Viewer**. You can click and drag in the viewer to rotate, scroll to zoom, and use the cursor keys to rotate by 15º. The viewer seems basic but has many powerful functions, including the ability to show objects in multiple colors, animate the view, save screenshots and even create timelapse animations. If you like to test this out, check out the the [PicoGKExamples.TimeLapseAnimation.Task](https://github.com/leap71/PicoGK/blob/main/Examples/Ex_TimelapseAnimation.cs). We have animated entire gear trains and other moving objects in the viewer.
+What you have on screen is the **PicoGK Viewer**. You can click and drag in the viewer to rotate, scroll to zoom, and use the cursor keys to rotate by 15º. The viewer may seem basic but has many powerful functions, including the ability to show objects in multiple colors, animate the view, save screenshots and even create timelapse animations. If you like to test this out, check out the the [PicoGKExamples.TimeLapseAnimation.Task](https://github.com/leap71/PicoGK/blob/main/Examples/Ex_TimelapseAnimation.cs). We have animated entire gear trains and other moving objects in the viewer.
 
 ## Creating your own app
 
@@ -91,7 +92,7 @@ One of the easiest ways to get set up, is to simply copy the example to a new di
 
 Check out the other examples from the Examples subdirectory of PicoGK. A fun way to work your way through is by simply typing a **dot** behind the **PicoGKExamples** namespace ID, as below, and you will see all the options. Just don't forget to add **Task** at the end.
 
-<img src="images/image-20231125184538276.png" alt="image-20231125184538276" style="zoom:50%;" />
+<img src="images/image-20231125184538276.png" style="zoom:33%;" />
 
 If you look at the code, you will see that it's super simple to create interesting things, even with the basic PicoGK functions.
 
@@ -105,7 +106,7 @@ If you'd like to jump into the details of compiling and developing the [PicoGKRu
 
 ### Cannot install on Mac, because of security warnings
 
-At this time, both our installers and our libraries are not signed. So MacOS X will refuse to run the installer. [You can solve this by following these steps.](MacSecurity.md)
+At this time, both our installers and our libraries are not signed. So macOS will refuse to run the installer. [You can solve this by following these steps.](MacSecurity.md)
 
 ### First time I run on Mac, I get multiple security warnings
 
@@ -119,19 +120,19 @@ PicoGK writes a detailed log of what is going on into **PicoGK.log**, which, by 
 PicoGK.Library.Go(0.5f, PicoGKExamples.BooleanShowCase.Task, "/Users/username/Documents/LogMeHere");
 ```
 
- It must be an existing folder, though.
+ It must be an existing folder.
 
 ### I get a salad of errors and nothing works
 
 The most likely issue is that the PicoGKRuntime library is not installed on your system. Unfortunately the error message that VisualStudio shows looks like this and is barely decipherable:
 
-<img src="images/image-20231125170514595.png" alt="image-20231125170514595" style="zoom:50%;" />
+<img src="images/image-20231125170514595.png" style="zoom:50%;" />
 
 If you installed from the installers, this should not happen. If you compiled yourself, either the library or one of the dependencies is missing, or the library is not signed and thus not loadable.
 
 ### My viewer is dark
 
-<img src="images/image-20231125171044858.png" alt="image-20231125171044858" style="zoom: 33%;" />
+<img src="images/image-20231125171044858.png" style="zoom: 33%;" />
 
 If your viewer looks like this, then the PicoGK Viewer did not find the textures for the image-based lighting environment. The most likely case is that your folder structure is different from what we described in the first steps of this document. **PicoGK Viewer assumes that PicoGK is in a subfolder named PicoGK** directly in your main project directory. If this isn't the case, it cannot find the file **PicoGK/ViewerEnvironment/PicoGKDefaultEnv.zip** and the scene is unlit. The easiest way to solve this is to follow the folder structure we described. Alternatively, you can provide a path to the ViewerEnvironment in a parameter to Library.Go.
 

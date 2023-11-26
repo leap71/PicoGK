@@ -2,7 +2,7 @@
 
 **Note** we show Mac screenshots. Windows is similar. 
 
-On Windows you [might want to consider using Visual Studio 2022](VisualStudio_FirstTime.md), which is, in our opinion, the more comfortable development environment.
+On Windows you [might want to consider using Visual Studio 2022](VisualStudio_FirstTime.md) and not Visual Studio Code. Visual Studio 2022 is the more comfortable development environment.
 
 ## Install the .NET SDK from Microsoft
 
@@ -14,11 +14,11 @@ On Windows you [might want to consider using Visual Studio 2022](VisualStudio_Fi
 
 After you downloaded it, drag and drop the app to your **Applications** folder. **Do not launch it from your Downloads folder directly.**
 
-<img src="images/VisualStudioCodeDownloaded.png" style="zoom:50%;" />
+<img src="images/VisualStudioCodeDownloaded.png" style="zoom:33%;" />
 
 Launch Visual Studio Code from the **Applications** folder
 
-<img src="images/VisualStudioCodeApp.png" style="zoom:50%;" />
+<img src="images/VisualStudioCodeApp.png" style="zoom:33%;" />
 
 You can customize Visual Studio (we prefer bright looks!). When you are done, click on the extensions button on the left.
 
@@ -42,9 +42,9 @@ Let's create a quick Hello World project to see everything works correctly.
 
 Click on **Create .NET Project**
 
-The first time you do this, Visual Studio Code will download some additional stuff, which can take a few seconds. Wait until the **Select a template to create a new .NET project** dropdown opens at the top of the Visual Studio Window.
+The first time you do this, Visual Studio Code will download some additional stuff, which can take a few seconds (and the only feedback is some console messages, that are easy to overlook). 
 
-
+Wait until the **Select a template to create a new .NET project** dropdown opens at the top of the Visual Studio Window.
 
 Begin to type **Console** and then choose **Console App**.
 
@@ -56,7 +56,7 @@ Sometimes Visual Studio will (once again) download stuff in the background. Once
 
 <img src="images/VisualStudioCodeProjectName.png" style="zoom:50%;" />
 
-A security warning pops up (whose purpose only Microsoft understands, since we are creating a new project...) Trust yourself.
+A security warning pops up (whose purpose only Microsoft understands, since we are creating a new project...) Trust yourself!
 
 <img src="images/VisualStudioCodeSecurity.png" style="zoom:50%;" />
 
@@ -66,15 +66,15 @@ Click on **Program.cs** — this is the main source file for your app.
 
 In the default app, it just writes "Hello World" to the console output. With **Program.cs** selected, press the **Run and Debug** icon in the left toolbar.
 
-<img src="images/VisualStudioCodeFirstProject.png" style="zoom:50%;" />
+<img src="images/VisualStudioCodeFirstProject.png" style="zoom:33%;" />
 
 Click on the **Run and Debug** button. 
 
-<img src="images/VisualStudioCodeRunAndDebug.png" style="zoom:50%;" />
+<img src="images/VisualStudioCodeRunAndDebug.png" style="zoom:33%;" />
 
 The first time you do this, Visual Studio Code will ask you which debugger to use.
 
-<img src="images/VisualStudioCodeSelectDebugger.png" style="zoom:50%;" />
+<img src="images/VisualStudioCodeSelectDebugger.png" style="zoom:33%;" />
 
 **Choose C#**, and you are finally done. The application will compile and start. 
 
@@ -82,9 +82,9 @@ There will be a number of diagnostic messages displayed when the application run
 
 You have successfully installed Visual Studio Code with C# support. 
 
-(It seems to be harder than it needs to be, but you're done now)
+(It seems to be harder than it needs to be, but hey, you're done now!)
 
-<img src="images/VisualStudioCodeConsoleOutput.png" alt="VisualStudioCodeConsoleOutput" style="zoom:50%;" />
+<img src="images/VisualStudioCodeConsoleOutput.png" style="zoom:50%;" />
 
 ## Opening and running the PicoGK test project in Visual Studio Code
 
@@ -94,7 +94,7 @@ Choose **File->Open Folder**
 
 Browse to the **PicoGK Example** project folder and open it.
 
-You will receive the warning again, whether you want to trust the authors of this folder, it's yes again.
+You will receive the warning again, whether you want to trust the authors of this folder, it's **yes** again.
 
 <img src="images/VisualStudioCodePicoGK.png" style="zoom:50%;" />
 

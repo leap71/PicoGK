@@ -28,7 +28,7 @@ You can now add the PicoGK and other submodules and replace the contents of Prog
 
 On the left toolbar, choose the bottom icon, called **Manage**. Choose **Command Palette** 
 
-<img src="images/VisualStudioCodeCommandPalette.png" alt="VisualStudioCodeCommandPalette" style="zoom:50%;" />
+<img src="images/VisualStudioCodeCommandPalette.png" style="zoom:50%;" />
 
 Choose  **.NET: New Project**
 
@@ -39,6 +39,8 @@ Begin to type **Console** and then choose **Console App**.
 Choose a folder and then a name for your project.
 
 <img src="images/VisualStudioCodeProjectName.png" style="zoom:50%;" />
+
+At first launch, a security dialog asks you to trust the source code in the folder (which you just created). So obviously you trust yourself....
 
 <img src="images/VisualStudioCodeSecurity.png" style="zoom:50%;" />
 

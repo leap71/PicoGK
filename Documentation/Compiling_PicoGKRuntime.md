@@ -1,6 +1,6 @@
 # Compiling the PicoGK Runtime
 
-We compiled and tested PicoGKRuntime on Windows 64 bit and MacOS 14 Sonoma on ARM-based Macs. Since Mac is our primary work environment, we have tested it on Mac significantly more than on Windows. There is, however, nothing fundamentally platform-specific about PicoGK. The main platform dependencies are well-established libraries like OpenVDB. [CorrieVS has forked PicoGK and made a docker environment for LINUX, check it out here.](https://github.com/CorrieVS/PicoGK)
+We compiled and tested PicoGKRuntime on Windows 64 bit and MacOS 14 Sonoma on Mac computers running Apple Silicon. Since macOS is our primary work environment, we have tested it on Mac significantly more than on Windows. There is, however, nothing fundamentally platform-specific about PicoGK. The main platform dependencies are well-established libraries like OpenVDB. [CorrieVS has forked PicoGK and made a docker environment for LINUX, check it out here.](https://github.com/CorrieVS/PicoGK)
 
 Our code is very straightforward and mostly header-only C++ code.
 
@@ -25,7 +25,7 @@ https://github.com/leap71/PicoGKRuntime
 Make sure to initialize the submodules, so that the OpenVDB submodule is properly initialized.
 
 ```
-git submodule update --init --recursive
+git submodule update --init --recursive -remote
 ```
 
 PicoGKRuntime has no dependencies besides **OpenVDB** and **GLFW** (which is fetched automatically), but those libraries have plenty of dependencies (boost, blosc, etc).
@@ -44,11 +44,11 @@ After you have done this, you can move onto compiling the PicoGK Runtime.
 
 ## Preparing the PicoGKRuntime build environment
 
-Start the CMake GUI client and specify the path to the PicoGKRuntime repository in **"Where is the source code"**.
+Start the **CMake GUI** client and specify the path to the PicoGKRuntime repository in **"Where is the source code"**.
 
 Specify the Build subfolder under **"Where to build the libraries"**. It should like this
 
-<img src="images/image-20231017134154856.png" alt="image-20231017134154856" style="zoom:50%;" />
+<img src="images/image-20231017134154856.png" style="zoom:50%;" />
 
 Hit **Configure** and accept all defaults. After Configure has run without errors, click **Generate**.
 
@@ -72,7 +72,7 @@ If you don't want to copy to your system folders, you can adjust the path that P
 public const string strPicoGKLib = "picogk.1.1"; // dll or dylib
 ```
 
-You can change this constant to load it from a specific location. However make sure to include the .dylib or .dll extension, as otherwise it will not work:
+You can change this constant to load it from a specific location. However make sure **to include the .dylib or .dll extension**, as otherwise it will not work:
 
 ```C#
 public const string strPicoGKLib = "/Users/myuser/GitHub/PicoGKRuntime/Dist/picogk.1.1.0.dylib";

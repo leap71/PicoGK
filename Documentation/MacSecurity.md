@@ -2,7 +2,9 @@
 
 Since we provide the installers as a convenience to this open source project, we have not signed them yet (we are working on this).
 
-As a result, you will be confronted with a number of security warnings. If you don't trust us, you can always compile yourself. But if you do trust us, here is how to get it up an running on the Mac.
+As a result, you will be confronted with a number of security warnings. If you don't trust us, you can [always compile yourself.](Compiling_PicoGKRuntime.md)
+
+But if you **do** trust us, here is how to get it up an running on the Mac.
 
 There are two security warning scenarios:
 
@@ -33,11 +35,11 @@ You get a warning that the installer package cannot be verified (our installers 
 
 <img src="images/MacInstallerWarning.png" style="zoom:50%;" />
 
-Go to System Settings and under **Privacy and Security**
+Go to System Settings and under **Privacy and Security** 
 
 Make sure **App Store and identified developers** is enabled. Then click on **Open Anyway**.
 
- <img src="images/MacSecuritySettings.png" style="zoom:50%;"/>
+<img src="images/MacSecuritySettings.png" style="zoom:50%;"/>
 
  After entering your credentials, the following dialog pops up.
 

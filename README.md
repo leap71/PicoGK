@@ -1,10 +1,10 @@
-# ![PicoGK](Documentation/images/PicoGK.jpg)
+![PicoGK](Documentation/images/PicoGK.jpg)
 
 # Welcome to PicoGK
 
 PicoGK ("peacock") is a compact, robust, and fast geometry kernel for Computational Engineering. 
 
-PicoGK was developed by Lin Kayser, and is maintained by [LEAP 71](www.leap71.com). PicoGK is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) (SPDX Apache-2.0).  
+PicoGK was developed by [Lin Kayser](https://github.com/LinKayser), and is maintained by [LEAP 71](www.leap71.com). PicoGK is released under the [Apache License 2.0.
 
 For more information, please visit https://PicoGK.org
 
@@ -12,15 +12,21 @@ We believe that [Computational Engineering](https://leap71.com/computationalengi
 
 By developing and maintaining PicoGK, we hope to make a contribution to accelerate the progress of invention.
 
-**To get started with PicoGK, please jump over to the [documentation](Documentation/README.md).**
+## Getting started
 
-To understand what can be done with PicoGK, what other modules we have, we recommend checking out the [LEAP 71 Github Overview Page](https://github.com/leap71) — this also has pointers to articles about the fundamentals of Computational Engineering.
+**To get started with PicoGK, please jump over to the [documentation](Documentation/README.md).** and [install the latest PicoGK release](https://github.com/leap71/PicoGK/releases).
+
+To understand what can be done with PicoGK, what other modules we have, we recommend checking out the [LEAP 71 Github Overview Page](https://github.com/leap71) — this page also has pointers to articles about the fundamentals of Computational Engineering.
 
 ![9CF66413-8BA1-4E18-9BA7-F5254235B44A](Documentation/images/9CF66413-8BA1-4E18-9BA7-F5254235B44A.jpeg)
+
+## On the shoulders of giants
 
 We are indebted to other Open-Source projects, without which writing PicoGK would have been an impossible task. Most notably we use the Academy Software Foundation's [OpenVDB library](https://www.openvdb.org/), which provides the majority of the functionality neccessary to build a robust geometry kernel. In many ways, PicoGK is a thin-yet-powerful layer of functionality on top of OpenVDB.
 
 The PicoGK viewer relies on the [GLFW library](https://www.glfw.org/), for simple cross-platform OpenGL user interface functionality.
+
+## PicoGK structure
 
 PicoGK consists of two modules. 
 
@@ -32,7 +38,7 @@ PicoGK consists of two modules.
 
 **PicoGKRuntime** exposes a minimal "extern C" interface, which can be implemented by other geometry kernels, including commercial ones. 
 
-We encourage other software vendors to support the PicoGKRuntime API and release commercial alternatives to our open-source project. PicoGK was developed as a reliable common interface that you, the engineer, can always fall back on when creating your own intellectual property.
+We encourage other software vendors to support the PicoGKRuntime API and release commercial alternatives to our open-source project. PicoGK was developed as a reliable common interface that you, the engineer, can always rely on as a free and universally available platform to fall back on when creating your own intellectual property.
 
 **PicoGK**, the C# code, which you have open right now, provides rich functionality based on the PicoGKRuntime interface. It makes it as simple as possible to build computational geometry.
 

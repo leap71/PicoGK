@@ -2,7 +2,7 @@
 
 ## Installing the PicoGK Runtime
 
-At this time, we have installers for macOS on ARM (Apple M1 upwards). There is no Intel support yet (you can compile on an Intel Mac, but we do not have Intel machines.).
+At this time, we have installers for macOS on Apple Silicon (M1 upwards). There is no Intel support yet (you can compile on an Intel Mac, but we do not have Intel machines.).
 
 [Download the macOS installer disk image of the latest release.](https://github.com/leap71/PicoGK/releases)
 
@@ -26,9 +26,9 @@ Go to System Settings and under **Privacy and Security**
 
 Make sure **App Store and identified developers** is enabled. Then click on **Open Anyway**.
 
- <img src="images/MacSecuritySettings.png" style="zoom:50%;"/>
+<img src="images/MacSecuritySettings.png" style="zoom:50%;"/>
 
- After entering your credentials, the following dialog pops up.
+After entering your credentials, the following dialog pops up.
 
 <img src="images/Mac_OpenInstaller.png" style="zoom:50%;" />
 
@@ -36,7 +36,7 @@ Choose **Open**
 
 The PicoGK Installer will open.
 
- <img src="images/MacInstaller1.png" style="zoom:50%;" />
+<img src="images/MacInstaller1.png" style="zoom:50%;" />
 
 Accept all defaults and install the PicoGKRuntime.
 
@@ -45,12 +45,13 @@ Accept all defaults and install the PicoGKRuntime.
 
 ## Next: Installing Visual Studio
 
-Next you have to decide, whether you want to use Visual Studio 2022, or Visual Studio Code. 
+Next you have to decide, whether you want to use **Visual Studio 2022**, or **Visual Studio Code**. 
 
 **Visual Studio 2022** has been end-of-lifed for macOS, unfortunately, as it was the easer-to-use product. It still works fine, though, for the time being.
 
-**Visual Studio Code** is the cross platform integrated development environment for Mac, Windows and LINUX. It's a bit harder to use, but it is Microsoft's supported platform.
+**Visual Studio Code** is the cross platform integrated development environment for macOS, Windows and LINUX. It's a bit harder to use, but it is Microsoft's supported platform.
 
 - [Install Visual Studio Code](VisualStudioCode_FirstTime.md)
+
 - [Install Visual Studio 2022](VisualStudio_FirstTime.md)
 

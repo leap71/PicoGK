@@ -18,11 +18,11 @@ Click Next and accept all defaults until the installer finishes.
 
 ## Next: Installing Visual Studio
 
-Next you have to decide, whether you want to use Visual Studio 2022, or Visual Studio Code. 
+Next you have to decide, whether you want to use **Visual Studio 2022**, or **Visual Studio Code**. 
 
-**Visual Studio 2022** Is the easier-to-use product, we recommend using this on Windows.
+**Visual Studio 2022** Is the easier-to-use product, we recommend using it on Windows.
 
-**Visual Studio Code** is the cross platform integrated development environment for Mac, Windows and LINUX. It's a bit harder to use, but if you switch between Mac and Windows frequently, it's a good choice.
+**Visual Studio Code** is the cross platform integrated development environment for macOS, Windows and LINUX. It's a bit harder to use, but if you switch between macOS and Windows frequently, it's a good choice.
 
 - [Install Visual Studio 2022](VisualStudio_FirstTime.md) (recommended)
 
