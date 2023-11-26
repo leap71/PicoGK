@@ -11,15 +11,15 @@ There are two security warning scenarios:
 
 ## Warning at first launch
 
-When you run a PicoGK project for the first time, it will warn you that the developer of a number of libraries cannot be verified. These are dependencies of OpenVDB. The first library you will encounter is **liblzma.5.dylib**
+When you run a PicoGK project for the first time, it may warn you that the developer of a number of libraries cannot be verified. These are dependencies of OpenVDB. The first library you will encounter is **liblzma.5.dylib** 
 
- <img src="images/WarningDependentLibrary.png" style="zoom:50%;" />
+<img src="images/WarningDependentLibrary.png" style="zoom:50%;" />
 
 To trust this library, go to your **Privacy and Security** settings in System Preferences.
 
 <img src="images/AddLibZma.png" style="zoom:50%;" />
 
-Click on Allow Anyway and confirm with your credentials. When you restart, you will be asked if you really trust this library, and have to confirm again.
+Click on Allow Anyway and confirm with your credentials. When you restart, you may be asked if you really trust this library, and have to confirm again.
 
 PicoGK will then try to load the second library, so you will receive a message again, this time for **libzstd.1.dylib**
 
@@ -47,4 +47,4 @@ Choose **Open**
 
 The PicoGK Installer will open.
 
- <img src="images/MacInstaller1.png" style="zoom:50%;" />
+<img src="images/MacInstaller1.png" style="zoom:50%;" />

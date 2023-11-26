@@ -42,11 +42,17 @@ Let's create a quick Hello World project to see everything works correctly.
 
 Click on **Create .NET Project**
 
+The first time you do this, Visual Studio Code will download some additional stuff, which can take a few seconds. Wait until the **Select a template to create a new .NET project** dropdown opens at the top of the Visual Studio Window.
+
+
+
 Begin to type **Console** and then choose **Console App**.
 
 <img src="images/VisualStudioCodeConsoleApp.png" style="zoom:50%;" />
 
-Choose a folder and then a name for your project.
+Choose a folder.
+
+Sometimes Visual Studio will (once again) download stuff in the background. Once it's done choose a name for your project.
 
 <img src="images/VisualStudioCodeProjectName.png" style="zoom:50%;" />
 
@@ -94,11 +100,9 @@ You will receive the warning again, whether you want to trust the authors of thi
 
 With Program.cs selected, choose again **Run and Debug**.
 
-The first time you launch a PicoGK project on your system, you will receive security warnings about the fact that libzma.5.dylib and libzstd.1.dylib are not signed. [See this info how to add them to your trusted files.](MacSecurity.md)
+If you receive any additional security warnings, [check out this page on how to silence them.](MacSecurity.md)
 
-<img src="images/WarningDependentLibrary.png" alt="WarningDependentLibrary" style="zoom:50%;" />
-
-After you have trusted those two files (which are standard dependencies of OpenVDB), you are good to go. You should now have the default PicoGK example open in your viewer.
+You should now have the default PicoGK example open in your viewer.
 
 <img src="images/image-20231014184919894.png" style="zoom:33%;" />
 
