@@ -28,6 +28,10 @@ After VisualStudio 2022 is installed, click the Launch button.
 
 <img src="images/VisualStudio2022Launch.png" style="zoom:50%;" />
 
+Congratulations, you have Visual Studio up and running.
+
+## Running the PicoGK Example Project
+
 After you launched VisualStudio 2022, you the welcome screen is shown. **Choose Open a project or solution**
 
 <img src="images/VisualStudio2022Welcome.png" style="zoom:50%;" />
@@ -40,4 +44,20 @@ Choose **PicoGK Example.vcproj**
 
 The example project will open in Visual Studio. On the right side, you see your project files. **Program.cs** contains the main source code of the example.
 
-Click on 
+Click on Program.cs to show the source code.
+
+<img src="images/VisualStudioProgramCS.png" style="zoom:50%;" />
+
+Click on the run PicoGK Example button at the top center of the screen.
+
+<img src="images/VisualStudioRun.png" style="zoom:50%;" />
+
+Visual Studio will now compile the example project and launch it.
+
+Your screen should look like this after you clicked run. 
+
+<img src="images/VisualStudioSuccess.png" style="zoom:50%;" />
+
+**Congratulations. You are up and running with Visual Studio and PicoGK.**
+
+Return to the [Main PicoGK Documentation](README.md)

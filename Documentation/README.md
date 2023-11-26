@@ -16,6 +16,9 @@ The easiest way to get started [is to use the installers to install PicoGK on yo
 
 You also need either [Visual Studio](https://visualstudio.microsoft.com/vs/getting-started/) or [Visual Studio Code](https://code.visualstudio.com/) — generally speaking Visual Studio is a bit easier to set up (it has been discontinued on Mac, but will work for another year or so).
 
+- [Installing Visual Studio](VisualStudio_FirstTime.md)
+- [Installing Visual Studio Code](VisualStudioCode_FirstTime.md)
+
 ## Folder structure of a PicoGK project
 
 Generally speaking, your PicoGK projects will look like this:
@@ -31,7 +34,7 @@ Generally speaking, your PicoGK projects will look like this:
    - **/LatticeLibrary** (contains the LEAP71_Lattice submodule)
    - ... other submodules
 
-**Program.cs** contains the code that executes your program. The PicoGK subfolder contains the source code of the PicoGK library. Under the hood PicoGK's C# code calls the PicoGK C++ runtime library for the heavy lifting. As many functions as possible are implemented directly in C# code, to make it as simple as possible to understand what is actually going on. Feel free to step into all functions using the debugger.
+**Program.cs** contains the code that executes your program. The PicoGK subfolder contains the source code of the PicoGK library. Under the hood PicoGK's C# code calls the PicoGK C++ runtime library for the heavy lifting. As many functions as possible are implemented directly in C# code, to make it simple to understand what is actually going on. Feel free to step into all functions using the debugger.
 
 If you have installed PicoGK using the installer, it you already have an example project in your **Documents** folder named **PicoGK Example**, which is ready to run.
 
@@ -39,8 +42,8 @@ If you have installed PicoGK using the installer, it you already have an example
 
 Opening and running your first PicoGK app looks a bit different between VisualStudio Code and VisualStudio. If you are new to this, here are detailed steps:
 
-- Running PicoGK Example on [VisualStudio](VisualStudio_FirstTime.md)
-- Running PicoGK Example on [VisualStudio Code](VisualStudioCode_FirstTime.md)
+- Running PicoGK Example on [VisualStudio](VisualStudio_FirstTime.md#Running-the-PicoGK-Example-Project)
+- Running PicoGK Example on [VisualStudio Code](VisualStudioCode_FirstTime.md#Opening-and-running the-PicoGK-test-project-in-Visual-Studio-Code)
 
 Open **Program.cs** and you will see the following code.
 

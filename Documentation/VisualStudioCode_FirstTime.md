@@ -106,6 +106,6 @@ You should now have the default PicoGK example open in your viewer.
 
 <img src="images/image-20231014184919894.png" style="zoom:33%;" />
 
-**Congratulations. You are up and running with Visual Studio Code.**
+**Congratulations. You are up and running with Visual Studio Code and PicoGK.**
 
 Return to the [Main PicoGK Documentation](README.md)

@@ -1,8 +1,28 @@
 # Creating an empty C# Console Project
 
+[Click here to scroll down to Visual Studio Code instructions.](#Visual-Studio-Code)
+
 ## Visual Studio 2022
 
-(Working on this at the moment)
+On the Welcome Screen choose **Create a new project** (or choose **File->New->Project** from the menu)
+
+<img src="images/VisualStudioNewConsole1.png" style="zoom:50%;" />
+
+Choose Console App 
+
+<img src="images/VisualStudioNewConsole2.png" style="zoom:50%;" />
+
+Give your project an name and place it in the desired folder. If you check the indicated box, your folder hierarchy is a bit flatter (recommended).
+
+<img src="images/VisualStudioNewConsole3.png" style="zoom:50%;" />
+
+Accept all defaults in the next boxes and create your project.
+
+Your new application is ready to run by clicking the Run button in the top center of the screen.
+
+<img src="images/VisualStudioNewConsole4.png" style="zoom:50%;" />
+
+You can now add the PicoGK and other submodules and replace the contents of Program.cs to launch the PicoGK Library.
 
 ## Visual Studio Code
 
