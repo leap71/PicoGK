@@ -113,8 +113,6 @@ Same as above, this is because our runtime libraries and their dependencies are 
 
 ### PicoGK.log
 
-### PicoGK.log
-
 PicoGK writes a detailed log of what is going on into **PicoGK.log**, which, by default, is located in your **Documents** folder. If you don't want us to spam your Documents folder, simply provide the path as the third parameter like this:
 
 ```c#
