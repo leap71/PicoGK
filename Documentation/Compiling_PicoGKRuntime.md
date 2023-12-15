@@ -25,7 +25,7 @@ https://github.com/leap71/PicoGKRuntime
 Make sure to initialize the submodules, so that the OpenVDB submodule is properly initialized.
 
 ```
-git submodule update --init --recursive -remote
+git submodule update --init --recursive --remote
 ```
 
 PicoGKRuntime has no dependencies besides **OpenVDB** and **GLFW** (which is fetched automatically), but those libraries have plenty of dependencies (boost, blosc, etc).
