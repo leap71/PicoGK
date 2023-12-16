@@ -303,7 +303,7 @@ namespace PicoGK
             }
         }
 
-        public void SetGroupMatrix(int nGroupID,
+        public void SetGroupMatrix( int nGroupID,
                                     Matrix4x4 mat)
         {
             lock (m_oActions)
@@ -323,7 +323,7 @@ namespace PicoGK
                                         float fElevationRelative)
         {
             SetViewAngles(  m_fOrbit + fOrbitRelative,
-                            m_fElevation += fElevationRelative);
+                            m_fElevation + fElevationRelative);
         }
 
         public void SetViewAngles(  float fOrbit,
@@ -381,11 +381,11 @@ namespace PicoGK
             Library.Log($"   Total Vertices:   {fVertices:F1} mio");
         }
 
-        public float m_fElevation = 30.0f;
-        public float m_fOrbit = 45.0f;
-        float m_fFov = 45.0f;
-        float m_fZoom = 1.0f;
-        bool m_bPerspective = true;
+        public float m_fElevation   = 30.0f;
+        public float m_fOrbit       = 45.0f;
+        float m_fFov                = 45.0f;
+        float m_fZoom               = 1.0f;
+        bool m_bPerspective         = true;
 
         int m_iMainThreadID = -1;
 
@@ -491,42 +491,45 @@ namespace PicoGK
             {
                 Debug.Assert(hViewer == m_hThis);
 
-                Vector3 vecSceneCenter = m_oBBox.vecCenter();
-
-                double fR = ((m_oBBox.vecMax - vecSceneCenter).Length() * 3.0f) * m_fZoom;
-                double fRElev = Math.Cos((double)m_fElevation * Math.PI / 180.0f) * fR;
-
-                m_vecEye.X = (float)(Math.Cos((double)m_fOrbit * Math.PI / 180.0) * fRElev);
-                m_vecEye.Y = (float)(Math.Sin((double)m_fOrbit * Math.PI / 180.0) * fRElev);
-                m_vecEye.Z = (float)(Math.Sin((double)m_fElevation * Math.PI / 180.0) * fR);
-
-                float fFar = (vecSceneCenter - m_vecEye).Length() * 2.0f;
-
-                Matrix4x4 matModelView = Utils.matLookAt(m_vecEye, vecSceneCenter);
-
-                Matrix4x4 matProjection;
-
-                if (m_bPerspective)
+                if (!m_oBBox.bIsEmpty())
                 {
-                    matProjection = Matrix4x4.CreatePerspectiveFieldOfView(
-                        (float)(m_fFov * Math.PI / 180.0),
-                        vecViewport.X / vecViewport.Y,
-                        0.1f,
-                        fFar);
-                }
-                else
-                {
-                    matProjection = Matrix4x4.CreateOrthographic(   m_oBBox.vecSize().X * 2,
-                                                                    m_oBBox.vecSize().Y * 2,
-                                                                    0.1f,
-                                                                    fFar);
-                }
+                    Vector3 vecSceneCenter = m_oBBox.vecCenter();
 
-                m_matModelViewStatic  = Utils.matLookAt(m_vecEyeStatic, new Vector3(0, 0, 0));
-                m_matProjectionStatic = Matrix4x4.CreateOrthographic(100f * vecViewport.X / vecViewport.Y, 100f, 0.1f, 100f);
+                    double fR = ((m_oBBox.vecMax - vecSceneCenter).Length() * 3.0f) * m_fZoom;
+                    double fRElev = Math.Cos((double)m_fElevation * Math.PI / 180.0f) * fR;
 
-                m_matModelViewProjection    = matModelView * matProjection;
-                m_matStatic                 = m_matModelViewStatic * m_matProjectionStatic;
+                    m_vecEye.X = (float)(Math.Cos((double)m_fOrbit * Math.PI / 180.0) * fRElev);
+                    m_vecEye.Y = (float)(Math.Sin((double)m_fOrbit * Math.PI / 180.0) * fRElev);
+                    m_vecEye.Z = (float)(Math.Sin((double)m_fElevation * Math.PI / 180.0) * fR);
+
+                    float fFar = (vecSceneCenter - m_vecEye).Length() * 2.0f;
+
+                    Matrix4x4 matModelView = Utils.matLookAt(m_vecEye, vecSceneCenter);
+
+                    Matrix4x4 matProjection;
+
+                    if (m_bPerspective)
+                    {
+                        matProjection = Matrix4x4.CreatePerspectiveFieldOfView(
+                            (float)(m_fFov * Math.PI / 180.0),
+                            vecViewport.X / vecViewport.Y,
+                            0.1f,
+                            fFar);
+                    }
+                    else
+                    {
+                        matProjection = Matrix4x4.CreateOrthographic(   m_oBBox.vecSize().X * 2,
+                                                                        m_oBBox.vecSize().Y * 2,
+                                                                        0.1f,
+                                                                        fFar);
+                    }
+
+                    m_matModelViewStatic    = Utils.matLookAt(m_vecEyeStatic, new Vector3(0, 0, 0));
+                    m_matProjectionStatic   = Matrix4x4.CreateOrthographic(100f * vecViewport.X / vecViewport.Y, 100f, 0.1f, 100f);
+
+                    m_matModelViewProjection = matModelView * matProjection;
+                    m_matStatic = m_matModelViewStatic * m_matProjectionStatic;
+                }
 
                 vecEyeStatic                = m_vecEyeStatic;
                 vecEyePosition              = m_vecEye;
@@ -607,7 +610,7 @@ namespace PicoGK
             }
         }
 
-        void ScrollWheelCB(IntPtr hViewer,
+        void ScrollWheelCB( IntPtr hViewer,
                             in Vector2 vecScrollWheel,
                             in Vector2 vecMousePos)
         {
