@@ -93,15 +93,41 @@ namespace PicoGK
             
             using (BinaryReader oReader = new BinaryReader(oFile, Encoding.ASCII))
             {
-                byte[] byHeader = new byte[80];
-                oReader.Read(byHeader, 0, 80);
-                strHeader = Encoding.ASCII.GetString(byHeader).Trim();
+                byte[] abyHeader = new byte[80];
+
+                if (oReader.Read(abyHeader, 0, 80) != 80)
+                    throw new Exception("Failed to read STL file, header too short");
+
+                strHeader = Encoding.ASCII.GetString(abyHeader).Trim();
                 string strOriginal = strHeader;
 
-                bool bAscii = strHeader.StartsWith("solid");
+                bool bAscii = false;
 
-                if (bAscii)
+                if (strHeader.StartsWith("solid"))
+                {
                     strHeader = strHeader.Substring("solid".Length);
+
+                    // This may be an ASCII STL, so let's test
+                    // that assumption
+
+                    long lPos = oFile.Position;
+
+                    // Let's peek into the file and see if ASCII data is inside
+                    // the first 1KB block (assuming nobody ever starts the
+                    // vertex data past the first KB
+
+                    byte[] abyPeek = new byte[1024];
+
+                    int iBytes = oReader.Read(abyPeek, 0, 1024);
+                    string strPeek = Encoding.ASCII.GetString(abyPeek).Trim();
+
+                    if (strPeek.IndexOf("vertex") != -1)
+                        bAscii = true;
+
+                    // return the file pos to the previous position
+
+                    oFile.Seek(lPos, 0);
+                }
 
                 float fScale = 1.0f; // 1mm default
 
@@ -153,7 +179,6 @@ namespace PicoGK
                 return oMesh;
             }
         }
-
 
 
         /// <summary>
