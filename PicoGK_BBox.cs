@@ -285,8 +285,11 @@ namespace PicoGK
         /// <param name="oBox">The box to include</param>
         public void Include(BBox3 oBox)
         {
-            Include(oBox.vecMin);
-            Include(oBox.vecMax);
+            if (!oBox.bIsEmpty())
+            {
+                Include(oBox.vecMin);
+                Include(oBox.vecMax);
+            }  
         }
 
         /// <summary>
