@@ -134,18 +134,21 @@ namespace PicoGK
 
                 if (bAscii)
                 {
-                    oMesh.DoReadMeshFromAsciiStl(oReader,
+                    oMesh.DoReadMeshFromAsciiStl(   oReader,
                                                     eLoadUnit,
                                                     fPostScale,
                                                     vecOffset);
                 }
                 else
                 {
-                    oMesh.DoReadMeshFromBinaryStl(oReader,
+                    oMesh.DoReadMeshFromBinaryStl(  oReader,
                                                     eLoadUnit,
                                                     fScale,
                                                     vecOffset);
                 }
+
+                if (oMesh.nTriangleCount() == 0)
+                    throw new Exception("Imported STL mesh is empty (zero triangles), failed to load");
 
                 return oMesh;
             }
@@ -274,7 +277,7 @@ namespace PicoGK
                                         float fPostScale,
                                         Vector3 vecPostOffsetMM)
         {
-
+            throw new NotImplementedException("ASCII STL Loading is not implemented at this time - please use binary STLs instead");
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
