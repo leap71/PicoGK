@@ -210,6 +210,25 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Append one mesh to another
+        /// Note, no deduplication is done
+        /// and no "boolean"
+        /// The source mesh remains unchanged
+        /// </summary>
+        public void Append(Mesh msh)
+        {
+            for (int n=0; n<msh.nTriangleCount(); n++)
+            {
+                msh.GetTriangle(    n,
+                                    out Vector3 vecA,
+                                    out Vector3 vecB,
+                                    out Vector3 vecC);
+
+                nAddTriangle(vecA, vecB, vecC);
+            }
+        }
+
+        /// <summary>
         /// Return the BoundingBox of the Mesh
         /// </summary>
         /// <returns>BoundingBox of the Mesh</returns>
