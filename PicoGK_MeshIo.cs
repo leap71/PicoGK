@@ -114,7 +114,7 @@ namespace PicoGK
 
                     // Let's peek into the file and see if ASCII data is inside
                     // the first 1KB block (assuming nobody ever starts the
-                    // vertex data past the first KB
+                    // vertex data past the first KB)
 
                     byte[] abyPeek = new byte[1024];
 
