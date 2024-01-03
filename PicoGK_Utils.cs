@@ -231,6 +231,11 @@ namespace PicoGK
             return mat;
         }
 
+        static public Mesh mshCreateCube(BBox3 oBox)
+        {
+            return mshCreateCube(oBox.vecSize(), oBox.vecCenter());
+        }
+
         static public Mesh mshCreateCube(   Vector3? vecScale       = null,
                                             Vector3? vecOffsetMM    = null)
         {
