@@ -273,7 +273,7 @@ namespace PicoGK
     {
         public ImageColorAbstract(  int _iWidth,
                                     int _iHeight)
-            : base(_iWidth,
+            : base( _iWidth,
                     _iHeight,
                     EType.COLOR)
         {
@@ -408,9 +408,9 @@ namespace PicoGK
 
     public partial class ImageColor : ImageColorAbstract
     {
-        public ImageColor(int _nWidth,
+        public ImageColor(  int _nWidth,
                             int _nHeight)
-                : base(_nWidth,
+                : base( _nWidth,
                         _nHeight)
         {
             m_aclrValues = new ColorFloat[nWidth * nHeight];
