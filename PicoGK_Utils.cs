@@ -34,11 +34,17 @@
 //
 
 using System.Numerics;
+using System.Diagnostics;
 
 namespace PicoGK
 {
     public class Utils
     {
+        /// <summary>
+        /// Strip quotes of a quoted path like "/usr/lib/" -> /usr/lib/
+        /// </summary>
+        /// <param name="strPath"></param>Path that is potentially quoted
+        /// <returns></returns>Unquoted path
         static string strStripQuotesFromPath(string strPath)
         {
             if (strPath.StartsWith("\"") && strPath.EndsWith("\""))
@@ -47,6 +53,31 @@ namespace PicoGK
             }
 
             return strPath;
+        }
+
+        /// <summary>
+        /// Wait for a file's creation
+        /// </summary>
+        /// <param name="strFile"></param>
+        /// File to check for existence
+        /// <param name="fTimeOut"></param> T
+        /// imeout in seconds
+        /// <returns></returns>true if file exists, false if timeout
+        static public bool bWaitForFileExistence(string strFile, float fTimeOut=1000000f)
+        {
+            Stopwatch oWatch = new();
+            oWatch.Start();
+            long lTimeout = oWatch.ElapsedMilliseconds + (long) (fTimeOut * 1000);
+
+            while (oWatch.ElapsedMilliseconds < lTimeout)
+            {
+                if (File.Exists(strFile))
+                    return true;
+
+                Thread.Sleep(100);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -515,4 +546,75 @@ namespace PicoGK
 
     }
 
+    /// <summary>
+    /// Creates a temporary folder with an arbitrary filename
+    /// in the system's default temp directory, which is guaranteed to be
+    /// writable (we don't check this, but the system should guarantee it)
+    /// Use the "using" syntax to automatically cleanup after the object
+    /// runs out of scope. It will clean up all the files inside and then
+    /// delete the temporary folder.
+    /// Note: It intentionally doesn't delete any subdirectories you may
+    /// create. If you create subdirs, please clean them up yourself.
+    /// We intentionally do not recursively wipe out everything out of an
+    /// abundance of caution.
+    ///
+    /// Access the temp folder using oFolder.strFolder
+    /// 
+    /// </summary>
+    public class TempFolder : IDisposable
+    {
+        public TempFolder()
+        {
+            strFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(strFolder);
+        }
+
+        public string strFolder;
+
+        ~TempFolder()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool bDisposing)
+        {
+            if (m_bDisposed)
+            {
+                return;
+            }
+
+            try
+            {
+                // We will cleanup all files, but will not cleanup subfolders
+                // this would require recursive delete, and I am afraid it
+                // could wipe out an entire disk, if used erroneously,
+                // however unlikely
+
+                string[] astrFiles = Directory.GetFiles(strFolder);
+                foreach (string strFile in astrFiles)
+                {
+                    File.Delete(strFile);
+                }
+
+                // Remove the temp directory
+                Directory.Delete(strFolder);
+            }
+            catch (Exception)
+            {
+                // Failed to cleanup, hopefully the system will do it for us at some point
+            }
+
+            m_bDisposed = true;
+        }
+
+        bool m_bDisposed = false;
+    }
 }
