@@ -144,24 +144,6 @@ namespace PicoGK
             => _BoolIntersect(m_hThis, voxOperand.m_hThis);
 
         /// <summary>
-        /// Performs a smooth boolean union, with the objects merged
-        /// into each other over the specified distance
-        /// </summary>
-        /// <param name="voxOperand">The voxels to add to ours</param>
-        /// <param name="fDist">The distance in MM over which to merge</param>
-        public void BoolAddSmoothVx(in Voxels voxOperand, float fDist)
-            => _BoolAddSmooth(m_hThis, voxOperand.m_hThis, fDist);
-
-        /// <summary>
-        /// Performs a smooth boolean union, with the objects merged
-        /// into each other over the specified distance
-        /// </summary>
-        /// <param name="voxOperand">The voxels to add to ours</param>
-        /// <param name="fDistMM">The distance in millimeters over which to merge</param>
-        public void BoolAddSmooth(in Voxels voxOperand, float fDistMM)
-            => _BoolAddSmooth( m_hThis, voxOperand.m_hThis, fDistMM);
-
-        /// <summary>
         /// Offsets the voxel field by the specified distance.
         /// The surface of the voxel field is moved outward or inward
         /// Outward is positive, inward is negative
