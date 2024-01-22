@@ -6,21 +6,21 @@ At this time, we have installers for macOS on Apple Silicon (M1 upwards). There 
 
 [Download the macOS installer disk image of the latest release.](https://github.com/leap71/PicoGK/releases)
 
-<img src="images/image-20231125201341187.png" style="zoom:50%;" />
+![](images/image-20231125201341187.png)
 
 Double click the disk image and accept the license agreement. The disk image opens.
 
-<img src="images/PicoGKDMG.png" style="zoom:33%;" />
+![](images/PicoGKDMG.png)
 
 Copy the PicoGK Example project from the disk image to your Documents folder (or wherever you want to have it).
 
-<img src="images/MacOSPicoGKExample.png" style="zoom:33%;" />
+![](images/MacOSPicoGKExample.png)
 
 Double click **on Install PicoGK.pkg**
 
 You will get a warning that the installer package cannot be verified (our installers are not code-signed — yet).
 
-<img src="images/MacInstallerWarning.png" style="zoom:50%;" />
+![](images/MacInstallerWarning.png)
 
 Go to System Settings and under **Privacy and Security**
 
