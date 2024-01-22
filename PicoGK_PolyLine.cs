@@ -76,7 +76,6 @@ namespace PicoGK
         /// Get the vertex in the polyline at the specified vertex index
         /// </summary>
         /// <param name="nIndex">Vertex index to retrieve</param>
-        /// <param name="vec">Coordinate of the vertex</param>
         public Vector3 vecVertexAt(int nIndex)
         {
             Vector3 vec = new();

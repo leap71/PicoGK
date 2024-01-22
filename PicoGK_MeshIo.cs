@@ -55,7 +55,6 @@ namespace PicoGK
         /// <param name="strFilePath">
         /// Path to the file. If not found or not able to open, an exception is thrown
         /// </param>
-        /// <param name="bFuseVertices">Fuse vertices that are close to each other (make mesh watertight)</param>
         /// <param name="eLoadUnit">Units to load</param>
         /// <param name="fPostScale">Scale parameter to be applied before offset</param>
         /// <param name="vecPostOffsetMM">Offset parameter to be applied last</param>
