@@ -34,13 +34,13 @@ After you launched VisualStudio, you the welcome screen is shown. **Choose Open 
 
 <img src="images/VisualStudio2022Welcome.png" style="zoom:50%;" />
 
-Browse to where you installed the PicoGK demo project (default is **Documents/PicoGK Example**)
+Browse to where you installed the PicoGK demo project (default is `Documents/PicoGK Example`)
 
-Choose **PicoGK Example.vcproj**
+Choose `PicoGK Example.vcproj`
 
 <img src="images/VisualStudio2022OpenVCPRJ.png" style="zoom:50%;" />
 
-The example project will open in Visual Studio. On the right side, you see your project files. **Program.cs** contains the main source code of the example.
+The example project will open in Visual Studio. On the right side, you see your project files. `Program.cs` contains the main source code of the example.
 
 Click on Program.cs to show the source code.
 

@@ -2,7 +2,7 @@
 
 **Note** we show Mac screenshots. Windows is similar. 
 
-On Windows you [might want to consider using Visual Studio 2022](VisualStudio_FirstTime.md) and not Visual Studio Code. Visual Studio 2022 is the more comfortable development environment.
+On Windows you [might want to consider using Visual Studio 2022](VisualStudio_FirstTime.md) and not Visual Studio Code. We think Visual Studio 2022 is the easier development environment.
 
 ## Install the .NET SDK from Microsoft
 
@@ -62,9 +62,9 @@ A security warning pops up (whose purpose only Microsoft understands, since we a
 
 Unfold the folders on the left side. This is where project is organized.
 
-Click on **Program.cs** — this is the main source file for your app. 
+Click on `Program.cs` — this is the main source file for your app. 
 
-In the default app, it just writes "Hello World" to the console output. With **Program.cs** selected, press the **Run and Debug** icon in the left toolbar.
+In the default app, it just writes "Hello World" to the console output. With `Program.cs` selected, press the **Run and Debug** icon in the left toolbar.
 
 <img src="images/VisualStudioCodeFirstProject.png" style="zoom:33%;" />
 
@@ -92,7 +92,7 @@ Choose **File->Open Folder**
 
 <img src="images/VisualStudioCodeOpenFolder.png" style="zoom:50%;" />
 
-Browse to the **PicoGK Example** project folder and open it.
+Browse to the `PicoGK Example` project folder and open it.
 
 You will receive the warning again, whether you want to trust the authors of this folder, it's **yes** again.
 

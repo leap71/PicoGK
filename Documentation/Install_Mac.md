@@ -18,22 +18,6 @@ Copy the PicoGK Example project from the disk image to your Documents folder (or
 
 Double click **on Install PicoGK.pkg**
 
-You will get a warning that the installer package cannot be verified (our installers are not code-signed — yet).
-
-![](images/MacInstallerWarning.png)
-
-Go to System Settings and under **Privacy and Security**
-
-Make sure **App Store and identified developers** is enabled. Then click on **Open Anyway**.
-
-<img src="images/MacSecuritySettings.png" style="zoom:50%;"/>
-
-After entering your credentials, the following dialog pops up.
-
-<img src="images/Mac_OpenInstaller.png" style="zoom:50%;" />
-
-Choose **Open**
-
 The PicoGK Installer will open.
 
 <img src="images/MacInstaller1.png" style="zoom:50%;" />
