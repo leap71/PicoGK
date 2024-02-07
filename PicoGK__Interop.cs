@@ -298,6 +298,11 @@ namespace PicoGK
                                                             out float pfVolume,
                                                             ref BBox3 oBBox);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetSurfaceNormal")]
+        private extern static void _GetSurfaceNormal(IntPtr hThis,
+                                                        in  Vector3 vecSurfacePoint,
+                                                        ref Vector3 vecSurfaceNormal);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bClosestPointOnSurface")]
         private extern static bool _bClosestPointOnSurface( IntPtr hThis,
                                                             in  Vector3 vecSearch,

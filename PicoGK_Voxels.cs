@@ -255,11 +255,27 @@ namespace PicoGK
         /// </summary>
         /// <param name="fVolumeCubicMM">Cubic MMs of volume filled with voxels</param>
         /// <param name="oBBox">The real world bounding box of the voxels</param>
-        public void CalculateProperties(out float fVolumeCubicMM,
+        public void CalculateProperties(    out float fVolumeCubicMM,
                                             out BBox3 oBBox)
         {
             oBBox = new();
            _CalculateProperties(m_hThis, out fVolumeCubicMM, ref oBBox);
+        }
+
+        /// <summary>
+        /// Returns the normal of the surface found at the specified point.
+        /// Use after functions like bClosestPointOnSurface or bRayCastToSurface
+        /// </summary>
+        /// <param name="vecSurfacePoint">
+        /// The point (on the surface of a voxel field, for which to return
+        /// the normal
+        /// </param>
+        /// <returns>The normal vector of the surface at the point</returns>
+        public Vector3 vecSurfaceNormal(    in Vector3 vecSurfacePoint)
+        {
+            Vector3 vecNormal = Vector3.Zero;
+            _GetSurfaceNormal(m_hThis, vecSurfacePoint, ref vecNormal);
+            return vecNormal;
         }
 
         /// <summary>
