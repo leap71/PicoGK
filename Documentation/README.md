@@ -14,7 +14,7 @@ The easiest way to get started [is to use the installers to install PicoGK on yo
 
 - [Here is how to install on Windows](Install_Windows.md)
 
-You also need either [Visual Studio](https://visualstudio.microsoft.com/vs/getting-started/) or [Visual Studio Code](https://code.visualstudio.com/) — generally speaking Visual Studio is a bit easier to set up (it has been discontinued on Mac, but will work for another year or so).
+You also need either [Visual Studio](https://visualstudio.microsoft.com/vs/getting-started/) or [Visual Studio Code](https://code.visualstudio.com/) — generally speaking Visual Studio is a bit easier to set up, but has been discontinued on macOS.
 
 - [Installing Visual Studio](VisualStudio_FirstTime.md)
 
@@ -37,7 +37,7 @@ Generally speaking, your PicoGK projects will look like this:
 
 `Program.cs` contains the code that executes your program. The PicoGK subfolder contains the source code of the PicoGK library. Under the hood PicoGK's C# code calls the PicoGK C++ runtime library for the heavy lifting. As many functions as possible are implemented directly in C# code, to make it simple to understand what is actually going on. Feel free to step into all functions using the debugger.
 
-If you have installed PicoGK using the installer, it you already have an example project in your `Documents` folder named `PicoGK Example`, which is ready to run.
+If you have installed PicoGK using the installer, you already have an example project in your `Documents` folder named `PicoGK Example`, which is ready to run.
 
 ## Running your first PicoGK App
 

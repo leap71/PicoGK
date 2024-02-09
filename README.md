@@ -4,7 +4,7 @@
 
 PicoGK ("peacock") is a compact, robust, and fast geometry kernel for Computational Engineering. 
 
-PicoGK was developed by [Lin Kayser](https://github.com/LinKayser), and is maintained by [LEAP 71](www.leap71.com). PicoGK is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+PicoGK was developed by [Lin Kayser](https://github.com/LinKayser), and is maintained by [LEAP 71](www.leap71.com). PicoGK is open-sourced under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 For more information, please visit https://PicoGK.org
 
@@ -14,7 +14,7 @@ By developing and maintaining PicoGK, we hope to make a contribution to accelera
 
 ## Getting started
 
-**To get started with PicoGK, please jump over to the [documentation](Documentation/README.md).** and [install the latest PicoGK release](https://github.com/leap71/PicoGK/releases).
+**To get started with PicoGK, please jump over to the [documentation](Documentation/README.md)** and [install the latest PicoGK release](https://github.com/leap71/PicoGK/releases).
 
 To understand what can be done with PicoGK, what other modules we have, we recommend checking out the [LEAP 71 Github Overview Page](https://github.com/leap71) — this page also has pointers to articles about the fundamentals of Computational Engineering.
 
