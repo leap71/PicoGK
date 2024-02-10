@@ -106,6 +106,8 @@ If you want to seriously dive in, **[you should work using the LEAP 71 Shape Ker
 
 If you'd like to jump into the details of compiling and developing the [PicoGKRuntime, you will find a setup guide here](Compiling_PicoGKRuntime.md).
 
+If you'd like to understand what files the PicoGK installer puts on your system, [check out this document](WhatIsInstalled.md).
+
 ## Troubleshooting
 
 ### PicoGK.log
