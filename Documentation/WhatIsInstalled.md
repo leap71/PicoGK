@@ -2,7 +2,7 @@
 
 The [PicoGK C# module](https://github.com/leap71/PicoGK) relies on the [PicoGK Runtime](https://github.com/leap71/PicoGKRuntime) to do the heavy lifting. 
 
-PicoGK Runtime is written in C++ and is dependent on [OpenVDB](https://www.openvdb.org/) and the [GLFW](https://www.glfw.org/) open source software projects.
+PicoGK Runtime is written in C++ and is dependent on the [OpenVDB](https://www.openvdb.org/) and the [GLFW](https://www.glfw.org/) open source software projects.
 
 In order for PicoGK to work, we need to put the compiled PicoGK Runtime and its dependent modules in a place on your system that can be found when you launch your Computational Engineering app.
 
@@ -18,7 +18,7 @@ picogk.v.x.liblzma.5.dylib
 picogk.v.x.libzstd.1.dylib
 ```
 
-(with `v.x.` being the PicoGK version, for exampe `picogk.1.0.dylib`)
+(with `v.x.` being the PicoGK version, for example `picogk.1.0.dylib`)
 
 `liblzma` and `libzstd` are dependencies of OpenVDB.
 
