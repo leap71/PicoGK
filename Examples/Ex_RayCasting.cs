@@ -62,7 +62,7 @@ namespace PicoGKExamples
                 // Add a log entry, so we can benchmark
                 Library.Log("Starting Raycasting");
 
-                for (int n=0; n<1000; n++)
+                for (int n=0; n<300; n++)
                 {
                     // random point from 0 .. 1 in x/y/z
                     Vector3 vecPos = new(   rnd.NextSingle(),
@@ -108,7 +108,11 @@ namespace PicoGKExamples
                     PolyLine oPoly = new(clr);
                     oPoly.nAddVertex(vecPos);
                     oPoly.nAddVertex(vecSurfacePt);
-                    oPoly.nAddVertex(vecNormalPt);
+
+                    if (vecSurfacePt != vecNormalPt)
+                        oPoly.nAddVertex(vecNormalPt);
+
+                    oPoly.AddArrow(0.5f);
                     Library.oViewer().Add(oPoly);
                 }
 
