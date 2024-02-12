@@ -635,6 +635,26 @@ namespace PicoGK
                                                 string strFieldName,
                                                 IntPtr hVoxels);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VdbFile_hGetScalarField")]
+        private static extern IntPtr _hGetScalarField(  IntPtr hThis,
+                                                        int nIndex);
+
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VdbFile_nAddScalarField", CharSet = CharSet.Ansi)]
+        private static extern int _nAddScalarField( IntPtr hThis,
+                                                    string strFieldName,
+                                                    IntPtr hField);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VdbFile_hGetVectorField")]
+        private static extern IntPtr _hGetVectorField(  IntPtr hThis,
+                                                        int nIndex);
+
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VdbFile_nAddVectorField", CharSet = CharSet.Ansi)]
+        private static extern int _nAddVectorField( IntPtr hThis,
+                                                    string strFieldName,
+                                                    IntPtr hField);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VdbFile_nFieldCount")]
         private static extern int _nFieldCount(IntPtr hThis);
 
@@ -687,4 +707,141 @@ namespace PicoGK
         bool m_bDisposed = false;
         internal IntPtr m_hThis = IntPtr.Zero;
     }
+
+    public partial class ScalarField : IDisposable
+    {
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_hCreate")]
+        public static extern IntPtr _hCreate();
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_hCreateCopy")]
+        public static extern IntPtr _hCreateCopy(IntPtr hSource);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_hCreateFromVoxels")]
+        public static extern IntPtr _hCreateFromVoxels(IntPtr hVoxels);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_bIsValid")]
+        private static extern bool _bIsValid(IntPtr hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_Destroy")]
+        private static extern void _Destroy(IntPtr hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_SetValue")]
+        private static extern void _SetValue(   IntPtr hThis,
+                                                in Vector3 vecPosition,
+                                                float fValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_bGetValue")]
+        private static extern bool _bGetValue(   IntPtr hThis,
+                                                 in  Vector3 vecPosition,
+                                                 ref float fValue);
+
+        // Dispose Pattern
+
+        ~ScalarField()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool bDisposing)
+        {
+            if (m_bDisposed)
+            {
+                return;
+            }
+
+            if (bDisposing)
+            {
+                // dispose managed state (managed objects).
+                // Nothing to do in this class
+            }
+
+            if (m_hThis != IntPtr.Zero)
+            {
+                _Destroy(m_hThis);
+                m_hThis = IntPtr.Zero;
+            }
+
+            m_bDisposed = true;
+        }
+
+        bool m_bDisposed = false;
+        internal IntPtr m_hThis = IntPtr.Zero;
+    }
+
+    public partial class VectorField : IDisposable
+    {
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_hCreate")]
+        public static extern IntPtr _hCreate();
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_hCreateCopy")]
+        public static extern IntPtr _hCreateCopy(IntPtr hSource);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_hCreateFromVoxels")]
+        public static extern IntPtr _hCreateFromVoxels(IntPtr hVoxels);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_bIsValid")]
+        private static extern bool _bIsValid(IntPtr hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_Destroy")]
+        private static extern void _Destroy(IntPtr hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_SetValue")]
+        private static extern void _SetValue(   IntPtr hThis,
+                                                in Vector3 vecPosition,
+                                                in Vector3 vecValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_bGetValue")]
+        private static extern bool _bGetValue(   IntPtr hThis,
+                                                 in  Vector3 vecPosition,
+                                                 ref Vector3 vecValue);
+
+        // Dispose Pattern
+
+        ~VectorField()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool bDisposing)
+        {
+            if (m_bDisposed)
+            {
+                return;
+            }
+
+            if (bDisposing)
+            {
+                // dispose managed state (managed objects).
+                // Nothing to do in this class
+            }
+
+            if (m_hThis != IntPtr.Zero)
+            {
+                _Destroy(m_hThis);
+                m_hThis = IntPtr.Zero;
+            }
+
+            m_bDisposed = true;
+        }
+
+        bool m_bDisposed = false;
+        internal IntPtr m_hThis = IntPtr.Zero;
+    }
+
 }
