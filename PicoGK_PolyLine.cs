@@ -113,7 +113,7 @@ namespace PicoGK
         /// and the distance from the tip. Defaults to 1mm
         /// </param>
         /// <param name="_vecDir">Optional direction of the arrow</param>
-        public void AddArrow(float fSizeMM = 1.0f,
+        public void AddArrow(   float fSizeMM = 1.0f,
                                 Vector3? _vecDir = null)
         {
             if (nVertexCount() < 1)
