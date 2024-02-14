@@ -329,6 +329,13 @@ namespace PicoGK
                                     out nZSize);
         }
 
+        public enum ESliceMode
+        {
+            SignedDistance,
+            BlackWhite,
+            Antialiased
+        }
+
         /// <summary>
         /// Returns a signed distance-field-encoded slice of the voxel field
         /// To use it, use GetVoxelDimensions to find out the size of the voxel
@@ -341,17 +348,64 @@ namespace PicoGK
         /// <param name="nZSlice">Slice to retrieve. 0 is at the bottom.</param>
         /// <param name="img">Pre-allocated grayscale image to receive the values</param>
         public void GetVoxelSlice(  in int nZSlice,
-                                    ref ImageGrayScale img)
+                                    ref ImageGrayScale img,
+                                    ESliceMode eMode = ESliceMode.SignedDistance)
         {
+            float fBackground = 0f;
             GCHandle oPinnedArray = GCHandle.Alloc(img.m_afValues, GCHandleType.Pinned);
             try
             {
                 IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
-                _GetVoxelSlice(m_hThis, nZSlice, afBufferPtr);
+                _GetVoxelSlice(m_hThis, nZSlice, afBufferPtr, ref fBackground);
             }
             finally
             {
                 oPinnedArray.Free();
+            }
+
+            switch (eMode)
+            {
+               case ESliceMode.Antialiased:
+                    {
+                        for (int x=0; x<img.nWidth; x++)
+                        {
+                            for (int y=0; y<img.nHeight; y++)
+                            {
+                                float fValue = img.fValue(x, y);
+                                if (fValue <= 0)
+                                    fValue = 0;
+                                else if (fValue > fBackground)
+                                    fValue = 1.0f;
+                                else
+                                    fValue = fValue / fBackground;
+
+                                img.SetValue(x, y, fValue);
+                            }
+                        }
+
+                        return;
+                    }
+
+                case ESliceMode.BlackWhite:
+                    {
+                        for (int x = 0; x < img.nWidth; x++)
+                        {
+                            for (int y = 0; y < img.nHeight; y++)
+                            {
+                                float fValue = img.fValue(x, y);
+                                if (fValue <= 0)
+                                    fValue = 0;
+                                else
+                                    fValue = 1.0f;
+
+                                img.SetValue(x, y, fValue);
+                            }
+                        }
+                        return;
+                    }
+
+                default:
+                    return;
             }
         }
     }
