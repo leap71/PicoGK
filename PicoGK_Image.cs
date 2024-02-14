@@ -267,6 +267,28 @@ namespace PicoGK
         {
             SetValue(x, y, (clr.R + clr.G + clr.B) / 3.0f);
         }
+
+        /// <summary>
+        /// Returns whether the image has any pixels set to a value
+        /// smaller or equal to the specified value
+        /// This is useful to find out if a signed distance field slice
+        /// contains any active voxels.
+        /// </summary>
+        /// <param name="fThreshold"></param>
+        /// <returns></returns>
+        public bool bContainsActivePixels(float fThreshold = 0.0f)
+        {
+            for (int x = 0; x < nWidth; x++)
+            {
+                for (int y = 0; y < nHeight; y++)
+                {
+                    if (fValue(x, y) <= fThreshold)
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     public abstract partial class ImageColorAbstract : Image
