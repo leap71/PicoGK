@@ -271,6 +271,10 @@ namespace PicoGK
         /// <param name="vec">Vector to include</param>
         public void Include(Vector3 vec)
         {
+            Debug.Assert(!float.IsNaN(vec.X));
+            Debug.Assert(!float.IsNaN(vec.Y));
+            Debug.Assert(!float.IsNaN(vec.Z));
+
             vecMin.X = Math.Min(vecMin.X, vec.X);
             vecMin.Y = Math.Min(vecMin.Y, vec.Y);
             vecMin.Z = Math.Min(vecMin.Z, vec.Z);
