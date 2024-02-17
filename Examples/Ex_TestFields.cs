@@ -33,18 +33,24 @@ namespace PicoGKExamples
         {
             try
             {
-                ScalarField oScalarField = new();
+                Library.Log("Testing fundamental field functions");
 
+                Library.Log("Create an empty scalar field and set a value at a point in space");
+                ScalarField oScalarField = new();
                 oScalarField.SetValue(Vector3.One, 10f);
+
+                Library.Log("Test if the value exists at the point and read back if this is the case");
+                
                 if (oScalarField.bGetValue(Vector3.One, out float fValue))
                 {
                     Library.Log($"Successfully read value back ({fValue})");
                 }
                 else
                 {
-                    Library.Log($"Failed to read value back.");
+                    Library.Log($"Failed to read value back (this should not happen)");
                 }
 
+                Library.Log("Create an empty vector field, set a value and read it back");
                 VectorField oVectorField = new();
 
                 oVectorField.SetValue(Vector3.One, Vector3.UnitZ);
@@ -54,40 +60,48 @@ namespace PicoGKExamples
                 }
                 else
                 {
-                    Library.Log($"Failed to read value back.");
+                    Library.Log($"Failed to read value back (this should not happen)");
                 }
 
-                // Set up viewer materials (transparent green for mesh outline)
-                Library.oViewer().SetGroupMaterial(0, "FF0000", 0f, 1f);
-                Library.oViewer().SetGroupMaterial(1, "00FF0033", 0f, 1f);
-
+                Library.Log("Let's create both a scalar signed distance field and a vector gradient field from an existing mesh");
+               
+                Library.Log("Load mesh from STL file");
+                
                 // Create a mesh from an existing teapot file
                 Mesh msh = Mesh.mshFromStlFile(
                     Path.Combine(   Utils.strPicoGKSourceCodeFolder(),
                                     "Examples/Testfiles/Teapot.stl"));
 
-                Lattice lat = new();
-                lat.AddSphere(Vector3.Zero, 1.3f);
-                lat.AddSphere(Vector3.One, 0.6f);
+                Library.Log("Create voxels from mesh");
+                Voxels vox = new(msh);
 
-                // Create Voxels from teapot mesh
-                Voxels vox = new(lat);
-                Library.oViewer().Add(vox, 1);
+                Library.oViewer().SetGroupMaterial(0, "AABBCCAA", 0f, 1f);
+                Library.oViewer().Add(vox);
 
-                // Create a gradient and signed distance field from voxels
+                Library.Log("Create gradient field from mesh");
                 VectorField oGradientField  = new(vox);
+
+                Library.Log("Create signed distance scalar field from mesh");
                 ScalarField oSDField        = new(vox);
 
-                Library.Log("Calculate properties");
-                vox.CalculateProperties(out float fVolume, out BBox3 oBox);
+                Library.Log("Calculate voxel field properties");
+                vox.CalculateProperties(    out float fVolume,
+                                            out BBox3 oBox);
 
-                Library.Log("Grow Bounding Box by .5mm");
-                oBox.Grow(.2f);
-
+                Library.Log("Grow Bounding Box by 1mm");
+                oBox.Grow(1f);
                 Vector3 vecSize = oBox.vecSize();
-                float fStep = float.Min(vecSize.X, float.Min(vecSize.Y, vecSize.Z)) / 20f;
+
+                Library.Log("Calculate step distance between samples");
+                float fStep = float.Max(    Library.fVoxelSizeMM * 4,
+                                            // to avoid cluttering the view, we use 4 voxels minimum spacing
+                                            float.Min(vecSize.X, float.Min(vecSize.Y, vecSize.Z)) / 10f);
 
                 Library.Log($"Starting plot with {fStep}mm grid raster");
+
+                ColorFloat clrMinus = "FF0000";
+                ColorFloat clrPlus  = "0000FF";
+                ColorFloat clrGrid  = "0011";
 
                 for (float x = 0f; x < vecSize.X; x += fStep)
                 {
@@ -98,52 +112,55 @@ namespace PicoGKExamples
                             Vector3 vecPos = oBox.vecMin + new Vector3(x,y,z);
                             Vector3 vecVal = Vector3.Zero;
 
-                            ColorFloat clrMinus = "AA0000";
-                            ColorFloat clrPlus  = "0000CC";
-
                             if (oGradientField.bGetValue(vecPos, out vecVal))
                             {
                                 if (oSDField.bGetValue(vecPos, out float fSDVal))
                                 {
-                                    vecVal = Vector3.Normalize(vecVal);
-                                    fSDVal = float.Abs(fSDVal / 3f);
-
                                     ColorFloat clr;
 
-                                    if (fSDVal < 0)
+                                    // Transform to real world values
+                                    // the SD value is in voxels
+                                    fSDVal *= Library.fVoxelSizeMM;
+
+                                    if (fSDVal < 0) 
                                     {
                                         clr = clrMinus;
-                                        fSDVal = -fSDVal;
                                     }
                                     else
                                     {
                                         clr = clrPlus;
                                     }
 
-                                    vecVal *= fSDVal;
-                                    PolyLine oPoly = new("AA");
+                                    // Multiply the vector with the SD value
+                                    // Exagerate the arrow by factor of 2:
+                                    vecVal *= fSDVal * 2f;
+
+                                    PolyLine oPoly = new(clr);
                                     oPoly.nAddVertex(vecPos);
                                     oPoly.nAddVertex(vecPos + vecVal);
-                                    oPoly.AddArrow(0.1f);
+                                    oPoly.AddArrow(fStep / 5);
 
                                     Library.oViewer().Add(oPoly);
                                 }
                                 else
                                 {
-                                    Library.Log("Inconsistency between SDF and VectorField");
+                                    Library.Log("Inconsistent active voxels between SDF and VectorField");
                                 }
                             }
                             else
                             {
-                                PolyLine oPoly = new("AA");
+                                PolyLine oPoly = new(clrGrid);
                                 oPoly.nAddVertex(vecPos);
-                                oPoly.nAddVertex(vecPos + Vector3.UnitZ * .1f);
+                                oPoly.AddCross(fStep / 8);
 
                                 Library.oViewer().Add(oPoly);
                             }
                         }
                     }
                 }
+                
+                Library.Log($"Done adding stuff to field");
+                Library.oViewer().LogStatistics();
             }
 
             catch (Exception e)
