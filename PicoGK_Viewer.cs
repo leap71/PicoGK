@@ -194,31 +194,18 @@ namespace PicoGK
         public void Add(    in Voxels vox,
                             int nGroupID = 0)
         {
-            Mesh msh = new Mesh(vox);
-
-            lock (m_oVoxels)
+            lock (m_oActions)
             {
-                m_oVoxels.Add(vox, msh);
+                m_oActions.Enqueue(new AddVoxelsAction(vox, nGroupID));
             }
-
-            Add(msh, nGroupID);
         }
 
         public void Remove(Voxels vox)
         {
-            Mesh? msh;
-
-            lock (m_oVoxels)
+            lock (m_oActions)
             {
-                if (!m_oVoxels.TryGetValue(vox, out msh))
-                {
-                    throw new Exception("Tried to remove voxels that were never added");
-                }
-
-                m_oVoxels.Remove(vox);
+                m_oActions.Enqueue(new RemoveVoxelsAction(vox));
             }
-
-            Remove(msh);
         }
 
         public void Add(    Mesh msh,
@@ -354,31 +341,10 @@ namespace PicoGK
 
         public void LogStatistics()
         {
-            float fTriangles = 0;
-            float fVertices = 0;
-            ulong nMeshes = 0;
-
-            lock (m_oMeshes)
+            lock (m_oActions)
             {
-                foreach (Mesh msh in m_oMeshes)
-                {
-                    fTriangles += (float)msh.nTriangleCount();
-                    fVertices += (float)msh.nVertexCount();
-                    nMeshes++;
-                }
+                m_oActions.Enqueue(new LogStatisticsAction());
             }
-
-            fTriangles /= 1000000.0f;
-            fVertices /= 1000000.0f;
-
-            Library.Log($"Viewer Stats:");
-            Library.Log($"   Number of Meshes: {nMeshes}");
-            lock (m_oVoxels)
-            {
-                Library.Log($"   Voxel Objects:    {m_oVoxels.Count()}");
-            }
-            Library.Log($"   Total Triangles:  {fTriangles:F1} mio");
-            Library.Log($"   Total Vertices:   {fVertices:F1} mio");
         }
 
         public float m_fElevation   = 30.0f;
@@ -418,6 +384,20 @@ namespace PicoGK
                     m_oBBox.Include(poly.oBoundingBox());
                 }
             }
+        }
+
+        void DoAdd(Mesh msh, int nGroupID)
+        {
+            m_oBBox.Include(msh.oBoundingBox());
+
+            lock (m_oMeshes)
+            {
+                m_oMeshes.Add(msh);
+            }
+
+            _AddMesh(   m_hThis,
+                        nGroupID,
+                        msh.m_hThis);
         }
 
         void DoRemove(Mesh msh)

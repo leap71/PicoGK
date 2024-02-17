@@ -34,7 +34,6 @@
 //
 
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
@@ -164,6 +163,60 @@ namespace PicoGK
             string m_strScreenShotPath;
         }
 
+        
+        class AddVoxelsAction : IViewerAction
+        {
+            public AddVoxelsAction( Voxels vox,
+                                    int nGroupID)
+            {
+                m_vox = vox;
+                m_nGroupID = nGroupID;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                Mesh msh = new Mesh(m_vox);
+
+                lock (oViewer.m_oVoxels)
+                {
+                    oViewer.m_oVoxels.Add(m_vox, msh);
+                }
+
+                oViewer.DoAdd(msh, m_nGroupID);
+            }
+         
+            Voxels m_vox;
+            int m_nGroupID;
+        }
+
+        class RemoveVoxelsAction : IViewerAction
+        {
+            public RemoveVoxelsAction(Voxels vox)
+            {
+                m_vox = vox;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                Mesh? msh;
+
+                lock (oViewer.m_oVoxels)
+                {
+                    if (!oViewer.m_oVoxels.TryGetValue(m_vox, out msh))
+                    {
+                        throw new Exception("Tried to remove voxels that were never added");
+                    }
+
+                    oViewer.m_oVoxels.Remove(m_vox);
+                }
+
+                oViewer.DoRemove(msh);
+            }
+
+            Voxels m_vox;
+
+        }
+
         class AddMeshAction : IViewerAction
         {
             public AddMeshAction(   Mesh msh,
@@ -175,16 +228,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                oViewer.m_oBBox.Include(m_msh.oBoundingBox());
-
-                lock (oViewer.m_oMeshes)
-                {
-                    oViewer.m_oMeshes.Add(m_msh);
-                }
-
-                _AddMesh(   oViewer.m_hThis,
-                            m_nGroupID,
-                            m_msh.m_hThis);
+                oViewer.DoAdd(m_msh, m_nGroupID);
             }
 
             Mesh m_msh;
@@ -277,6 +321,60 @@ namespace PicoGK
 
                     oViewer.m_oMeshes.Clear();
                 }
+
+                // Clear bounds
+                oViewer.RecalculateBoundingBox();
+            }
+        }
+
+        class LogStatisticsAction : IViewerAction
+        {
+            public LogStatisticsAction()
+            {
+
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                float fTriangles = 0;
+                float fVertices = 0;
+                ulong nMeshes = 0;
+
+                lock (oViewer.m_oMeshes)
+                {
+                    foreach (Mesh msh in oViewer.m_oMeshes)
+                    {
+                        fTriangles += (float)msh.nTriangleCount();
+                        fVertices += (float)msh.nVertexCount();
+                        nMeshes++;
+                    }
+                }
+
+                string strUnit = "";
+
+                if (fTriangles > 1000f)
+                {
+                    strUnit = "K";
+                    fTriangles  /= 1000.0f;
+                    fVertices   /= 1000.0f;
+
+                    if (fTriangles > 1000f)
+                    {
+                        strUnit = "mio";
+                        fTriangles /= 1000.0f;
+                        fVertices /= 1000.0f;
+                    }
+                }
+
+                Library.Log($"Viewer Stats:");
+                Library.Log($"   Number of Meshes: {nMeshes}");
+                lock (oViewer.m_oVoxels)
+                {
+                    Library.Log($"   Voxel Objects:    {oViewer.m_oVoxels.Count()}");
+                }
+                Library.Log($"   Total Triangles:  {fTriangles:F1}{strUnit}");
+                Library.Log($"   Total Vertices:   {fVertices:F1}{strUnit}");
+                Library.Log($"   Bounding Box:     {oViewer.m_oBBox}");
             }
         }
 
