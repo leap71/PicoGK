@@ -147,8 +147,11 @@ namespace PicoGK
 
             Vector3 vecInit = Vector3.UnitX;
 
-            if (vecDir == Vector3.UnitX)
+            if (    (vecDir == Vector3.UnitX) ||
+                    (vecDir == -Vector3.UnitX))
+            {
                 vecInit = Vector3.UnitY;
+            }    
 
             Vector3 vecU = Vector3.Normalize(Vector3.Cross(vecDir, vecInit));
             Vector3 vecV = Vector3.Normalize(Vector3.Cross(vecDir, vecU));
@@ -162,6 +165,34 @@ namespace PicoGK
             nAddVertex(vecBase + vecV * fSizeMM / 2f);
             nAddVertex(vecBase - vecV * fSizeMM / 2f);
             nAddVertex(vecTip);
+        }
+
+        /// <summary>
+        /// Adds a cross at the end of the current polyline, oriented in X,Y,Z
+        /// The cross ends in the current position, so no change in the last
+        /// polyline position is made
+        /// </summary>
+        /// <param name="fSizeMM">
+        /// Optional size of the cross,
+        /// and the distance from the tip. Defaults to 1mm
+        /// </param>
+        /// <param name="_vecDir">Optional direction of the arrow</param>
+        public void AddCross(float fSizeMM = 1.0f)
+        {
+            if (nVertexCount() < 1)
+                return;
+
+            Vector3 vecCenter = vecVertexAt(nVertexCount()-1);
+
+            nAddVertex(vecCenter + Vector3.UnitX * fSizeMM);
+            nAddVertex(vecCenter - Vector3.UnitX * fSizeMM);
+            nAddVertex(vecCenter);
+            nAddVertex(vecCenter + Vector3.UnitY * fSizeMM);
+            nAddVertex(vecCenter - Vector3.UnitY * fSizeMM);
+            nAddVertex(vecCenter);
+            nAddVertex(vecCenter + Vector3.UnitZ * fSizeMM);
+            nAddVertex(vecCenter - Vector3.UnitZ * fSizeMM);
+            nAddVertex(vecCenter);
         }
 
         BBox3 m_oBoundingBox = new BBox3();
