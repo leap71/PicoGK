@@ -39,7 +39,13 @@ using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
-   public partial class VectorField
+    public interface ITraverseVectorField
+    {
+        public abstract void InformActiveValue( in Vector3 vecPosition,
+                                                in Vector3 vecValue);
+    }
+
+    public partial class VectorField
     {
         /// <summary>
         /// Create a VectorField object from an existing handle
@@ -106,6 +112,25 @@ namespace PicoGK
         {
             vecValue = Vector3.Zero;
             return (_bGetValue(m_hThis, vecPosition, ref vecValue));
+        }
+
+        /// <summary>
+        /// Removes the value at the specified position
+        /// </summary>
+        /// <param name="vecPosition">Position of the value in space</param>
+        public void RemoveValue(Vector3 vecPosition)
+        {
+            _RemoveValue(m_hThis, vecPosition);
+        }
+
+        /// <summary>
+        /// Visit each active value in the vector field and call the
+        /// InformActiveValue methot of the ITraverseVectorField interface
+        /// </summary>
+        /// <param name="xTraverse">The interface containing the callback</param>
+        public void TraverseActive(ITraverseVectorField xTraverse)
+        {
+            _TraverseActive(m_hThis, xTraverse.InformActiveValue);
         }
     }
 }

@@ -215,6 +215,12 @@ namespace PicoGK
         internal IntPtr m_hThis     = IntPtr.Zero;
     }
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void CallbackScalarFieldTraverse(in Vector3 vec, float fValue);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    delegate void CallbackVectorFieldTraverse(in Vector3 vec, in Vector3 vecValue);
+
     public partial class Voxels : IDisposable
     {
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreate")]
@@ -222,6 +228,9 @@ namespace PicoGK
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateCopy")]
         internal static extern IntPtr _hCreateCopy(IntPtr hSource);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateFromScalarField")]
+        internal static extern IntPtr _hCreateFromScalarField(IntPtr hSource);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsValid")]
         private static extern bool _bIsValid(IntPtr hThis);
@@ -736,6 +745,15 @@ namespace PicoGK
                                                  in  Vector3 vecPosition,
                                                  ref float fValue);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_RemoveValue")]
+        private static extern bool _RemoveValue(    IntPtr hThis,
+                                                    in  Vector3 vecPosition);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_TraverseActive")]
+        private extern static void _TraverseActive( IntPtr hThis,
+                                                    CallbackScalarFieldTraverse pfn);
+
+
         // Dispose Pattern
 
         ~ScalarField()
@@ -803,6 +821,14 @@ namespace PicoGK
         private static extern bool _bGetValue(   IntPtr hThis,
                                                  in  Vector3 vecPosition,
                                                  ref Vector3 vecValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_RemoveValue")]
+        private static extern bool _RemoveValue(    IntPtr hThis,
+                                                    in  Vector3 vecPosition);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_TraverseActive")]
+        private extern static void _TraverseActive( IntPtr hThis,
+                                                    CallbackVectorFieldTraverse pfn);
 
         // Dispose Pattern
 

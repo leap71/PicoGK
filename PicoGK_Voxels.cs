@@ -87,6 +87,16 @@ namespace PicoGK
         {}
 
         /// <summary>
+        /// Create a voxel field from a supplied scalar field
+        /// the scalar field needs to contain a valid discretized
+        /// signed distance field for this to work properly
+        /// </summary>
+        /// <param name="oSource">Source to copy from</param>
+        public Voxels(in ScalarField oSource)
+            : this(_hCreateFromScalarField(oSource.m_hThis))
+        {}
+
+        /// <summary>
         /// Creates a new voxel field and renders it using the
         /// implicit function specified
         /// </summary>
