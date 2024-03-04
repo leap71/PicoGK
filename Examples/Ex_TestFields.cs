@@ -50,6 +50,19 @@ namespace PicoGKExamples
                     Library.Log($"Failed to read value back (this should not happen)");
                 }
 
+                Library.Log("Remove the value at the specified point");
+
+                oScalarField.RemoveValue(Vector3.One);
+
+                if (oScalarField.bGetValue(Vector3.One, out fValue))
+                {
+                    Library.Log($"Error value still there: ({fValue})");
+                }
+                else
+                {
+                    Library.Log($"Successfully removed the value");
+                }
+
                 Library.Log("Create an empty vector field, set a value and read it back");
                 VectorField oVectorField = new();
 
@@ -63,6 +76,19 @@ namespace PicoGKExamples
                     Library.Log($"Failed to read value back (this should not happen)");
                 }
 
+                oVectorField.RemoveValue(Vector3.One);
+
+                if (oVectorField.bGetValue(Vector3.One, out vecValue))
+                {
+                    Library.Log($"Error value still there: ({vecValue})");
+                }
+                else
+                {
+                    Library.Log($"Successfully removed the value");
+                }
+
+                Library.oViewer().SetGroupMaterial(0, "AA33", 0f, 1f);
+
                 Library.Log("Let's create both a scalar signed distance field and a vector gradient field from an existing mesh");
                
                 Library.Log("Load mesh from STL file");
@@ -74,10 +100,8 @@ namespace PicoGKExamples
 
                 Library.Log("Create voxels from mesh");
                 Voxels vox = new(msh);
-
-                Library.oViewer().SetGroupMaterial(0, "AABBCCAA", 0f, 1f);
-                Library.oViewer().Add(vox);
-
+                Library.oViewer().Add(vox, 0);
+               
                 Library.Log("Create gradient field from mesh");
                 VectorField oGradientField  = new(vox);
 
@@ -95,7 +119,7 @@ namespace PicoGKExamples
                 Library.Log("Calculate step distance between samples");
                 float fStep = float.Max(    Library.fVoxelSizeMM * 4,
                                             // to avoid cluttering the view, we use 4 voxels minimum spacing
-                                            float.Min(vecSize.X, float.Min(vecSize.Y, vecSize.Z)) / 10f);
+                                            float.Min(vecSize.X, float.Min(vecSize.Y, vecSize.Z)) / 20f);
 
                 Library.Log($"Starting plot with {fStep}mm grid raster");
 
@@ -132,8 +156,8 @@ namespace PicoGKExamples
                                     }
 
                                     // Multiply the vector with the SD value
-                                    // Exagerate the arrow by factor of 2:
-                                    vecVal *= fSDVal * 2f;
+                                    // Exagerate the arrow by factor of 4:
+                                    vecVal *= fSDVal * 4f;
 
                                     PolyLine oPoly = new(clr);
                                     oPoly.nAddVertex(vecPos);
@@ -151,7 +175,7 @@ namespace PicoGKExamples
                             {
                                 PolyLine oPoly = new(clrGrid);
                                 oPoly.nAddVertex(vecPos);
-                                oPoly.AddCross(fStep / 8);
+                                oPoly.AddCross(fStep / 15);
 
                                 Library.oViewer().Add(oPoly);
                             }
