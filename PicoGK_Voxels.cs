@@ -93,7 +93,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="oSource">Source to copy from</param>
         public Voxels(in ScalarField oSource)
-            : this(_hCreateFromScalarField(oSource.m_hThis))
+            : this(oSource, oSource.oBoundingBox())
         {}
 
         /// <summary>
@@ -268,8 +268,12 @@ namespace PicoGK
         public void CalculateProperties(    out float fVolumeCubicMM,
                                             out BBox3 oBBox)
         {
-            oBBox = new();
-           _CalculateProperties(m_hThis, out fVolumeCubicMM, ref oBBox);
+            oBBox           = new();
+            fVolumeCubicMM  = 0f;
+
+           _CalculateProperties(    m_hThis,
+                                    ref fVolumeCubicMM,
+                                    ref oBBox);
         }
 
         /// <summary>
@@ -281,7 +285,7 @@ namespace PicoGK
         /// the normal
         /// </param>
         /// <returns>The normal vector of the surface at the point</returns>
-        public Vector3 vecSurfaceNormal(    in Vector3 vecSurfacePoint)
+        public Vector3 vecSurfaceNormal(in Vector3 vecSurfacePoint)
         {
             Vector3 vecNormal = Vector3.Zero;
             _GetSurfaceNormal(m_hThis, vecSurfacePoint, ref vecNormal);
@@ -326,6 +330,38 @@ namespace PicoGK
         /// <summary>
         /// Returns the dimensions of the voxel field in discrete voxels
         /// </summary>
+        /// <param name="nXOrigin">X origin of the voxel field in voxels</param>
+        /// <param name="nYOrigin">Y origin of the voxel field in voxels</param>
+        /// <param name="nZOrigin">Z origin of the voxel field in voxels</param>
+        /// <param name="nXSize">Size in x direction in voxels</param>
+        /// <param name="nYSize">Size in y direction in voxels</param>
+        /// <param name="nZSize">Size in z direction in voxels</param>
+        public void GetVoxelDimensions( out int nXOrigin,
+                                        out int nYOrigin,
+                                        out int nZOrigin,
+                                        out int nXSize,
+                                        out int nYSize,
+                                        out int nZSize)
+        {
+            nXOrigin    = 0;
+            nYOrigin    = 0;
+            nZOrigin    = 0;
+            nXSize      = 0;
+            nYSize      = 0;
+            nZSize      = 0;
+
+            _GetVoxelDimensions(    m_hThis,
+                                    ref nXOrigin,
+                                    ref nYOrigin,
+                                    ref nZOrigin,
+                                    ref nXSize,
+                                    ref nYSize,
+                                    ref nZSize);
+        }
+
+        /// <summary>
+        /// Returns the dimensions of the voxel field in discrete voxels
+        /// </summary>
         /// <param name="nXSize">Size in x direction in voxels</param>
         /// <param name="nYSize">Size in y direction in voxels</param>
         /// <param name="nZSize">Size in z direction in voxels</param>
@@ -333,10 +369,20 @@ namespace PicoGK
                                         out int nYSize,
                                         out int nZSize)
         {
+            int nXOrigin    = 0; // unused in this function
+            int nYOrigin    = 0; // unused in this function
+            int nZOrigin    = 0; // unused in this function
+            nXSize          = 0;
+            nYSize          = 0;
+            nZSize          = 0;
+
             _GetVoxelDimensions(    m_hThis,
-                                    out nXSize,
-                                    out nYSize,
-                                    out nZSize);
+                                    ref nXOrigin,
+                                    ref nYOrigin,
+                                    ref nZOrigin,
+                                    ref nXSize,
+                                    ref nYSize,
+                                    ref nZSize);
         }
 
         public enum ESliceMode

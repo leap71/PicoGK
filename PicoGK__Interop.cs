@@ -57,6 +57,14 @@ namespace PicoGK
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_GetBuildInfo", CharSet = CharSet.Ansi)]
         private static extern void _GetBuildInfo(StringBuilder psz);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_VoxelsToMm")]
+        private static extern void _VoxelsToMm( in  Vector3 vecVoxelCoordinate,
+                                                ref Vector3 vecMmCoordinate);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_MmToVoxels")]
+        private static extern void _MmToVoxels( in  Vector3 vecMmCoordinate,
+                                                ref Vector3 vecVoxelCoordinate);
     }
 
     public partial class Mesh : IDisposable
@@ -229,9 +237,6 @@ namespace PicoGK
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateCopy")]
         internal static extern IntPtr _hCreateCopy(IntPtr hSource);
 
-        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateFromScalarField")]
-        internal static extern IntPtr _hCreateFromScalarField(IntPtr hSource);
-
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsValid")]
         private static extern bool _bIsValid(IntPtr hThis);
 
@@ -304,7 +309,7 @@ namespace PicoGK
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_CalculateProperties")]
         private extern static void _CalculateProperties(    IntPtr hThis,
-                                                            out float pfVolume,
+                                                            ref float pfVolume,
                                                             ref BBox3 oBBox);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetSurfaceNormal")]
@@ -325,9 +330,12 @@ namespace PicoGK
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetVoxelDimensions")]
         private extern static void _GetVoxelDimensions( IntPtr hThis,
-                                                        out int nXSize,
-                                                        out int nYSize,
-                                                        out int nZSize);
+                                                        ref int nXOrigin,
+                                                        ref int nYOrigin,
+                                                        ref int nZOrigin,
+                                                        ref int nXSize,
+                                                        ref int nYSize,
+                                                        ref int nZSize);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetSlice")]
         private extern static void _GetVoxelSlice(  IntPtr hThis,
@@ -748,6 +756,20 @@ namespace PicoGK
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_RemoveValue")]
         private static extern bool _RemoveValue(    IntPtr hThis,
                                                     in  Vector3 vecPosition);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_GetVoxelDimensions")]
+        private extern static void _GetVoxelDimensions( IntPtr hThis,
+                                                        ref int nXOrigin,
+                                                        ref int nYOrigin,
+                                                        ref int nZOrigin,
+                                                        ref int nXSize,
+                                                        ref int nYSize,
+                                                        ref int nZSize);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_GetSlice")]
+        private extern static void _GetVoxelSlice(  IntPtr hThis,
+                                                    int nZSlice,
+                                                    IntPtr afBuffer);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ScalarField_TraverseActive")]
         private extern static void _TraverseActive( IntPtr hThis,

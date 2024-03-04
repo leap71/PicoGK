@@ -420,6 +420,35 @@ namespace PicoGK
             return true;
         }
 
+        public static Vector3 vecVoxelsToMm(    int x,
+                                                int y,
+                                                int z)
+        {
+            Vector3 vecMm = new();
+            Vector3 vecVoxels   = new Vector3(  (float) x,
+                                                (float) y,
+                                                (float) z);
+            _VoxelsToMm(    in vecVoxels,
+                            ref vecMm);
+
+            return vecMm;
+        }
+
+         public static void MmToVoxels( Vector3 vecMm,
+                                        out int x,
+                                        out int y,
+                                        out int z)
+        {
+            Vector3 vecResult   = Vector3.Zero;
+
+            _VoxelsToMm(    in vecMm,
+                            ref vecResult);
+
+            x = (int) (vecResult.X + 0.5f);
+            y = (int) (vecResult.Y + 0.5f);
+            z = (int) (vecResult.Z + 0.5f);
+        }
+
         public static   float   fVoxelSizeMM = 0.0f;
         public static   string  strLogFolder = "";
         public static   string  strSrcFolder = "";

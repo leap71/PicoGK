@@ -45,7 +45,7 @@ namespace PicoGK
                                                 float       fValue);
     }
 
-    public partial class ScalarField
+    public partial class ScalarField : IImplicit
     {
         /// <summary>
         /// Create a voxels object from an existing handle
@@ -126,6 +126,90 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Returns the dimensions of the field in discrete voxels
+        /// </summary>
+        /// <param name="nXOrigin">X origin of the field in voxels</param>
+        /// <param name="nYOrigin">Y origin of the field in voxels</param>
+        /// <param name="nZOrigin">Z origin of the field in voxels</param>
+        /// <param name="nXSize">Size in x direction in voxels</param>
+        /// <param name="nYSize">Size in y direction in voxels</param>
+        /// <param name="nZSize">Size in z direction in voxels</param>
+        public void GetVoxelDimensions( out int nXOrigin,
+                                        out int nYOrigin,
+                                        out int nZOrigin,
+                                        out int nXSize,
+                                        out int nYSize,
+                                        out int nZSize)
+        {
+            nXOrigin    = 0;
+            nYOrigin    = 0;
+            nZOrigin    = 0;
+            nXSize      = 0;
+            nYSize      = 0;
+            nZSize      = 0;
+
+            _GetVoxelDimensions(    m_hThis,
+                                    ref nXOrigin,
+                                    ref nYOrigin,
+                                    ref nZOrigin,
+                                    ref nXSize,
+                                    ref nYSize,
+                                    ref nZSize);
+        }
+
+        /// <summary>
+        /// Returns the dimensions of the field in discrete voxels
+        /// </summary>
+        /// <param name="nXSize">Size in x direction in voxels</param>
+        /// <param name="nYSize">Size in y direction in voxels</param>
+        /// <param name="nZSize">Size in z direction in voxels</param>
+        public void GetVoxelDimensions( out int nXSize,
+                                        out int nYSize,
+                                        out int nZSize)
+        {
+            int nXOrigin    = 0; // unused in this function
+            int nYOrigin    = 0; // unused in this function
+            int nZOrigin    = 0; // unused in this function
+            nXSize          = 0;
+            nYSize          = 0;
+            nZSize          = 0;
+
+            _GetVoxelDimensions(    m_hThis,
+                                    ref nXOrigin,
+                                    ref nYOrigin,
+                                    ref nZOrigin,
+                                    ref nXSize,
+                                    ref nYSize,
+                                    ref nZSize);
+        }
+
+        /// <summary>
+        /// Returns a signed distance-field-encoded slice of the voxel field
+        /// To use it, use GetVoxelDimensions to find out the size of the voxel
+        /// field in voxel units. Then allocate a new grayscale image to copy
+        /// the data into, and pass it as a reference. Since GetVoxelDimensions
+        /// is potentially an "expensive" function, we are putting the burden
+        /// on you to allocate an image and don't create it for you. You can
+        /// also re-use the image if you want to save an entire image stack
+        /// </summary>
+        /// <param name="nZSlice">Slice to retrieve. 0 is at the bottom.</param>
+        /// <param name="img">Pre-allocated grayscale image to receive the values</param>
+        public void GetVoxelSlice(  in int nZSlice,
+                                    ref ImageGrayScale img)
+        {
+            GCHandle oPinnedArray = GCHandle.Alloc(img.m_afValues, GCHandleType.Pinned);
+            try
+            {
+                IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
+                _GetVoxelSlice(m_hThis, nZSlice, afBufferPtr);
+            }
+            finally
+            {
+                oPinnedArray.Free();
+            }
+        }
+
+        /// <summary>
         /// Visit each active value in the vector field and call the
         /// InformActiveValue methot of the ITraverseScalarField interface
         /// </summary>
@@ -133,6 +217,43 @@ namespace PicoGK
         public void TraverseActive(ITraverseScalarField xTraverse)
         {
             _TraverseActive(m_hThis, xTraverse.InformActiveValue);
+        }
+
+        /// <summary>
+        /// Return the scalar value at the specified position as
+        /// as signed distance value. This assumes you stored an signed
+        /// distance field in the scalar field (for example by constructing it
+        /// from a voxel field)
+        /// </summary>
+        /// <param name="vecPosition">Position to sample</param>
+        /// <returns>
+        /// Distance to the surface - negative values are inside the object
+        /// positive values are outside the object, values of 0 are exactly
+        /// on the surface
+        /// </returns>
+        public float fSignedDistance(in Vector3 vecPosition)
+        {
+            bGetValue(vecPosition, out float fValue);
+            return fValue * Library.fVoxelSizeMM;
+        }
+
+        /// <summary>
+        /// Returns the bounding box of all active voxels in mm coordinates
+        /// </summary>
+        /// <returns>Bounding box of all active voxels</returns>
+        public BBox3 oBoundingBox()
+        {
+            GetVoxelDimensions( out int iXOrigin,
+                                out int iYOrigin,
+                                out int iZOrigin,
+                                out int nXSize,
+                                out int nYSize,
+                                out int nZSize);
+
+            return new( Library.vecVoxelsToMm(iXOrigin, iYOrigin, iZOrigin),
+                        Library.vecVoxelsToMm(  iXOrigin + nXSize,
+                                                iYOrigin + nYSize,
+                                                iZOrigin + nZSize));
         }
     }
 }
