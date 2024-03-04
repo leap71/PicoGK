@@ -33,6 +33,7 @@
 // limitations under the License.   
 //
 
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace PicoGK
@@ -166,6 +167,47 @@ namespace PicoGK
             G = clr.G;
             B = clr.B;
             A = fAlphaOverride;
+        }
+
+        public ColorFloat(ColorHSV clrHSV)
+        {
+            ColorFloat clr = clrHSV;
+            R = clr.R;
+            G = clr.G;
+            B = clr.B;
+            A = 1f;
+        }
+
+        public ColorFloat(ColorHLS clrHLS)
+        {
+            ColorFloat clr = clrHLS;
+            R = clr.R;
+            G = clr.G;
+            B = clr.B;
+            A = 1f;
+        }
+
+        public static ColorFloat clrWeighted(   ColorFloat clr1,
+                                                ColorFloat clr2,
+                                                float fWeight)
+        {
+            Debug.Assert(fWeight >= 0);
+            Debug.Assert(fWeight <= 1);
+
+            clr1.R *= fWeight;
+            clr1.G *= fWeight;
+            clr1.B *= fWeight;
+            clr1.A *= fWeight;
+
+            clr1.R *= (1 - fWeight);
+            clr1.G *= (1 - fWeight);
+            clr1.B *= (1 - fWeight);
+            clr1.A *= (1 - fWeight);
+
+            return new ColorFloat(  clr1.R + clr2.R,
+                                    clr1.G + clr2.G,
+                                    clr1.B + clr2.B,
+                                    clr1.A + clr2.A);
         }
 
         /// <summary>
@@ -322,5 +364,231 @@ namespace PicoGK
         public byte A;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct ColorHSV
+    {
+        public float H;
+        public float S;
+        public float V;
+
+        public ColorHSV( float fH,
+                         float fS,
+                         float fV)
+        {
+            H = fH;
+            S = fS;
+            V = fV;
+        }
+
+        public ColorHSV(ColorFloat clr)
+        {
+            // make sure we are in valid range for HSV conversion
+            // No HDR values
+            clr.R = float.Clamp(clr.R, 0, 1);
+            clr.G = float.Clamp(clr.G, 0, 1);
+            clr.B = float.Clamp(clr.B, 0, 1);
+
+            float min = Math.Min(Math.Min(clr.R, clr.G), clr.B);
+            float max = Math.Max(Math.Max(clr.R, clr.G), clr.B);
+            V = max; // Value is the maximum of RGB components.
+
+            float delta = max - min;
+
+            if (max != 0)
+            {
+                S = delta / max; // Saturation is the ratio of delta and max.
+            }
+            else
+            {
+                // R = G = B = 0 (S = 0, V is undefined)
+                S = 0;
+                H = 0;
+                return;
+            }
+
+            if (delta != 0) // Ensure delta is not zero to avoid division by zero
+            {
+                if (clr.R == max)
+                {
+                    H = (clr.G - clr.B) / delta; // Between yellow & magenta
+                }
+                else if (clr.G == max)
+                {
+                    H = 2 + (clr.B - clr.R) / delta; // Between cyan & yellow
+                }
+                else
+                {
+                    H = 4 + (clr.R - clr.G) / delta; // Between magenta & cyan
+                }
+
+                H *= 60; // Convert to degrees
+
+                if (H < 0)
+                    H += 360;
+            }
+            else
+            {
+                H = 0; // If delta is zero, hue is 0
+            }
+        }
+
+        /// <summary>
+        /// Allows you to pass a ColorFloat to any function that needs a ColorBgra32
+        /// </summary>
+        /// <param name="clr">The ColorFloat to use</param>
+        public static implicit operator ColorHSV(ColorFloat clr)
+        {
+            return new ColorHSV(clr);
+        }
+
+        public static implicit operator ColorFloat(ColorHSV clrHSV)
+        {   
+            float h = clrHSV.H;
+            float s = clrHSV.S;
+            float v = clrHSV.V;
+
+            if (s == 0)
+            {
+                // Achromatic (grey)
+                return new ColorFloat(v, v, v);
+            }
+
+            h /= 60; // sector 0 to 5
+            int i = (int)Math.Floor(h);
+            float f = h - i; // factorial part of h
+            float p = v * (1 - s);
+            float q = v * (1 - s * f);
+            float t = v * (1 - s * (1 - f));
+
+            switch (i)
+            {
+                case 0:
+                    return new ColorFloat(v, t, p);
+                case 1:
+                    return new ColorFloat(q, v, p);
+                case 2:
+                    return new ColorFloat(p, v, t);
+                case 3:
+                    return new ColorFloat(p, q, v);
+                case 4:
+                    return new ColorFloat(t, p, v);
+                default: // case 5:
+                    return new ColorFloat(v, p, q);
+            }
+        }
+    }
+
+    public struct ColorHLS
+    {
+        public float H; // Hue (0-360)
+        public float L; // Lightness (0-1)
+        public float S; // Saturation (0-1)
+
+        public ColorHLS(float h, float l, float s)
+        {
+            H = h;
+            L = l;
+            S = s;
+        }
+
+        public ColorHLS(ColorFloat clr)
+        {
+            // make sure we are in valid range for HSV conversion
+            // No HDR values
+            clr.R = float.Clamp(clr.R, 0, 1);
+            clr.G = float.Clamp(clr.G, 0, 1);
+            clr.B = float.Clamp(clr.B, 0, 1);
+
+            float min = float.Min(float.Min(clr.R, clr.G), clr.B);
+            float max = float.Max(float.Max(clr.R, clr.G), clr.B);
+            float delta = max - min;
+
+            // Lightness calculation
+            L = (max + min) / 2;
+
+            // Saturation calculation
+            if (delta == 0)
+            {
+                S = 0; // Achromatic (grey), no saturation
+                H = 0; // Hue is undefined
+            }
+            else
+            {
+                // Saturation is calculated differently for light and dark colors
+                S = L < 0.5 ? delta / (max + min) : delta / (2.0f - max - min);
+
+                // Hue calculation
+                if (clr.R == max)
+                {
+                    H = (clr.G - clr.B) / delta; // Between yellow & magenta
+                }
+                else if (clr.G == max)
+                {
+                    H = 2 + (clr.B - clr.R) / delta; // Between cyan & yellow
+                }
+                else if (clr.B == max)
+                {
+                    H = 4 + (clr.R - clr.G) / delta; // Between magenta & cyan
+                }
+
+                H *= 60; // Convert to degrees
+                if (H < 0)
+                {
+                    H += 360;
+                }
+            }
+        }
+
+        public static implicit operator ColorHLS(ColorFloat clr)
+        {
+            return new ColorHLS(clr);
+        }
+
+        public static implicit operator ColorFloat(ColorHLS clrHLS)
+        {
+            float r, g, b;
+            float h = clrHLS.H;
+            float l = clrHLS.L;
+            float s = clrHLS.S;
+
+            if (s == 0)
+            {
+                // Achromatic case (grey)
+                r = g = b = l; // all components equal to lightness
+            }
+            else
+            {
+                float temp2 = l < 0.5 ? l * (1.0f + s) : l + s - l * s;
+                float temp1 = 2.0f * l - temp2;
+
+                r = GetColorComponent(temp1, temp2, h + 120);
+                g = GetColorComponent(temp1, temp2, h);
+                b = GetColorComponent(temp1, temp2, h - 120);
+            }
+
+            return new ColorFloat(r, g, b);
+        }
+
+        private static float GetColorComponent(float temp1, float temp2, float temp3)
+        {
+            temp3 = NormalizeHue(temp3);
+            if (temp3 < 60)
+                return temp1 + (temp2 - temp1) * temp3 / 60.0f;
+            if (temp3 < 180)
+                return temp2;
+            if (temp3 < 240)
+                return temp1 + (temp2 - temp1) * (240 - temp3) / 60.0f;
+            return temp1;
+        }
+
+        private static float NormalizeHue(float hue)
+        {
+            hue = hue % 360; // Normalize hue to be within 0-360
+            if (hue < 0)
+                hue += 360;
+
+            return hue;
+        }
+    }
 }
 
