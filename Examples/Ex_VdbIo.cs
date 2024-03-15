@@ -1,4 +1,5 @@
 ﻿using PicoGK;
+using System.Numerics;
 
 namespace PicoGKExamples
 {
@@ -111,12 +112,55 @@ namespace PicoGKExamples
             // If no compatible field is found, an exception is thrown
             Voxels voxReadSimple = Voxels.voxFromVdbFile(strVdbFileName);
 
+            voxReadSimple.m_oMetadata.SetValue("StringValue", "Hello PicoGK");
+
+            if (!voxReadSimple.m_oMetadata.bGetValueAt("StringValue", out string strValue))
+            {
+                Library.Log($"Did not find the metadata value previously saved");
+            }
+            else
+            {
+                Library.Log($"Found metadata value {strValue}");
+            }
+
+            voxReadSimple.m_oMetadata.SetValue("FloatValue", 12345.67f);
+
+            if (!voxReadSimple.m_oMetadata.bGetValueAt("FloatValue", out float fValue))
+            {
+                Library.Log($"Did not find the metadata value previously saved");
+            }
+            else
+            {
+                Library.Log($"Found metadata value {fValue}");
+            }
+
+            voxReadSimple.m_oMetadata.SetValue("VectorValue", new Vector3(1,2,3));
+
+            if (!voxReadSimple.m_oMetadata.bGetValueAt("VectorValue", out Vector3 vecValue))
+            {
+                Library.Log($"Did not find the metadata value previously saved");
+            }
+            else
+            {
+                Library.Log($"Found metadata value {vecValue}");
+            }
+
+            Library.Log($"Metadata state: {voxReadSimple.m_oMetadata}");
+
+            Library.Log($"Removing data item 'StringValue'");
+            voxReadSimple.m_oMetadata.RemoveValue("StringValue");
+
+            Library.Log($"After removal: {voxReadSimple.m_oMetadata}");
+
             // Now lets save the Voxels to a new file
-            voxReadSimple.SaveToVdbFile(Path.Combine(   Library.strLogFolder,
-                                                        "Simple.vdb"));
+            string strSimple = Path.Combine(Library.strLogFolder, "Simple.vdb");
+            voxReadSimple.SaveToVdbFile(strSimple);
 
             // This file now contains exactly one field,
             // and uses an auto-generated field name
+
+            Voxels voxReadAgain = Voxels.voxFromVdbFile(strSimple);
+            Library.Log($"After reading: {voxReadAgain.m_oMetadata}");
         }
     }
 }

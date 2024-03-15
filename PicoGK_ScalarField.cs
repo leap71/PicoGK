@@ -56,6 +56,8 @@ namespace PicoGK
             m_hThis = hField;
             Debug.Assert(m_hThis != IntPtr.Zero);
             Debug.Assert(_bIsValid(m_hThis));
+
+            m_oMetadata = new(FieldMetadata._hFromScalarField(m_hThis));
         }
 
         /// <summary>
@@ -255,5 +257,7 @@ namespace PicoGK
                                                 iYOrigin + nYSize,
                                                 iZOrigin + nZSize));
         }
+
+        public FieldMetadata m_oMetadata;
     }
 }

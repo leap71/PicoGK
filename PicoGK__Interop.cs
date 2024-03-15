@@ -893,4 +893,92 @@ namespace PicoGK
         internal IntPtr m_hThis = IntPtr.Zero;
     }
 
+    public partial class FieldMetadata
+    {
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_hFromVoxels")]
+        internal static extern IntPtr _hFromVoxels(IntPtr hVoxels);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_hFromScalarField")]
+        internal static extern IntPtr _hFromScalarField(IntPtr hScalarField);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_hFromVectorField")]
+        internal static extern IntPtr _hFromVectorField(IntPtr hVectorField);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_Destroy")]
+        private static extern void _Destroy(IntPtr hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_nCount")]
+        private static extern int _nCount(IntPtr hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_nNameLengthAt")]
+        private static extern int _nNameLengthAt(IntPtr hThis, int nIndex);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_bGetNameAt", CharSet = CharSet.Ansi)]
+        private static extern bool _bGetNameAt( IntPtr hThis, int nIndex, StringBuilder pszValueName, int nMaxStringLen);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_nTypeAt", CharSet = CharSet.Ansi)]
+        private static extern int _nTypeAt(IntPtr hThis, string strName);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_nStringLengthAt", CharSet = CharSet.Ansi)]
+        private static extern int _nStringLengthAt( IntPtr hThis, string strFieldName);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_bGetStringAt", CharSet = CharSet.Ansi)]
+        private static extern bool _bGetStringAt(IntPtr hThis, string strFieldName, StringBuilder pszValue, int nMaxStringLen);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_bGetFloatAt", CharSet = CharSet.Ansi)]
+        private static extern bool _bGetFloatAt(IntPtr hThis, string strFieldName, ref float fValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_bGetVectorAt", CharSet = CharSet.Ansi)]
+        private static extern bool _bGetVectorAt(IntPtr hThis, string strFieldName, ref Vector3 vecValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_SetStringValue", CharSet = CharSet.Ansi)]
+        private static extern void _SetStringValue(IntPtr hThis, string strFieldName, string strValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_SetFloatValue", CharSet = CharSet.Ansi)]
+        private static extern void _SetFloatValue(IntPtr hThis, string strFieldName, float fValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_SetVectorValue", CharSet = CharSet.Ansi)]
+        private static extern void _SetVectorValue(IntPtr hThis, string strFieldName, in Vector3 vecValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "MetaData_RemoveValue", CharSet = CharSet.Ansi)]
+        private static extern void _RemoveValue(IntPtr hThis, string strFieldName);
+
+         ~FieldMetadata()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool bDisposing)
+        {
+            if (m_bDisposed)
+            {
+                return;
+            }
+
+            if (bDisposing)
+            {
+                // dispose managed state (managed objects).
+                // Nothing to do in this class
+            }
+
+            if (m_hThis != IntPtr.Zero)
+            {
+                _Destroy(m_hThis);
+                m_hThis = IntPtr.Zero;
+            }
+
+            m_bDisposed = true;
+        }
+
+        bool m_bDisposed = false;
+        internal IntPtr m_hThis = IntPtr.Zero;
+    }
 }

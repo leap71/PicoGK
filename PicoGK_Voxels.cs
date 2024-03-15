@@ -68,6 +68,8 @@ namespace PicoGK
             m_hThis = hVoxels;
             Debug.Assert(m_hThis != IntPtr.Zero);
             Debug.Assert(_bIsValid(m_hThis));
+
+            m_oMetadata = new(FieldMetadata._hFromVoxels(m_hThis));
         }
 
         /// <summary>
@@ -464,5 +466,7 @@ namespace PicoGK
                     return;
             }
         }
+
+        public FieldMetadata m_oMetadata;
     }
 }

@@ -56,6 +56,8 @@ namespace PicoGK
             m_hThis = hField;
             Debug.Assert(m_hThis != IntPtr.Zero);
             Debug.Assert(_bIsValid(m_hThis));
+
+            m_oMetadata = new(FieldMetadata._hFromVectorField(m_hThis));
         }
 
         /// <summary>
@@ -132,5 +134,7 @@ namespace PicoGK
         {
             _TraverseActive(m_hThis, xTraverse.InformActiveValue);
         }
+
+        public FieldMetadata m_oMetadata;
     }
 }
