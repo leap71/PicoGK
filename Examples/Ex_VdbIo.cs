@@ -112,6 +112,8 @@ namespace PicoGKExamples
             // If no compatible field is found, an exception is thrown
             Voxels voxReadSimple = Voxels.voxFromVdbFile(strVdbFileName);
 
+            // Let's deal with field meta data
+
             voxReadSimple.m_oMetadata.SetValue("StringValue", "Hello PicoGK");
 
             if (!voxReadSimple.m_oMetadata.bGetValueAt("StringValue", out string strValue))

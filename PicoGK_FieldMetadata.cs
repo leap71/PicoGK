@@ -35,13 +35,20 @@
 
 using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// Metadata table containing parameters associated with field types
+    /// like Voxels, ScalarFields, VectorFields. The metadata contained in here
+    /// is saved and loaded from VDB files.
+    /// </summary>
     public partial class FieldMetadata
     {
+        /// <summary>
+        /// Type of the data items in the metadata table
+        /// </summary>
         public enum EType
         {
             UNKNOWN = -1,
@@ -50,11 +57,22 @@ namespace PicoGK
             VECTOR
         };
 
+        /// <summary>
+        /// Number of items in the metadata table
+        /// </summary>
         public int nCount()
         {
             return _nCount(m_hThis);
         }
 
+        /// <summary>
+        /// Attempts to retrieve the name of the parameter at
+        /// the index supplied
+        /// </summary>
+        /// <param name="nIndex">Index value of the parameter</param>
+        /// <param name="strValueName">Name of the parameter at this
+        /// position.</param>
+        /// <returns></returns>
         public bool bGetNameAt(int nIndex, out string strValueName)
         {
             int nLength = _nNameLengthAt(m_hThis, nIndex) + 1;
@@ -70,6 +88,11 @@ namespace PicoGK
             return true;
         }
 
+        /// <summary>
+        /// Returns the type of the value with the specified name
+        /// </summary>
+        /// <param name="strName">Name of the parameter to retrieve</param>
+        /// <returns>Type of the parameter</returns>
         public EType eTypeAt(string strName)
         {
             int iType = _nTypeAt(m_hThis, strName);
@@ -82,11 +105,22 @@ namespace PicoGK
             return (EType) iType;
         }
 
+        /// <summary>
+        /// Returns the human readable type of the parameter with the
+        /// specified name
+        /// </summary>
+        /// <param name="strName">Name of the parameter</param>
+        /// <returns>The human readable name of the type</returns>
         public string strTypeAt(string strName)
         {
             return strTypeName(eTypeAt(strName));
         }
 
+        /// <summary>
+        /// Translate the type enum to a string
+        /// </summary>
+        /// <param name="eType">Type to translate</param>
+        /// <returns>Human readable string</returns>
         public string strTypeName(EType eType)
         {
             switch (eType)
@@ -105,6 +139,13 @@ namespace PicoGK
             return "undefined";
         }
 
+        /// <summary>
+        /// Try to get the value of a parameter
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="strValue">Value returned</param>
+        /// <returns>Returns false if value doesn't exist or has the
+        /// wrong type</returns>
         public bool bGetValueAt(    string strFieldName,
                                     out string strValue)
         {
@@ -121,42 +162,75 @@ namespace PicoGK
             return true;
         }
 
-        
+        /// <summary>
+        /// Try to get the value of a parameter
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="fValue">Value returned</param>
+        /// <returns>Returns false if value doesn't exist or has the
+        /// wrong type</returns>
         public bool bGetValueAt(string strFieldName, out float fValue)
         {
             fValue = 0f;
             return _bGetFloatAt(m_hThis, strFieldName, ref fValue);
         }
 
-        
+        /// <summary>
+        /// Try to get the value of a parameter
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="vecValue">Value returned</param>
+        /// <returns>Returns false if value doesn't exist or has the
+        /// wrong type</returns>
         public bool bGetValueAt(string strFieldName, out Vector3 vecValue)
         {
             vecValue = Vector3.Zero;
             return _bGetVectorAt(m_hThis, strFieldName, ref vecValue);
         }
 
-        
+        /// <summary>
+        /// Set string value in the metadata table
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="strValue">Value to set</param>
         public void SetValue(string strFieldName, string strValue)
         {
             _SetStringValue(m_hThis, strFieldName, strValue);
         }
-        
+
+        /// <summary>
+        /// Set floating point value in the metadata table
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="fValue">Value to set</param>
         public void SetValue(string strFieldName, float fValue)
         {
             _SetFloatValue(m_hThis, strFieldName, fValue);
         }
-        
+
+        /// <summary>
+        /// Set a vector value in the metadata table
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="vecValue">Value to set</param>
         public void SetValue(string strFieldName, Vector3 vecValue)
         {
             _SetVectorValue(m_hThis, strFieldName, vecValue);
         }
 
-        
+        /// <summary>
+        /// Remove a value from the metadata table
+        /// </summary>
+        /// <param name="strFieldName">Name of the value</param>
         public void RemoveValue(string strFieldName)
         {
             _RemoveValue(m_hThis, strFieldName);
         }
 
+        /// <summary>
+        /// Converts the contents of the metadata table to a string
+        /// </summary>
+        /// <returns>String containing info about metadata</returns>
         public override string? ToString()
         {
             string str = $"Metadata table with {nCount()} items\n";
@@ -197,6 +271,16 @@ namespace PicoGK
         public FieldMetadata(IntPtr hSource)
         {
             m_hThis = hSource;
+
+            // These values are added to every field we store from PicoGK
+            // this allows us to deal with future extensions, and also
+            // informs the user about the voxel size used in the field
+            // Note - all values we save to the metadata is in SI unites
+            // so we divide the voxel size in mm by 1000 to get the voxel size
+            // in meters
+            SetValue("PicoGK.Library", Library.strName());
+            SetValue("PicoGK.Version", Library.strVersion());
+            SetValue("PicoGK.VoxelSize", Library.fVoxelSizeMM / 1000f);
         }
     }
 }
