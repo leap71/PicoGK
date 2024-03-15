@@ -59,8 +59,14 @@ namespace PicoGKExamples
             oFileCreated.nAdd(vox);
 
             // Note, internally copies are made of the voxel fields, so
-            // after you add a voxel field, any changes made to it are not
-            // reflected when you save it
+            // after you add a voxel field, any changes made to it after adding
+            // are not reflected in the saved file
+
+            VectorField oVectorField = new(vox);
+            oFileCreated.nAdd(oVectorField, "Vector");
+
+            ScalarField oScalarField = new(vox);
+            oFileCreated.nAdd(oScalarField, "Scalar");
 
             // Filename to use
             string strVdbFileName = Path.Combine(   Library.strLogFolder,
@@ -87,6 +93,12 @@ namespace PicoGKExamples
             {
                 Library.Log($"-  Field {nField} has type {oFileLoad.strFieldType(nField)} and name '{oFileLoad.strFieldName(nField)}'");
             }
+
+            VectorField oReadVectorField = oFileLoad.oGetVectorField("Vector");
+            Library.Log($"VectorField metadata after reading {oReadVectorField.m_oMetadata}");
+
+            ScalarField oReadScalarField = oFileLoad.oGetScalarField("Scalar");
+            Library.Log($"ScalarField metadata after reading {oReadScalarField.m_oMetadata}");
 
             // Extract field number with the name Teapot (case insensitive)
             // .vdb files support several fields of various types, which
