@@ -58,7 +58,7 @@ namespace PicoGK
             Debug.Assert(_bIsValid(m_hThis));
 
             m_oMetadata = new(FieldMetadata._hFromScalarField(m_hThis));
-            m_oMetadata.SetValue("PicoGK_Class", "ScalarField");
+            m_oMetadata.SetValue("PicoGK.Class", "ScalarField");
         }
 
         /// <summary>
