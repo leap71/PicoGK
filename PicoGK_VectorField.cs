@@ -58,7 +58,7 @@ namespace PicoGK
             Debug.Assert(_bIsValid(m_hThis));
 
             m_oMetadata = new(FieldMetadata._hFromVectorField(m_hThis));
-            m_oMetadata.SetValue("PicoGK.Class", "VectorField");
+            m_oMetadata._SetValue("PicoGK.Class", "VectorField");
         }
 
         /// <summary>

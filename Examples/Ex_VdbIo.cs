@@ -166,15 +166,30 @@ namespace PicoGKExamples
 
             Library.Log($"After removal: {voxReadSimple.m_oMetadata}");
 
-            // Now lets save the Voxels to a new file
+            Library.Log($"Now lets save the Voxels to a new file");
             string strSimple = Path.Combine(Library.strLogFolder, "Simple.vdb");
             voxReadSimple.SaveToVdbFile(strSimple);
 
-            // This file now contains exactly one field,
-            // and uses an auto-generated field name
+            Library.Log($"This file now contains exactly one field,and uses an auto-generated field name");
 
             Voxels voxReadAgain = Voxels.voxFromVdbFile(strSimple);
             Library.Log($"After reading: {voxReadAgain.m_oMetadata}");
+
+            try
+            {
+                Library.Log($"Try setting a metadata item that is internal");
+                Library.Log($"this will result in an exception, because we guard against this");
+
+                voxReadSimple.m_oMetadata.SetValue("file_compression", "Hello");
+
+                Library.Log($"Error - you should not be able to set this metadata");
+            }
+
+            catch (Exception e)
+            {
+                 Library.Log($"Correctly caught exception, as you are not allowed to set this value");
+                 Library.Log($"{e.Message}");
+            }
         }
     }
 }

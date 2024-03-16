@@ -195,7 +195,8 @@ namespace PicoGK
         /// <param name="strValue">Value to set</param>
         public void SetValue(string strFieldName, string strValue)
         {
-            _SetStringValue(m_hThis, strFieldName, strValue);
+            GuardInternalFields(strFieldName);
+            _SetValue(strFieldName, strValue);
         }
 
         /// <summary>
@@ -205,7 +206,8 @@ namespace PicoGK
         /// <param name="fValue">Value to set</param>
         public void SetValue(string strFieldName, float fValue)
         {
-            _SetFloatValue(m_hThis, strFieldName, fValue);
+            GuardInternalFields(strFieldName);
+            _SetValue(strFieldName, fValue);
         }
 
         /// <summary>
@@ -215,7 +217,8 @@ namespace PicoGK
         /// <param name="vecValue">Value to set</param>
         public void SetValue(string strFieldName, Vector3 vecValue)
         {
-            _SetVectorValue(m_hThis, strFieldName, vecValue);
+            GuardInternalFields(strFieldName);
+            _SetValue(strFieldName, vecValue);
         }
 
         /// <summary>
@@ -224,6 +227,7 @@ namespace PicoGK
         /// <param name="strFieldName">Name of the value</param>
         public void RemoveValue(string strFieldName)
         {
+            GuardInternalFields(strFieldName);
             _RemoveValue(m_hThis, strFieldName);
         }
 
@@ -278,9 +282,72 @@ namespace PicoGK
             // Note - all values we save to the metadata is in SI unites
             // so we divide the voxel size in mm by 1000 to get the voxel size
             // in meters
-            SetValue("PicoGK.Library", Library.strName());
-            SetValue("PicoGK.Version", Library.strVersion());
-            SetValue("PicoGK.VoxelSize", Library.fVoxelSizeMM / 1000f);
+            _SetValue("PicoGK.Library", Library.strName());
+            _SetValue("PicoGK.Version", Library.strVersion());
+            _SetValue("PicoGK.VoxelSize", Library.fVoxelSizeMM / 1000f);
+        }
+
+        /// <summary>
+        /// Set string value in the metadata table (internal, do not use)
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="strValue">Value to set</param>
+        internal void _SetValue(string strFieldName, string strValue)
+        {
+            _SetStringValue(m_hThis, strFieldName, strValue);
+        }
+
+        /// <summary>
+        /// Set floating point value in the metadata table (internal, do not use)
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="fValue">Value to set</param>
+        internal void _SetValue(string strFieldName, float fValue)
+        {
+            _SetFloatValue(m_hThis, strFieldName, fValue);
+        }
+
+        /// <summary>
+        /// Set a vector value in the metadata table (internal, do not use)
+        /// </summary>
+        /// <param name="strFieldName">Name of the parameter</param>
+        /// <param name="vecValue">Value to set</param>
+        internal void _SetValue(string strFieldName, Vector3 vecValue)
+        {
+            _SetVectorValue(m_hThis, strFieldName, vecValue);
+        }
+
+        /// <summary>
+        /// Remove a value from the metadata table (internal, do not use)
+        /// </summary>
+        /// <param name="strFieldName">Name of the value</param>
+        internal void _RemoveValue(string strFieldName)
+        {
+            _RemoveValue(m_hThis, strFieldName);
+        }
+
+        /// <summary>
+        /// This function tests whether you are attempting to set internal
+        /// metadata fields from your code — this can mess up openvdb and
+        /// internal PicoGK functionality
+        /// </summary>
+        /// <param name="strFieldName">Field name you are trying to set</param>
+        /// <exception cref="FieldAccessException"></exception>
+        protected void GuardInternalFields(string strFieldName)
+        {
+            if (strFieldName.StartsWith("PicoGK.", StringComparison.InvariantCultureIgnoreCase))
+                throw new FieldAccessException($"Fields starting with 'PicoGK.' are internal - do not set them from your code ('{strFieldName}').");
+
+            if (    strFieldName.Equals("class",   StringComparison.InvariantCultureIgnoreCase) ||
+                    strFieldName.Equals("name",    StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new FieldAccessException($"Do not set openvdb-internal fields from your code ('{strFieldName}')");
+            }
+
+            if (strFieldName.StartsWith("file_", StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new FieldAccessException($"Field names starting with file_ are openvdb-internal - do not set from your code ('{strFieldName}')");
+            }   
         }
     }
 }

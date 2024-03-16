@@ -70,7 +70,7 @@ namespace PicoGK
             Debug.Assert(_bIsValid(m_hThis));
 
             m_oMetadata = new(FieldMetadata._hFromVoxels(m_hThis));
-            m_oMetadata.SetValue("PicoGK.Class", "Voxels");
+            m_oMetadata._SetValue("PicoGK.Class", "Voxels");
         }
 
         /// <summary>
