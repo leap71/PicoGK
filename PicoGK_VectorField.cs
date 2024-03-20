@@ -86,6 +86,22 @@ namespace PicoGK
         {}
 
         /// <summary>
+        /// Creates a vector field from an existing voxel field
+        /// setting the value of each voxel to the specified value
+        /// </summary>
+        /// <param name="oVoxels">Voxel field that defines which values to set</param>
+        /// <param name="vecValue">Value to set in the vector field</param>
+        /// <param name="fSdThreshold">The threshold of the signed distance field
+        /// to be used for the definition of "inside" - usually 0.5 is a good
+        /// value - the surface is at exactly 0 and a value means you are 1voxel
+        /// away from the surface.</param>
+        public VectorField( Voxels oVoxels,
+                            Vector3 vecValue,
+                            float fSdThreshold = 0.5f)
+            : this(_hBuildFromVoxels(oVoxels.m_hThis, vecValue, fSdThreshold))
+        {}
+
+        /// <summary>
         /// Sets the value at the specified position in mm
         /// When you set a value, the position gets "activated"
         /// When no value is set, the position doesn't contain

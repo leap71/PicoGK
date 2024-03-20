@@ -828,6 +828,9 @@ namespace PicoGK
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_hCreateFromVoxels")]
         public static extern IntPtr _hCreateFromVoxels(IntPtr hVoxels);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_hBuildFromVoxels")]
+        public static extern IntPtr _hBuildFromVoxels(IntPtr hVoxels, in Vector3 vecValue, float fSDThreshold);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "VectorField_bIsValid")]
         private static extern bool _bIsValid(IntPtr hThis);
 
