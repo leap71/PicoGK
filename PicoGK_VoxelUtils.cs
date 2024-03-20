@@ -34,6 +34,7 @@
 //
 
 using System.Numerics;
+using System.Diagnostics;
 
 namespace PicoGK
 {
@@ -152,13 +153,24 @@ namespace PicoGK
 
     public class SurfaceNormalFieldExtractor : ITraverseScalarField
     {
-        public static VectorField oExtract(   Voxels vox,
-                                              float fSurfaceThresholdVx = 0.5f)
+        public static VectorField oExtract( Voxels vox,
+                                            float fSurfaceThresholdVx         = 0.5f,
+                                            Vector3? vecDirectionFilter       = null,
+                                            float fDirectionFilterTolerance   = 0f,
+                                            Vector3? vecScaleBy               = null)
         {
             VectorField oField = new();
 
+            Debug.Assert(fDirectionFilterTolerance >= 0f);
+            Debug.Assert(fDirectionFilterTolerance <= 1f);
+
             SurfaceNormalFieldExtractor oExtractor
-                = new(vox, oField, fSurfaceThresholdVx);
+                = new(  vox,
+                        oField,
+                        fSurfaceThresholdVx,
+                        vecDirectionFilter ?? Vector3.Zero,
+                        fDirectionFilterTolerance,
+                        vecScaleBy ?? Vector3.One);
 
             oExtractor.Run();
 
@@ -167,12 +179,21 @@ namespace PicoGK
 
         protected SurfaceNormalFieldExtractor(  Voxels voxSource,
                                                 VectorField oDestination,
-                                                float fSurfaceThresholdVx)
+                                                float fSurfaceThresholdVx,
+                                                Vector3 vecDirFilter,
+                                                float fDirTolerance,
+                                                Vector3 vecScaleBy)
         {
             m_voxSource     = voxSource;
             m_oSource       = new(voxSource);
             m_oDestination  = oDestination;
             m_fThreshold    = fSurfaceThresholdVx;
+            m_vecDirFilter  = vecDirFilter;
+            m_fDirTolerance = fDirTolerance;
+            m_vecScaleBy    = vecScaleBy;
+
+            if (m_vecDirFilter != Vector3.Zero)
+                m_vecDirFilter = Vector3.Normalize(vecDirFilter);
         }
 
         protected void Run()
@@ -182,17 +203,132 @@ namespace PicoGK
 
         public void InformActiveValue(in Vector3 vecPosition, float fValue)
         {
-            if (float.Abs(fValue) < m_fThreshold)
+            if (float.Abs(fValue) > m_fThreshold)
+                return;
+
+            Vector3 vecNormal = m_voxSource.vecSurfaceNormal(vecPosition);
+            if (m_vecDirFilter != Vector3.Zero)
             {
-                m_oDestination.SetValue(    vecPosition,
-                                            m_voxSource.vecSurfaceNormal(vecPosition));
+                float fDeviation = float.Abs(1 - Vector3.Dot(vecNormal, m_vecDirFilter));
+                if (fDeviation > m_fDirTolerance)
+                    return;
             }
+
+            m_oDestination.SetValue(vecPosition, vecNormal * m_vecScaleBy);  
         }
 
         float           m_fThreshold;
         Voxels          m_voxSource;
+        Vector3         m_vecDirFilter;
+        float           m_fDirTolerance;
+        Vector3         m_vecScaleBy;
         ScalarField     m_oSource;
         VectorField     m_oDestination;
     }
+
+    public class VectorFieldMerge : ITraverseVectorField
+    {
+        public static void Merge(   VectorField oSource,
+                                    VectorField oTarget)
+        {
+            VectorFieldMerge oMerge = new(oSource, oTarget);
+            oMerge.Run();
+        }
+
+        protected VectorFieldMerge( VectorField oSource,
+                                    VectorField oTarget)
+        {
+            m_oSource   = oSource;
+            m_oTarget   = oTarget;
+        }
+
+        protected void Run()
+        {
+            m_oSource.TraverseActive(this);
+        }
+
+        public void InformActiveValue(in Vector3 vecPosition, in Vector3 vecValue)
+        {
+            m_oTarget.SetValue(vecPosition, vecValue);
+        }
+
+        VectorField m_oSource;
+        VectorField m_oTarget;
+    }
+
+    public class AddVectorFieldToViewer : ITraverseVectorField
+    {
+        public static void AddToViewer( Viewer      oViewer,
+                                        VectorField oField,
+                                        ColorFloat  clr,
+                                        int         nStep   = 10,
+                                        float       fArrow  = 1f,
+                                        int         nGroup  = 0)
+        {
+            Debug.Assert(nStep > 0);
+            AddVectorFieldToViewer oAdder = new(    oViewer,
+                                                    oField,
+                                                    clr,
+                                                    nStep,
+                                                    fArrow,
+                                                    nGroup);
+
+            oAdder.Run();
+        }
+
+        protected AddVectorFieldToViewer(  Viewer       oViewer,
+                                           VectorField  oField,
+                                           ColorFloat   clr,
+                                           int          nStep,
+                                           float        fArrow,
+                                           int          nGroup)
+        {
+            m_oViewer   = oViewer;
+            m_oField    = oField;
+            m_clr       = clr;
+            m_nStep     = nStep;
+            m_fArrow    = fArrow;
+            m_nGroup    = nGroup;
+        }
+
+        protected void Run()
+        {
+            m_oField.TraverseActive(this);
+        }
+
+        public void InformActiveValue(in Vector3 vecPosition, in Vector3 vecValue)
+        {
+            m_nCount++;
+            if (m_nCount < m_nStep)
+                return;
+
+            m_nCount=0;
+
+            PolyLine poly = new(m_clr);
+
+            poly.nAddVertex(vecPosition);
+
+            if (vecValue == Vector3.Zero)
+            {
+                poly.AddCross(m_fArrow);
+            }
+            else
+            {
+                poly.nAddVertex(vecPosition + vecValue);
+                poly.AddArrow(m_fArrow);
+            }
+           
+            m_oViewer.Add(poly, m_nGroup);
+        }
+
+        Viewer      m_oViewer;
+        VectorField m_oField;
+        int         m_nStep;
+        float       m_fArrow;
+        ColorFloat  m_clr;
+        int         m_nGroup;
+        int         m_nCount = 0;
+    }
+
 }
 
