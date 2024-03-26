@@ -38,7 +38,7 @@ using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
-    class TgaIo
+    public class TgaIo
     {
         public static void SaveTga( string strFilename,
                                     in Image img)

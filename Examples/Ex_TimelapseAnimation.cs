@@ -17,9 +17,7 @@
 //
 
 using PicoGK;
-using System.Diagnostics;
 using System.Numerics;
-using static PicoGK.Viewer;
 
 namespace PicoGKExamples
 {
@@ -63,9 +61,9 @@ namespace PicoGKExamples
                     Library.oViewer().SetGroupMaterial(0, ColorFloat.clrRandom(), 0.0f, 1.0f);
 
                     Animation.IAction xAction1
-                    = new AnimViewRotate(   Library.oViewer(),
-                                            new Vector2(90, 20),
-                                            new Vector2(30, -20));
+                    = new Viewer.AnimViewRotate(    Library.oViewer(),
+                                                    new Vector2(90, 20),
+                                                    new Vector2(30, -20));
 
                     // Let's create an animation — length is 5 seconds
                     // it's executed just once and it eases in and out
