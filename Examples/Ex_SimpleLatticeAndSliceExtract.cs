@@ -17,6 +17,7 @@
 //
 
 using PicoGK;
+using System.Numerics;
 
 namespace PicoGKExamples
 {
