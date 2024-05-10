@@ -200,6 +200,33 @@ namespace PicoGK
             => _TripleOffset(m_hThis, fDistMM);
 
         /// <summary>
+        /// Applies a Gaussian Blur to the voxel field with the specified size
+        /// EXPERIMENTAL - We may remove this function again, if we determine
+        /// it isn't suitable for engineering applications
+        /// </summary>
+        /// <param name="fDistMM">The size of the Gaussian kernel applied</param>
+        public void Gaussian(float fSizeMM)
+            => _Gaussian(m_hThis, fSizeMM);
+
+        /// <summary>
+        /// Applies a median avergage to the voxel field with the specified size
+        /// EXPERIMENTAL - We may remove this function again, if we determine
+        /// it isn't suitable for engineering applications
+        /// </summary>
+        /// <param name="fDistMM">The size of the median average kernel applied</param>
+        public void Median(float fSizeMM)
+            => _Median(m_hThis, fSizeMM);
+
+        /// <summary>
+        /// Applies a mean avergage to the voxel field with the specified size
+        /// EXPERIMENTAL - We may remove this function again, if we determine
+        /// it isn't suitable for engineering applications
+        /// </summary>
+        /// <param name="fDistMM">The size of the mean average kernel applied</param>
+        public void Mean(float fSizeMM)
+            => _Mean(m_hThis, fSizeMM);
+
+        /// <summary>
         /// Renders a mesh into the voxel field, combining it with
         /// the existing content
         /// </summary>

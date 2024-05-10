@@ -272,6 +272,18 @@ namespace PicoGK
         private static extern void _TripleOffset(   IntPtr hThis,
                                                     float fOffset);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_Gaussian")]
+        private static extern void _Gaussian( IntPtr hThis,
+                                            float fDistance);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_Median")]
+        private static extern void _Median( IntPtr hThis,
+                                            float fDistance);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_Mean")]
+        private static extern void _Mean( IntPtr hThis,
+                                          float fDistance);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_RenderMesh")]
         private static extern void _RenderMesh( IntPtr hThis,
                                                 IntPtr hMesh);
