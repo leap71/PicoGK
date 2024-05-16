@@ -40,18 +40,34 @@ namespace PicoGK
 {
     public class SdfVisualizer
     {
+        /// <summary>
+        /// Create a color image which encodes the signed distance values
+        /// contained in the ScalarField. You can create a new ScalarField
+        /// from a Voxels object, if you want to visualize a voxel field
+        /// </summary>
+        /// <param name="oField">Scalar field to visualize</param>
+        /// <param name="fBackgroundValue">Background value, usually 3.0f</param>
+        /// <param name="nSlice">Slice to visualize</param>
+        /// <param name="_clrBackground">Color used for background value voxels</param>
+        /// <param name="_clrSurface">Color used for surface value voxels</param>
+        /// <param name="_clrInside">Color used for the voxels on the inside</param>
+        /// <param name="_clrOutside">Color used for the voxels on the outside</param>
+        /// <param name="_clrDefect">Color used for defective voxels</param>
+        /// <returns>A color image containing the encoded SDF</returns>
         public static ImageColor imgEncodeFromSdf(  ScalarField oField,
                                                     float fBackgroundValue,
                                                     int nSlice,
                                                     ColorFloat? _clrBackground  = null,
                                                     ColorFloat? _clrSurface     = null,
                                                     ColorFloat? _clrInside      = null,
-                                                    ColorFloat? _clrOutside     = null)
+                                                    ColorFloat? _clrOutside     = null,
+                                                    ColorFloat? _clrDefect      = null)
         {
             ColorFloat clrBackGround    = _clrBackground ?? new ColorFloat("0066ff");
             ColorFloat clrSurface       = _clrSurface    ?? new ColorFloat("FF");
             ColorFloat clrInside        = _clrInside     ?? new ColorFloat("cc33ff");
             ColorFloat clrOutside       = _clrOutside    ?? new ColorFloat("33cc33");
+            ColorFloat clrDefect        = _clrDefect     ?? new ColorFloat("ff5400");
             
             oField.GetVoxelDimensions(  out int nXOrigin,
                                         out int nYOrigin,
@@ -77,41 +93,48 @@ namespace PicoGK
 
                     ColorHLS clr;
 
-                    if (float.Abs(fValue) < float.Epsilon)
+                    if (float.IsInfinity(fValue) || float.IsNaN(fValue))
                     {
-                        clr = clrSurface;
-                    }
-                    else if (fValue == fBackgroundValue)
-                    {
-                        clr = clrBackGround;
+                        clr = clrDefect;
                     }
                     else
                     {
-                        if (fValue < 0)
+                        if (float.Abs(fValue) < float.Epsilon)
                         {
-                            clr = clrInside;
-                            fValue = -fValue;
+                            clr = clrSurface;
+                        }
+                        else if (fValue == fBackgroundValue)
+                        {
+                            clr = clrBackGround;
                         }
                         else
                         {
-                            clr = clrOutside;
+                            if (fValue < 0)
+                            {
+                                clr = clrInside;
+                                fValue = -fValue;
+                            }
+                            else
+                            {
+                                clr = clrOutside;
+                            }
+
+                            if (fValue > fBackgroundValue)
+                            {
+                                // outside the narrow band
+                                // oversaturate the color
+                                clr.S = 1.0f;
+                            }
+                            else
+                            {
+                                clr.L = 0.7f - (fValue / fBackgroundValue / 2.0f); 
+                            }
                         }
 
-                        if (fValue > fBackgroundValue)
+                        if (!bSet)
                         {
-                            // outside the narrow band
-                            // oversaturate the color
-                            clr.S = 1.0f;
+                            clr.S = 0.3f; // desaturate significantly
                         }
-                        else
-                        {
-                            clr.L = 0.7f - (fValue / fBackgroundValue / 2.0f); 
-                        }
-                    }
-
-                    if (!bSet)
-                    {
-                        clr.S = 0.3f; // desaturate significantly
                     }
 
                     imgResult.SetValue(x,y,clr);
@@ -119,6 +142,110 @@ namespace PicoGK
             }
 
             return imgResult;
+        }
+
+        /// <summary>
+        /// Checks if the scalar field slice contains a defective voxel. 
+        /// Defective voxels are voxels that contain NaN or infinity values
+        /// </summary>
+        /// <param name="oField">Field to analyze</param>
+        /// <param name="nSlice">Slice to analyze</param>
+        /// <returns>true if a defective voxel is found</returns>
+        public static bool bDoesSliceContainDefect( ScalarField oField,
+                                                    int nSlice)
+        {
+            oField.GetVoxelDimensions(  out int nXOrigin,
+                                        out int nYOrigin,
+                                        out int nZOrigin,
+                                        out int nXSize,
+                                        out int nYSize,
+                                        out int nZSize);
+
+            if (nSlice >= nZSize)
+                return false;
+
+            for (int x=0; x<nXSize; x++)
+            {
+                for (int y=0; y<nYSize; y++)
+                {
+                    Vector3 vecCoord = Library.vecVoxelsToMm(   nXOrigin + x,
+                                                                nYOrigin + y,
+                                                                nZOrigin + nSlice);
+
+                    oField.bGetValue(vecCoord, out float fValue);
+
+                    if (float.IsInfinity(fValue) || float.IsNaN(fValue))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Saves a stack of TGA files, visualizing the signed distance field
+        /// contained in the ScalarField.
+        /// </summary>
+        /// <param name="oField">Scalar SDF to visualize (you can build one from if a Voxels object if needed</param>
+        /// <param name="fBackgroundValue">Background value (usually 3.0f)</param>
+        /// <param name="strPath">Path to write the image stack to</param>
+        /// <param name="strFilePrefix">File prefix to use, before slice number is appended</param>
+        /// <param name="bOnlyDefective">Write only frames that contain defective values (such as NaN, Infinity)</param>
+        /// <param name="_clrBackground">Color used for background value voxels</param>
+        /// <param name="_clrSurface">Color used for surface value voxels</param>
+        /// <param name="_clrInside">Color used for the voxels on the inside</param>
+        /// <param name="_clrOutside">Color used for the voxels on the outside</param>
+        /// <param name="_clrDefect">Color used for defective voxels</param>
+        /// <returns>Returns true if defective voxels were found</returns>
+        public static bool bVisualizeSdfSlicesAsTgaStack(   ScalarField oField,
+                                                            float fBackgroundValue,
+                                                            string strPath,
+                                                            string strFilePrefix        = "Sdf_",
+                                                            bool bOnlyDefective         = false,
+                                                            ColorFloat? _clrBackground  = null,
+                                                            ColorFloat? _clrSurface     = null,
+                                                            ColorFloat? _clrInside      = null,
+                                                            ColorFloat? _clrOutside     = null,
+                                                            ColorFloat? _clrDefect      = null)
+        {
+            bool bContainsDefects = false;
+
+            oField.GetVoxelDimensions(  out int nXOrigin,
+                                        out int nYOrigin,
+                                        out int nZOrigin,
+                                        out int nXSize,
+                                        out int nYSize,
+                                        out int nZSize);
+
+            for (int nSlice = 0; nSlice < nZSize; nSlice++)
+            {
+                if (bDoesSliceContainDefect(oField, nSlice))
+                {
+                    bContainsDefects = true;
+                }
+                else
+                {
+                    if (bOnlyDefective)
+                        continue;
+                }
+
+                string strFile = Path.Combine(strPath, strFilePrefix);
+                strFile += nSlice.ToString("D5") + ".tga";
+
+                ImageColor img = imgEncodeFromSdf(  oField,
+                                                    fBackgroundValue,
+                                                    nSlice,
+                                                    _clrBackground,
+                                                    _clrSurface,
+                                                    _clrInside,
+                                                    _clrOutside,
+                                                    _clrDefect);
+                TgaIo.SaveTga(strFile, img);
+            }
+
+            return bContainsDefects;
         }
     }
 
