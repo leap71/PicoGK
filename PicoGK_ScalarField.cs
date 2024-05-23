@@ -79,13 +79,24 @@ namespace PicoGK
 
         /// <summary>
         /// Creates a scalar field from an existing voxel field
-        /// the scalar field contains the signed distance values
+        /// setting the voxels inside the object to the specified value
         /// of the voxels
         /// </summary>
         /// <param name="oVoxels">Voxels to create SDF from</param>
+        /// <param name="fValue">Value to set the scalar field to</param>"
+        /// <param name="fSdThreshold">The threshold of the signed distance field
+        /// to be used for the definition of "inside" - usually 0.5 is a good
+        /// value - the surface is at exactly 0 and a value of
+        /// 1.0 means you are 1 voxel outside from the surface.</param>
         public ScalarField(Voxels oVoxels)
             : this(_hCreateFromVoxels(oVoxels.m_hThis))
         { }
+
+        public ScalarField( Voxels oVoxels,
+                            float fValue,
+                            float fSdThreshold = 0.5f)
+            : this(_hBuildFromVoxels(oVoxels.m_hThis, fValue, fSdThreshold))
+        {}
 
         /// <summary>
         /// Sets the value at the specified position in mm

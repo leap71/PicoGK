@@ -179,14 +179,19 @@ namespace PicoGKExamples
 
             Library.oViewer().SetGroupVisible(10, false);
 
+            // Create a new scalar field, which contains the density of water
+            // at all voxels which are in the fluid domain (997 kg/m³)
+            ScalarField oFluidDensity = new(voxFluid, 997.0f);
+
             OpenVdbFile oFile = new();
 
             voxFluid.m_oMetadata.SetValue("Simulation.Material.Name", "Water");
             voxFluid.m_oMetadata.SetValue("Simulation.Material.Type", "Liquid");
             oFile.nAdd(voxFluid, "Simulation.FluidDomain");
 
-            oFile.nAdd(voxManifold, "Simulation.SolidDomain");
-            oFile.nAdd(oFlowSpeed,  "Simulation.FlowSpeed");
+            oFile.nAdd(voxManifold,     "Simulation.SolidDomain");
+            oFile.nAdd(oFlowSpeed,      "Simulation.FlowSpeed");
+            oFile.nAdd(oFluidDensity,   "Simulation.FluidDensity");
 
             string strVdbFile = Path.Combine(Utils.strDocumentsFolder(), "Sim.vdb");
             oFile.SaveToFile(strVdbFile);
