@@ -93,8 +93,8 @@ namespace PicoGK
         /// <param name="vecValue">Value to set in the vector field</param>
         /// <param name="fSdThreshold">The threshold of the signed distance field
         /// to be used for the definition of "inside" - usually 0.5 is a good
-        /// value - the surface is at exactly 0 and a value means you are 1voxel
-        /// away from the surface.</param>
+        /// value - the surface is at exactly 0 and a value of
+        /// 1.0 means you are 1 voxel outside from the surface.</param>
         public VectorField( Voxels oVoxels,
                             Vector3 vecValue,
                             float fSdThreshold = 0.5f)
