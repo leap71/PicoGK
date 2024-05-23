@@ -40,7 +40,7 @@ using System.Text;
 
 namespace PicoGK
 {
-    public partial class Library
+    public partial class Library : IDisposable
     {
         /// <summary>
         /// Returns the library name (from the C++ side)
@@ -116,6 +116,14 @@ namespace PicoGK
                                 string strSrcFolder     = "",
                                 string strLightsFile    = "")
         {
+            lock(mtxRunOnce)
+            {
+                if (bRunning)
+                    throw new Exception("PicoGK only supports running one library config at one time");
+
+                bRunning = true;
+            }
+
             Debug.Assert(_fVoxelSizeMM > 0.0f);
             fVoxelSizeMM = _fVoxelSizeMM;
 
@@ -267,6 +275,12 @@ namespace PicoGK
                     Log("Viewer Window Closed");
                 }
             }
+
+            lock(mtxRunOnce)
+            {
+                Debug.Assert(bRunning);
+                bRunning = false;
+            }
         }
 
         /// <summary>
@@ -336,6 +350,52 @@ namespace PicoGK
                     throw new Exception("Trying to access Viewer before Library::Go() was called");
 
                 return oTheViewer;
+            }
+        }
+
+        /// <summary>
+        /// This is an alternate way to run the library, instead of using "Go"
+        /// if you use this, you cannot invoke the viewer and the log file functions
+        /// You also cannot use this in a thread
+        /// 
+        /// Use this in headless mode
+        ///
+        /// Example:
+        /// using (PicoGK.Library oLibrary = new(0.1f))
+        /// {
+        ///     PicoGK.Voxels vox = new(PicoGK.Utils.mshCreateCube());
+        ///     vox.mshAsMesh().SaveToStlFile(Path.Combine(PicoGK.Utils.strDocumentsFolder(), "PicoGK.stl"));
+        /// }
+        /// 
+        /// </summary>
+        /// <param name="fVoxelSizeMM">Voxel size in mm</param>
+        /// <exception cref="Exception">Throws an exception if library cannot be initialized</exception>
+        /// 
+        public Library(float _fVoxelSizeMM)
+        {
+            lock(mtxRunOnce)
+            {
+                if (bRunning)
+                    throw new Exception("PicoGK only supports running one library config at one time");
+
+                bRunning = true;
+            }
+
+            TestAssumptions();
+
+            Debug.Assert(_fVoxelSizeMM > 0f);
+            fVoxelSizeMM = _fVoxelSizeMM;
+           
+            try
+            {
+                // Create a config using physical coordinates
+                _Init(fVoxelSizeMM);
+                // Done creating C++ Library
+            }
+
+            catch (Exception)
+            {
+                throw new Exception($"Failed to load PicoGK Runtime. Make sure the PicoGK Runtime is installed and {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.\n");
             }
         }
 
@@ -457,5 +517,45 @@ namespace PicoGK
         private static object   oMtxViewer  = new object();
         private static LogFile? oTheLog     = null;
         private static Viewer?  oTheViewer  = null;
+
+        private static object   mtxRunOnce  = new object();
+        private static bool     bRunning    = false;
+
+        ~Library()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool bDisposing)
+        {
+            if (m_bDisposed)
+            {
+                return;
+            }
+
+            if (bDisposing)
+            {
+                // dispose managed state (managed objects).
+                // Nothing to do in this class
+            }
+
+            lock(mtxRunOnce)
+            {
+                Debug.Assert(bRunning);
+                bRunning = false;
+            }
+
+            m_bDisposed = true;
+        }
+
+        bool m_bDisposed = false;
     }
 }
