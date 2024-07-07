@@ -59,17 +59,17 @@ namespace PicoGK
         public abstract void SetValue(int x, int y, float fGray);
         public abstract void SetValue(int x, int y, bool bValue);
 
-        public byte byGetValue(int x, int y)
+        public virtual byte byGetValue(int x, int y)
         {
             return (byte)(Math.Clamp(fValue(x, y), 0.0f, 1.0f) * 255.0f);
         }
 
-        public void SetValue(int x, int y, byte byValue)
+        public virtual void SetValue(int x, int y, byte byValue)
         {
             SetValue(x, y, byValue / 255.0f);
         }
 
-        public ColorBgr24 sGetBgr24(int x, int y)
+        public virtual ColorBgr24 sGetBgr24(int x, int y)
         {
             ColorFloat clr = clrValue(x, y);
             ColorBgr24 sClr;
@@ -79,12 +79,28 @@ namespace PicoGK
             return sClr;
         }
 
-        public void SetBgr24(int x, int y, ColorBgr24 sClr)
+        public virtual void SetBgr24(int x, int y, ColorBgr24 sClr)
         {
             SetValue(x, y, new ColorFloat(sClr));
         }
 
-        public ColorRgb24 sGetRgb24(int x, int y)
+        public virtual ColorBgra32 sGetBgra32(int x, int y)
+        {
+            ColorFloat clr = clrValue(x, y);
+            ColorBgra32 sClr;
+            sClr.B = (byte)(Math.Clamp(clr.B, 0.0f, 1.0f) * 255.0f);
+            sClr.G = (byte)(Math.Clamp(clr.G, 0.0f, 1.0f) * 255.0f);
+            sClr.R = (byte)(Math.Clamp(clr.R, 0.0f, 1.0f) * 255.0f);
+            sClr.A = (byte)(Math.Clamp(clr.A, 0.0f, 1.0f) * 255.0f);
+            return sClr;
+        }
+
+        public virtual void SetBgra32(int x, int y, ColorBgra32 sClr)
+        {
+            SetValue(x, y, new ColorFloat(sClr));
+        }
+
+        public virtual ColorRgb24 sGetRgb24(int x, int y)
         {
             ColorFloat clr = clrValue(x, y);
             ColorRgb24 sClr;
@@ -94,7 +110,23 @@ namespace PicoGK
             return sClr;
         }
 
-        public void SetRgb24(int x, int y, ColorRgb24 sClr)
+        public virtual ColorRgba32 sGetRgba32(int x, int y)
+        {
+            ColorFloat clr = clrValue(x, y);
+            ColorRgba32 sClr;
+            sClr.R = (byte)(Math.Clamp(clr.R, 0.0f, 1.0f) * 255.0f);
+            sClr.G = (byte)(Math.Clamp(clr.G, 0.0f, 1.0f) * 255.0f);
+            sClr.B = (byte)(Math.Clamp(clr.B, 0.0f, 1.0f) * 255.0f);
+            sClr.A = (byte)(Math.Clamp(clr.A, 0.0f, 1.0f) * 255.0f);
+            return sClr;
+        }
+
+        public virtual void SetRgb24(int x, int y, ColorRgb24 sClr)
+        {
+            SetValue(x, y, new ColorFloat(sClr));
+        }
+
+        public virtual void SetRgba32(int x, int y, ColorRgba32 sClr)
         {
             SetValue(x, y, new ColorFloat(sClr));
         }
@@ -426,6 +458,104 @@ namespace PicoGK
         }
 
         public float[] m_afValues;
+    }
+
+    public partial class ImageRgba32 : ImageColorAbstract
+    {
+        public ImageRgba32(  int _nWidth,
+                             int _nHeight)
+                : base( _nWidth,
+                        _nHeight)
+        {
+            m_aclrValues = new ColorRgba32[nWidth * nHeight];
+        }
+
+        public override ColorFloat clrValue(int x, int y)
+        {
+            return new ColorFloat(sGetRgba32(x,y));
+        }
+
+        public override void SetValue(int x, int y, in ColorFloat clr)
+        {
+            SetRgba32(x,y,new ColorRgba32(clr));
+        }
+
+        public override void SetRgba32(int x, int y, ColorRgba32 clr)
+        {
+            if (    (x < 0) ||
+                    (y < 0) ||
+                    (x >= nWidth) ||
+                    (y >= nHeight))
+            {
+                return;
+            }
+
+            m_aclrValues[x + (y * nWidth)] = clr;
+        }
+
+        public override ColorRgba32 sGetRgba32(int x, int y)
+        {
+            if (    (x < 0) ||
+                    (y < 0) ||
+                    (x >= nWidth) ||
+                    (y >= nHeight))
+            {
+                return new ColorRgba32(0, 0, 0, 0);
+            }
+
+            return m_aclrValues[x + (y * nWidth)];
+        }
+
+        ColorRgba32[] m_aclrValues;
+    }
+
+    public partial class ImageRgb24 : ImageColorAbstract
+    {
+        public ImageRgb24(  int _nWidth,
+                            int _nHeight)
+                : base( _nWidth,
+                        _nHeight)
+        {
+            m_aclrValues = new ColorRgb24[nWidth * nHeight];
+        }
+
+        public override ColorFloat clrValue(int x, int y)
+        {
+            return new ColorFloat(sGetRgb24(x,y));
+        }
+
+        public override void SetValue(int x, int y, in ColorFloat clr)
+        {
+            SetRgb24(x,y,new ColorRgb24(clr));
+        }
+
+        public override void SetRgb24(int x, int y, ColorRgb24 clr)
+        {
+            if (    (x < 0) ||
+                    (y < 0) ||
+                    (x >= nWidth) ||
+                    (y >= nHeight))
+            {
+                return;
+            }
+
+            m_aclrValues[x + (y * nWidth)] = clr;
+        }
+
+        public override ColorRgb24 sGetRgb24(int x, int y)
+        {
+            if (    (x < 0) ||
+                    (y < 0) ||
+                    (x >= nWidth) ||
+                    (y >= nHeight))
+            {
+                return new ColorRgb24(0, 0, 0);
+            }
+
+            return m_aclrValues[x + (y * nWidth)];
+        }
+
+        ColorRgb24[] m_aclrValues;
     }
 
     public partial class ImageColor : ImageColorAbstract
