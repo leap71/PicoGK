@@ -470,6 +470,19 @@ namespace PicoGK
             m_aclrValues = new ColorRgba32[nWidth * nHeight];
         }
 
+        public ImageRgba32(Image imgSource)
+            : this( imgSource.nWidth,
+                    imgSource.nHeight)
+        {
+            for (int x=0; x<nWidth; x++)
+            {
+                for (int y = 0; y < nHeight; y++)
+                {
+                    SetRgba32(x,y,imgSource.clrValue(x,y));
+                }
+            }
+        }
+
         public override ColorFloat clrValue(int x, int y)
         {
             return new ColorFloat(sGetRgba32(x,y));
@@ -519,6 +532,19 @@ namespace PicoGK
             m_aclrValues = new ColorRgb24[nWidth * nHeight];
         }
 
+        public ImageRgb24(Image imgSource)
+            : this( imgSource.nWidth,
+                    imgSource.nHeight)
+        {
+            for (int x=0; x<nWidth; x++)
+            {
+                for (int y = 0; y < nHeight; y++)
+                {
+                    SetRgb24(x,y,imgSource.clrValue(x,y));
+                }
+            }
+        }
+
         public override ColorFloat clrValue(int x, int y)
         {
             return new ColorFloat(sGetRgb24(x,y));
@@ -566,6 +592,19 @@ namespace PicoGK
                         _nHeight)
         {
             m_aclrValues = new ColorFloat[nWidth * nHeight];
+        }
+
+        public ImageColor(Image imgSource)
+            : this( imgSource.nWidth,
+                    imgSource.nHeight)
+        {
+            for (int x=0; x<nWidth; x++)
+            {
+                for (int y = 0; y < nHeight; y++)
+                {
+                    SetValue(x,y,imgSource.clrValue(x,y));
+                }
+            }
         }
 
         public override void SetValue(int x, int y, in ColorFloat clr)
