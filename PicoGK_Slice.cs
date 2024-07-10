@@ -98,7 +98,7 @@ namespace PicoGK
             else
             {
                 m_eWinding = eWinding;
-                Debug.Assert(m_eWinding == eDetectWinding(m_oVertices),
+                Debug.Assert(   m_eWinding == eDetectWinding(m_oVertices),
                                 "Detected Winding that is not correct");
             }
 
@@ -119,9 +119,6 @@ namespace PicoGK
         {
             m_eWinding = eDetectWinding(m_oVertices);
         }
-
-        public EWinding eWinding() { return m_eWinding; }
-        public List<Vector2> oVertices() { return m_oVertices; }
 
         public void AsSvgPolyline(out string str)
         {
@@ -163,13 +160,15 @@ namespace PicoGK
             str += " Z";
         }
 
-        List<Vector2> m_oVertices;
-        EWinding m_eWinding;
-        BBox2 m_oBBox;
+        List<Vector2>   m_oVertices;
+        EWinding        m_eWinding;
+        BBox2           m_oBBox;
 
-        public BBox2 oBBox() => m_oBBox;
-        public int nCount() => m_oVertices.Count;
-        public Vector2 vecVertex(int n) => m_oVertices[n];
+        public BBox2            oBBox()             => m_oBBox;
+        public int              nCount()            => m_oVertices.Count;
+        public Vector2          vecVertex(int n)    => m_oVertices[n];
+        public EWinding         eWinding()          => m_eWinding;
+        public List<Vector2>    oVertices()         => m_oVertices;
     }
 
     public class PolySlice
@@ -255,14 +254,14 @@ namespace PicoGK
             }
         }
 
-        public float fZPos() => m_fZPos;
-        public BBox2 oBBox() => m_oBBox;
-        public int nCountours() => m_oContours.Count;
-        public PolyContour oCountourAt(int i) => m_oContours[i];
+        public float        fZPos()              => m_fZPos;
+        public BBox2        oBBox()              => m_oBBox;
+        public int          nCountours()         => m_oContours.Count;
+        public PolyContour  oCountourAt(int i)   => m_oContours[i];
 
         List<PolyContour>   m_oContours;
         float               m_fZPos;
-        BBox2 m_oBBox;
+        BBox2               m_oBBox;
     }
 
     public class PolySliceStack
@@ -322,11 +321,11 @@ namespace PicoGK
             }
         }
 
-        public int nCount() => m_oSlices.Count();
-        public PolySlice oSliceAt(int n) => m_oSlices[n];
-        public BBox3 oBBox() => m_oBBox;
+        public int          nCount()            => m_oSlices.Count();
+        public PolySlice    oSliceAt(int n)     => m_oSlices[n];
+        public BBox3        oBBox()             => m_oBBox;
 
         List<PolySlice> m_oSlices;
-        BBox3 m_oBBox;
+        BBox3           m_oBBox;
     }
 }
