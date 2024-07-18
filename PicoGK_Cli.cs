@@ -36,6 +36,7 @@
 using System.Text;
 using System.Numerics;
 using System.Diagnostics;
+using Leap71.ShapeKernel;
 
 namespace PicoGK
 {
@@ -61,7 +62,7 @@ namespace PicoGK
             public string strWarnings = "";
         }
 
-        public static void WriteSlicesToCliFile(PolySliceStack oSlices,
+        public static void WriteSlicesToCliFile(    PolySliceStack oSlices,
                                                     string strFilePath,
                                                     string strDate = "",
                                                     float fUnitsInMM = 0.0f)
@@ -655,7 +656,7 @@ namespace PicoGK
         {
         }
 
-        private static bool bExtractParameter(ref string strLine,
+        private static bool bExtractParameter(  ref string strLine,
                                                 ref string strParam)
         {
             if ((strLine.StartsWith('/')) || (strLine.StartsWith(',')))
@@ -676,6 +677,52 @@ namespace PicoGK
             strParam = strLine;
             strLine = "";
             return true;
+        }
+    }
+
+    public partial class Voxels
+    {
+        public void SaveToCliFile(  string strFileName,
+                                    bool bUseAbsXYOrigin = false)
+        {
+            GetVoxelDimensions( out int nXOrigin,
+                                out int nYOrigin,
+                                out int nZOrigin,
+                                out int nXSize,
+                                out int nYSize,
+                                out int nZSize);
+
+            ImageGrayScale img = new(nXSize,nYSize);
+
+            List<PolySlice> oSlices = new();
+
+            Vector2 vecOrigin   = Vector2.Zero;
+            
+
+            if (bUseAbsXYOrigin)
+            {
+                vecOrigin = new(    nXOrigin*Library.fVoxelSizeMM,
+                                    nYOrigin*Library.fVoxelSizeMM);
+            }
+
+            for (int z=0;z<nZSize;z++)
+            {
+               GetVoxelSlice(   z,
+                                ref img,
+                                ESliceMode.SignedDistance);
+
+                PolySlice oSlice = PolySlice.oFromSdf(  img,
+                                                        z*Library.fVoxelSizeMM,
+                                                        vecOrigin,
+                                                        Library.fVoxelSizeMM);
+
+                oSlices.Add(oSlice);
+            }
+
+            PolySliceStack oStack = new();
+            oStack.AddSlices(oSlices);
+
+            CliIo.WriteSlicesToCliFile(oStack, strFileName);
         }
     }
 }
