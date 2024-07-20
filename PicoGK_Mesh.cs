@@ -91,6 +91,31 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Create a transformed mesh by offsetting and scaling it
+        /// </summary>
+        /// <param name="matTrans">Transformation Matrix to apply</param>
+        /// <returns>A new mesh that has the transformation applied</returns>
+        public Mesh mshCreateTransformed(Matrix4x4 matTrans)
+        {
+            Mesh mshTrans = new Mesh();
+            for (int n = 0; n < nTriangleCount(); n++)
+            {
+                GetTriangle(    n,
+                                out Vector3 A,
+                                out Vector3 B,
+                                out Vector3 C);
+
+                A = Vector3.Transform(A, matTrans);
+                B = Vector3.Transform(B, matTrans);
+                C = Vector3.Transform(C, matTrans);
+
+                mshTrans.nAddTriangle(A, B, C);
+            }
+
+            return mshTrans;
+        }
+
+        /// <summary>
         /// Add a new vertex to the mesh so that it can be used in mesh triangles
         /// </summary>
         /// <param name="vec">The vertex to add</param>
