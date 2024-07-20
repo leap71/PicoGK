@@ -36,7 +36,6 @@
 using System.Text;
 using System.Numerics;
 using System.Diagnostics;
-using Leap71.ShapeKernel;
 
 namespace PicoGK
 {
