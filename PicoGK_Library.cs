@@ -180,45 +180,23 @@ namespace PicoGK
                     throw new Exception("Failed to load PicoGK Library");
                 }
 
+                string strSearched = "";
+
                 if (strLightsFile == "")
+                    strLightsFile = strFindLightSetupFile(  strSrcFolder, 
+                                                            out strSearched);
+
+                if (!File.Exists(strLightsFile))
                 {
-                    string strSearched = "";
+                    strSearched += strLightsFile + "\n";
 
-                    strLightsFile = Path.Combine(Utils.strPicoGKSourceCodeFolder(), "ViewerEnvironment/PicoGKDefaultEnv.zip");
-
-                    if (!File.Exists(strLightsFile))
-                    {
-                        strSearched += strLightsFile + "\n";
-
-                        if (strSrcFolder == "")
-                        {
-                            strLightsFile = Path.Combine(Utils.strDocumentsFolder(), "PicoGKDefaultEnv.zip");
-                        }
-                        else
-                        {
-                            strLightsFile = Path.Combine(strSrcFolder, "PicoGKDefaultEnv.zip");
-                        }
-
-                        if (!File.Exists(strLightsFile))
-                        {
-                            strSearched += strLightsFile + "\n";
-
-                            strLightsFile = Path.Combine(Utils.strExecutableFolder(), "ViewerEnvironment.zip");
-
-                            if (!File.Exists(strLightsFile))
-                            {
-                                strSearched += strLightsFile + "\n";
-
-                                Log($"Could not find a lights file - your viewer will look quite dark.");
-                                Log($"Searched in:");
-                                Log($"{strSearched}");
-                                Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
-                                Log("or providing the file as a parameter at Library.Go()");
-                            }
-                        }
-                    }
+                    Log($"Could not find a lights file - your viewer will look quite dark.");
+                    Log($"Searched in:");
+                    Log($"{strSearched}");
+                    Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
+                    Log("or providing the file as a parameter at Library.Go()");
                 }
-
+            
                 Log("Creating Viewer");
 
                 Viewer? oViewer = null;
@@ -524,6 +502,45 @@ namespace PicoGK
         ~Library()
         {
             Dispose(false);
+        }
+
+        public static string strFindLightSetupFile( string strInputFolder,
+                                                    out string strSearched)
+        {
+            strSearched = "";
+
+            string strLightsFile    = Path.Combine( Utils.strPicoGKSourceCodeFolder(), 
+                                                    "ViewerEnvironment/PicoGKDefaultEnv.zip");
+
+            if (File.Exists(strLightsFile))
+                return strLightsFile;
+
+            strSearched += strLightsFile + "\n";
+
+            if (strInputFolder == "")
+            {
+                strLightsFile = Path.Combine(   Utils.strDocumentsFolder(), 
+                                                "PicoGKDefaultEnv.zip");
+
+                strSearched += strLightsFile + "\n";
+            }
+            else
+            {
+                strLightsFile = Path.Combine(   strInputFolder, 
+                                                "PicoGKDefaultEnv.zip");
+
+                strSearched += strLightsFile + "\n";
+            }
+
+            if (!File.Exists(strLightsFile))
+            {
+                strLightsFile = Path.Combine(    Utils.strExecutableFolder(), 
+                                                "ViewerEnvironment.zip");
+
+                strSearched += strLightsFile + "\n";
+            }
+
+            return strLightsFile;
         }
 
         public void Dispose()
