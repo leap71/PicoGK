@@ -64,6 +64,16 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Adds all vertices from a container (such as a List<>)
+        /// </summary>
+        /// <param name="avec">list/array etc. of vertices</param>
+        public void Add(IEnumerable<Vector3> avec)
+        {
+            foreach (Vector3 vec in avec)
+                nAddVertex(vec);
+        }
+
+        /// <summary>
         /// Return number of vertices in the PolyLine
         /// </summary>
         /// <returns>Number of vertices</returns>
