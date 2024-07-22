@@ -329,9 +329,9 @@ namespace PicoGK
 
         class LogStatisticsAction : IViewerAction
         {
-            public LogStatisticsAction()
+            public LogStatisticsAction(LogFile oLog)
             {
-
+                m_oLog = oLog;
             }
 
             public void Do(Viewer oViewer)
@@ -366,23 +366,27 @@ namespace PicoGK
                     }
                 }
 
-                Library.Log($"Viewer Stats:");
-                Library.Log($"   Number of Meshes: {nMeshes}");
+                m_oLog.Log($"Viewer Stats:");
+                m_oLog.Log($"   Number of Meshes: {nMeshes}");
                 lock (oViewer.m_oVoxels)
                 {
-                    Library.Log($"   Voxel Objects:    {oViewer.m_oVoxels.Count()}");
+                    m_oLog.Log($"   Voxel Objects:    {oViewer.m_oVoxels.Count()}");
                 }
-                Library.Log($"   Total Triangles:  {fTriangles:F1}{strUnit}");
-                Library.Log($"   Total Vertices:   {fVertices:F1}{strUnit}");
-                Library.Log($"   Bounding Box:     {oViewer.m_oBBox}");
+                m_oLog.Log($"   Total Triangles:  {fTriangles:F1}{strUnit}");
+                m_oLog.Log($"   Total Vertices:   {fVertices:F1}{strUnit}");
+                m_oLog.Log($"   Bounding Box:     {oViewer.m_oBBox}");
             }
+
+            LogFile m_oLog;
         }
 
         class LoadLightSetupAction : IViewerAction
         {
-            public LoadLightSetupAction(    byte [] abyDiffuseDds,
+            public LoadLightSetupAction(    LogFile oLog,
+                                            byte [] abyDiffuseDds,
                                             byte [] abySpecularDds)
             {
+                m_oLog              = oLog;
                 m_abyDiffuseDds     = abyDiffuseDds;
                 m_abySpecularDds    = abySpecularDds;
             }
@@ -395,10 +399,11 @@ namespace PicoGK
                                         m_abySpecularDds,
                                         m_abySpecularDds.Length))
                 {
-                    Library.Log($"Failed to load light setup");
+                    m_oLog.Log($"Failed to load light setup");
                 }
             }
 
+            LogFile m_oLog;
             byte [] m_abyDiffuseDds;
             byte [] m_abySpecularDds;
         }

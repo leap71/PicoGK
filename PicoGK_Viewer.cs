@@ -42,8 +42,11 @@ namespace PicoGK
     public partial class Viewer
     {
         public Viewer(  string strTitle,
-                        Vector2 vecSize)
+                        Vector2 vecSize,
+                        LogFile oLog)
         {
+            m_oLog = oLog;
+
             m_iMainThreadID = Environment.CurrentManagedThreadId;
 
             m_oHandler.AddAction(new KeyAction(
@@ -185,7 +188,8 @@ namespace PicoGK
 
                 lock (m_oActions)
                 {
-                    m_oActions.Enqueue(new LoadLightSetupAction(    abyDiffuseData,
+                    m_oActions.Enqueue(new LoadLightSetupAction(    m_oLog,
+                                                                    abyDiffuseData,
                                                                     abySpecularData));
                 }
             }
@@ -343,7 +347,7 @@ namespace PicoGK
         {
             lock (m_oActions)
             {
-                m_oActions.Enqueue(new LogStatisticsAction());
+                m_oActions.Enqueue(new LogStatisticsAction(m_oLog));
             }
         }
 
@@ -450,12 +454,14 @@ namespace PicoGK
         Vector2 m_vecPrevPos                = new();
         bool m_bOrbit                       = false;
 
+        LogFile m_oLog;
+
         ///////// Internals
 
         void InfoCB(    string strMessage,
                         bool bFatalError)
         {
-            Library.Log(strMessage);
+            m_oLog.Log(strMessage);
         }
 
         void UpdateCB(  IntPtr hViewer,
@@ -521,7 +527,7 @@ namespace PicoGK
 
             catch (Exception e)
             {
-                Library.Log($"Caught exception in Viewer update callback:\n{e.ToString()}\n");
+                m_oLog.Log($"Caught exception in Viewer update callback:\n{e.ToString()}\n");
             }
         }
 

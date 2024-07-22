@@ -203,7 +203,9 @@ namespace PicoGK
 
                 try
                 {
-                    oViewer = new Viewer("PicoGK", new Vector2(2048f, 1024f));
+                    oViewer = new Viewer(   "PicoGK", 
+                                            new Vector2(2048f, 1024f),
+                                            oLog);
                 }
 
                 catch (Exception e)
