@@ -67,10 +67,25 @@ namespace PicoGKExamples
 
                 // Read the voxel slice from the middle of the voxel field
                 // into our grayscale image
-                vox.GetVoxelSlice(nZSize / 2, ref img);
+
+                int nMiddle = nZSize / 2;
+
+                vox.GetVoxelSlice(nMiddle, ref img);
 
                 // Save it as an TGA file to the log folder
-                TgaIo.SaveTga(Path.Combine(Library.strLogFolder, "Slice.tga"), img);
+                TgaIo.SaveTga(Path.Combine(Library.strLogFolder, $"Slice_{nMiddle}.tga"), img);
+
+                // Try out interpolated slices
+
+                for (float f=0;f<1;f+=0.1f)
+                {
+                    float fZ = nMiddle + f;
+                    vox.GetInterpolatedVoxelSlice(fZ, ref img);
+                    TgaIo.SaveTga(Path.Combine(Library.strLogFolder, $"Slice_In_{fZ}.tga"), img);
+
+                    PolySlice oSlice = PolySlice.oFromSdf(img, fZ, Vector2.Zero, Library.fVoxelSizeMM);
+                    oSlice.SaveToSvgFile(Path.Combine(Library.strLogFolder, $"Slice_In_{fZ}.svg"), true);
+                }
             }
 
             catch (Exception e)
