@@ -151,6 +151,11 @@ namespace PicoGKExamples
                 Library.Log($"Finally we are saving the new STL to {strNewSTL}");
                 mshFromVox.SaveToStlFile(strNewSTL);
 
+                // for the fun of it, let's also save it to the industry standard CLI data format
+                // with a layer height of 60 micron, which is a typical value.
+
+                vox.SaveToCliFile(Path.Combine(Library.strLogFolder, strFile + "_Printable.cli"), 0.06f);
+
                 Thread.Sleep(1000);
                 Library.oViewer().Remove(mshCut);
 
