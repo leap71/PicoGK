@@ -194,6 +194,11 @@ namespace PicoGK
             m_oContours.Add(oPoly);
         }
 
+        public bool bIsEmpty()
+        {
+            return m_oContours.Count() == 0;
+        }
+
         public void SaveToSvgFile(  string strPath,
                                     bool bSolid,
                                     BBox2? oBBoxToUse = null)
