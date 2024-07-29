@@ -562,8 +562,7 @@ namespace PicoGK
 
             if (bDisposing)
             {
-                // dispose managed state (managed objects).
-                // Nothing to do in this class
+                _Destroy();
             }
 
             lock(mtxRunOnce)

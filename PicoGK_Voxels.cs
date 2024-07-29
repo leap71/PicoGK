@@ -495,6 +495,94 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Returns a signed distance-field-encoded slice of the voxel field
+        /// at the interpolated fZSlice value. This is the same as GetVoxelSlice
+        /// except you can use intermediate positions for the Z position, which
+        /// are interpolated between the actual two Z slice positions
+        /// To use it, use GetVoxelDimensions to find out the size of the voxel
+        /// field in voxel units. Then allocate a new grayscale image to copy
+        /// the data into, and pass it as a reference. Since GetVoxelDimensions
+        /// is potentially an "expensive" function, we are putting the burden
+        /// on you to allocate an image and don't create it for you. You can
+        /// also re-use the image if you want to save an entire image stack
+        /// </summary>
+        /// <param name="fZSlice">Slice to retrieve. 
+        /// 0.5f is halfway between bottom and second layer.</param>
+        /// <param name="img">Pre-allocated grayscale image to receive the values</param>
+        /// <summary>
+        /// Returns a signed distance-field-encoded slice of the voxel field
+        /// To use it, use GetVoxelDimensions to find out the size of the voxel
+        /// field in voxel units. Then allocate a new grayscale image to copy
+        /// the data into, and pass it as a reference. Since GetVoxelDimensions
+        /// is potentially an "expensive" function, we are putting the burden
+        /// on you to allocate an image and don't create it for you. You can
+        /// also re-use the image if you want to save an entire image stack
+        /// </summary>
+        /// <param name="nZSlice">Slice to retrieve. 0 is at the bottom.</param>
+        /// <param name="img">Pre-allocated grayscale image to receive the values</param>
+        public void GetInterpolatedVoxelSlice(  in float fZSlice,
+                                                ref ImageGrayScale img,
+                                                ESliceMode eMode = ESliceMode.SignedDistance)
+        {
+            float fBackground = 0f;
+            GCHandle oPinnedArray = GCHandle.Alloc(img.m_afValues, GCHandleType.Pinned);
+            try
+            {
+                IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
+                _GetInterpolatedVoxelSlice(m_hThis, fZSlice, afBufferPtr, ref fBackground);
+            }
+            finally
+            {
+                oPinnedArray.Free();
+            }
+
+            switch (eMode)
+            {
+               case ESliceMode.Antialiased:
+                    {
+                        for (int x=0; x<img.nWidth; x++)
+                        {
+                            for (int y=0; y<img.nHeight; y++)
+                            {
+                                float fValue = img.fValue(x, y);
+                                if (fValue <= 0)
+                                    fValue = 0;
+                                else if (fValue > fBackground)
+                                    fValue = 1.0f;
+                                else
+                                    fValue = fValue / fBackground;
+
+                                img.SetValue(x, y, fValue);
+                            }
+                        }
+
+                        return;
+                    }
+
+                case ESliceMode.BlackWhite:
+                    {
+                        for (int x = 0; x < img.nWidth; x++)
+                        {
+                            for (int y = 0; y < img.nHeight; y++)
+                            {
+                                float fValue = img.fValue(x, y);
+                                if (fValue <= 0)
+                                    fValue = 0;
+                                else
+                                    fValue = 1.0f;
+
+                                img.SetValue(x, y, fValue);
+                            }
+                        }
+                        return;
+                    }
+
+                default:
+                    return;
+            }
+        }
+
         public FieldMetadata m_oMetadata;
     }
 }

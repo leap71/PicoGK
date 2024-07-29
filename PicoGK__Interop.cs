@@ -48,6 +48,9 @@ namespace PicoGK
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_Init", CharSet = CharSet.Ansi)]
         private static extern void _Init(float fVoxelSizeMM);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_Destroy", CharSet = CharSet.Ansi)]
+        private static extern void _Destroy();
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_GetName", CharSet = CharSet.Ansi)]
         private static extern void _GetName(StringBuilder psz);
 
@@ -353,6 +356,12 @@ namespace PicoGK
                                                     int nZSlice,
                                                     IntPtr afBuffer,
                                                     ref float fBackgroundValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetInterpolatedSlice")]
+        private extern static void _GetInterpolatedVoxelSlice(  IntPtr hThis,
+                                                                float fZSlice,
+                                                                IntPtr afBuffer,
+                                                                ref float fBackgroundValue);
 
         // Dispose Pattern
 
