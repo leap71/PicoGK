@@ -83,7 +83,6 @@ namespace PicoGK
                     oTextWriter.WriteLine("$$LABEL/1,default");
                     oTextWriter.WriteLine("$$DATE/" + strDate);
 
-
                     string strDim = oSlices.oBBox().vecMin.X.ToString("00000000.00000") + "," +
                                     oSlices.oBBox().vecMin.Y.ToString("00000000.00000") + "," +
                                     oSlices.oBBox().vecMin.Z.ToString("00000000.00000") + "," +
@@ -682,8 +681,14 @@ namespace PicoGK
     public partial class Voxels
     {
         public void SaveToCliFile(  string strFileName,
+                                    float fLayerHeight = 0f,
                                     bool bUseAbsXYOrigin = false)
         {
+            if (fLayerHeight == 0f)
+                fLayerHeight = Library.fVoxelSizeMM;
+                
+            float fZStep = fLayerHeight / Library.fVoxelSizeMM;
+
             GetVoxelDimensions( out int nXOrigin,
                                 out int nYOrigin,
                                 out int nZOrigin,
@@ -704,18 +709,33 @@ namespace PicoGK
                                     nYOrigin*Library.fVoxelSizeMM);
             }
 
-            for (int z=0;z<nZSize;z++)
+            float fLastLayer = nZSize-1;
+            float fZ=0;
+            float fLayerZ = fLayerHeight;
+
+            while (fZ <= fLastLayer)
             {
-               GetVoxelSlice(   z,
-                                ref img,
-                                ESliceMode.SignedDistance);
+               GetInterpolatedVoxelSlice(   fZ,
+                                            ref img,
+                                            ESliceMode.SignedDistance);
+
+                fZ += fZStep;
 
                 PolySlice oSlice = PolySlice.oFromSdf(  img,
-                                                        z*Library.fVoxelSizeMM,
+                                                        fLayerZ,
                                                         vecOrigin,
                                                         Library.fVoxelSizeMM);
 
+                if (fLayerZ == fLayerHeight) // first slice
+                {
+                    // Skip empty layers until first filled layer
+                    if (oSlice.bIsEmpty())
+                        continue; 
+                }
+
                 oSlices.Add(oSlice);
+
+                fLayerZ += fLayerHeight;
             }
 
             PolySliceStack oStack = new();
