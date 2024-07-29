@@ -303,6 +303,9 @@ namespace PicoGK
         /// <param name="fZ">At which Z coord</param>
         public void Include(BBox2 oBox, float fZ = 0.0f)
         {
+            if (oBox.bIsEmpty())
+                return;
+                
             Include(new Vector3(oBox.vecMin.X, oBox.vecMin.Y, fZ));
             Include(new Vector3(oBox.vecMax.X, oBox.vecMax.Y, fZ));
         }
