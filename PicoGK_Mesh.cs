@@ -91,7 +91,7 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Create a transformed mesh by offsetting and scaling it
+        /// Create a transformed mesh by applying a transformation matrix
         /// </summary>
         /// <param name="matTrans">Transformation Matrix to apply</param>
         /// <returns>A new mesh that has the transformation applied</returns>
@@ -105,15 +105,39 @@ namespace PicoGK
                                 out Vector3 B,
                                 out Vector3 C);
 
-                A = Vector3.Transform(A, matTrans);
-                B = Vector3.Transform(B, matTrans);
-                C = Vector3.Transform(C, matTrans);
-
-                mshTrans.nAddTriangle(A, B, C);
+               mshTrans.nAddTriangle(   A.vecTransformed(matTrans),
+                                        B.vecTransformed(matTrans),
+                                        C.vecTransformed(matTrans));
             }
 
             return mshTrans;
         }
+
+        //// <summary>
+        /// Mirrors a mesh at the specified plane.
+        /// </summary>
+        /// <param name="msh">The mesh to mirror.</param>
+        /// <param name="vecPlanePoint">A point through which the mirror plane passes.</param>
+        /// <param name="vecPlaneNormal">The normal vector of the mirror plane.</param>
+        /// <returns>The mirrored mesh.</returns>
+        public Mesh mshCreateMirrored(  Vector3 vecPlanePoint,
+									    Vector3 vecPlaneNormal)
+		{
+			Mesh mshResult = new();
+
+            vecPlaneNormal = vecPlaneNormal.vecNormalized();
+
+			for (int n=0; n<nTriangleCount();n++)
+			{
+				GetTriangle(n, out Vector3 vecA, out Vector3 vecB, out Vector3 vecC);
+
+				mshResult.nAddTriangle(	vecA.vecMirrored(vecPlanePoint, vecPlaneNormal),
+										vecB.vecMirrored(vecPlanePoint, vecPlaneNormal),
+										vecC.vecMirrored(vecPlanePoint, vecPlaneNormal));
+			}
+
+			return mshResult;
+		}
 
         /// <summary>
         /// Add a new vertex to the mesh so that it can be used in mesh triangles
