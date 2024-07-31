@@ -388,5 +388,57 @@ namespace PicoGK
                     return $"Unknown #{_nFieldType(m_hThis, nIndex)}";
             }
         }
+
+        public IFieldWithMetadata xField(int nIndex)
+        {
+            if (nIndex >= nFieldCount())
+                throw new ArgumentOutOfRangeException();
+
+            switch (eFieldType(nIndex))
+            {
+                case EFieldType.Voxels:
+                    return voxGet(nIndex);
+
+                case EFieldType.ScalarField:
+                    return oGetScalarField(nIndex);
+
+                case EFieldType.VectorField:
+                    return oGetVectorField(nIndex);
+            }
+
+            throw new Exception($"Unsupported field at index {nIndex})");
+        }
+
+        public bool bIsPicoGKCompatible()
+        {
+            if (nFieldCount() < 1)
+                return false; // nothing inside
+
+            IFieldWithMetadata x = xField(0);
+
+            if (x.oMetaData().bGetValueAt("PicoGK.VoxelSize", out float fSize))
+            {
+                if (fSize > 0f)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public float fPicoGKVoxelSizeMM()
+        {
+            if (nFieldCount() < 1)
+                return 0f; // nothing inside
+
+            IFieldWithMetadata x = xField(0);
+
+            if (x.oMetaData().bGetValueAt("PicoGK.VoxelSize", out float fSize))
+            {
+                if (fSize > 0f)
+                    return fSize * 1000f; // Meters to mm
+            }
+
+            return 0f;
+        }
     }
 }

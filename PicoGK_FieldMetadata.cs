@@ -39,6 +39,26 @@ using System.Text;
 
 namespace PicoGK
 {
+    public interface IFieldWithMetadata
+    {
+        public FieldMetadata oMetaData();
+    }
+
+    public partial class Voxels : IFieldWithMetadata
+    {
+        public FieldMetadata oMetaData() => m_oMetadata;
+    }
+
+    public partial class VectorField : IFieldWithMetadata
+    {
+        public FieldMetadata oMetaData() => m_oMetadata;
+    }
+
+    public partial class ScalarField : IFieldWithMetadata
+    {
+        public FieldMetadata oMetaData() => m_oMetadata;
+    }
+
     /// <summary>
     /// Metadata table containing parameters associated with field types
     /// like Voxels, ScalarFields, VectorFields. The metadata contained in here
