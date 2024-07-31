@@ -60,6 +60,8 @@ namespace PicoGKExamples
 
                 OpenVdbFile oFile = new OpenVdbFile(strVdbFile);
 
+                bool bFound = false;
+
                 for (int n=0; n<oFile.nFieldCount(); n++)
                 {
                     Voxels vox;
@@ -76,10 +78,19 @@ namespace PicoGKExamples
 
                     // Save to CLI file
                     vox.SaveToCliFile(strCLIFile, fLayerHeight);
-                    return;
+                    bFound = true;
+                    break;
                 }
 
-                throw new Exception($"No voxels found in VDB file {strVdbFile}");
+                if (!bFound)
+                    throw new Exception($"No voxels found in VDB file {strVdbFile}");
+            }
+
+            // Lastly, let's visualize the CLI in the viewer, and output it to .SVG slices
+            // we can use the ShowCLIFile example for that
+            {
+                ShowCLI oShow = new(strCLIFile);
+                Library.Go(1, oShow.Task);
             }
         }
     }
