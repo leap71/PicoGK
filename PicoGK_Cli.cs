@@ -66,6 +66,9 @@ namespace PicoGK
                                                     string strDate = "",
                                                     float fUnitsInMM = 0.0f)
         {
+            if ((oSlices.nCount() < 1) || oSlices.oBBox().bIsEmpty())
+                throw new Exception("No valid slices detected (empty)");
+
             if (fUnitsInMM <= 0.0f)
                 fUnitsInMM = 1.0f;
 
@@ -83,12 +86,15 @@ namespace PicoGK
                     oTextWriter.WriteLine("$$LABEL/1,default");
                     oTextWriter.WriteLine("$$DATE/" + strDate);
 
+                    // Use X/Y dimenstions of the bounding box
+                    // use 0 as first Z coordinate and last layer's Z coordinate as Z height
+
                     string strDim = oSlices.oBBox().vecMin.X.ToString("00000000.00000") + "," +
                                     oSlices.oBBox().vecMin.Y.ToString("00000000.00000") + "," +
-                                    oSlices.oBBox().vecMin.Z.ToString("00000000.00000") + "," +
+                                    "00000000.00000" + "," + 
                                     oSlices.oBBox().vecMax.X.ToString("00000000.00000") + "," +
                                     oSlices.oBBox().vecMax.Y.ToString("00000000.00000") + "," +
-                                    oSlices.oBBox().vecMax.Z.ToString("00000000.00000");
+                                    oSlices.oSliceAt(oSlices.nCount()-1).fZPos().ToString("00000000.00000");
 
                     oTextWriter.WriteLine("$$DIMENSION/{0}", strDim);
                     oTextWriter.WriteLine("$$LAYERS/{0}", (oSlices.nCount() + 1).ToString("00000"));
@@ -680,9 +686,8 @@ namespace PicoGK
 
     public partial class Voxels
     {
-        public void SaveToCliFile(  string strFileName,
-                                    float fLayerHeight = 0f,
-                                    bool bUseAbsXYOrigin = false)
+        public PolySliceStack oVectorize(   float fLayerHeight = 0f,
+                                            bool bUseAbsXYOrigin = false)
         {
             if (fLayerHeight == 0f)
                 fLayerHeight = Library.fVoxelSizeMM;
@@ -733,6 +738,9 @@ namespace PicoGK
                         continue; 
                 }
 
+                Console.WriteLine($"Slice has {oSlice.nCountours()} contours");
+
+                oSlice.Close();
                 oSlices.Add(oSlice);
 
                 fLayerZ += fLayerHeight;
@@ -741,6 +749,14 @@ namespace PicoGK
             PolySliceStack oStack = new();
             oStack.AddSlices(oSlices);
 
+            return oStack;
+        }
+
+        public void SaveToCliFile(  string strFileName,
+                                    float fLayerHeight = 0f,
+                                    bool bUseAbsXYOrigin = false)
+        {
+            PolySliceStack oStack = oVectorize(fLayerHeight, bUseAbsXYOrigin);
             CliIo.WriteSlicesToCliFile(oStack, strFileName);
         }
     }
