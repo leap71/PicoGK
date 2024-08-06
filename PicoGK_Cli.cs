@@ -688,7 +688,11 @@ namespace PicoGK
     {
         public PolySliceStack oVectorize(   float fLayerHeight = 0f,
                                             bool bUseAbsXYOrigin = false)
+
         {
+            // Default to the voxel size as layer height, if not specified
+            // usually your CLI slices should have a smaller height. The slices
+            // are interpolated between voxel layers
             if (fLayerHeight == 0f)
                 fLayerHeight = Library.fVoxelSizeMM;
                 
@@ -696,7 +700,7 @@ namespace PicoGK
 
             GetVoxelDimensions( out int nXOrigin,
                                 out int nYOrigin,
-                                out int nZOrigin,
+                                out int _,
                                 out int nXSize,
                                 out int nYSize,
                                 out int nZSize);
@@ -706,7 +710,6 @@ namespace PicoGK
             List<PolySlice> oSlices = new();
 
             Vector2 vecOrigin   = Vector2.Zero;
-            
 
             if (bUseAbsXYOrigin)
             {
@@ -714,9 +717,9 @@ namespace PicoGK
                                     nYOrigin*Library.fVoxelSizeMM);
             }
 
-            float fLastLayer = nZSize-1;
-            float fZ=0;
-            float fLayerZ = fLayerHeight;
+            float fLastLayer    = nZSize-1;
+            float fZ            = 0;
+            float fLayerZ       = fLayerHeight;
 
             while (fZ <= fLastLayer)
             {
@@ -738,20 +741,44 @@ namespace PicoGK
                         continue; 
                 }
 
-                Console.WriteLine($"Slice has {oSlice.nCountours()} contours");
-
                 oSlice.Close();
                 oSlices.Add(oSlice);
 
                 fLayerZ += fLayerHeight;
             }
 
-            PolySliceStack oStack = new();
-            oStack.AddSlices(oSlices);
+            if (oSlices.Count() == 0)
+                throw new Exception("Voxel field is empty - cannot write .CLI file");
 
-            return oStack;
+
+            int nLast = oSlices.Count()-1;
+            while (oSlices[nLast].bIsEmpty())
+            {
+                oSlices.RemoveAt(nLast);
+                nLast--;
+                // This assert will trigger if somehow the
+                // list only contained empty slices, which
+                // should not happen, because we skip empty
+                // slices at the beginning
+                Debug.Assert(nLast > 0);
+            }
+
+            return new PolySliceStack(oSlices);
         }
 
+        /// <summary>
+        /// Save the voxel field to a .cli file
+        /// CLI is an quasi industry standard for exchanging
+        /// layer information with Laser Powder Bed Fusion (LBPF)
+        /// industrial 3D printers
+        /// </summary>
+        /// <param name="strFileName">File name of the .CLI file</param>
+        /// <param name="fLayerHeight">Layer height in mm
+        /// Typical values are 30 micron (0.03f) or 60 micron (0.06f)</param>
+        /// <param name="bUseAbsXYOrigin">If specified, the CLI file uses the 
+        /// position in space in X/Y that the voxel field was in. By default
+        /// the position of the CLI slices are relative to the voxel field
+        /// boundaries.</param>
         public void SaveToCliFile(  string strFileName,
                                     float fLayerHeight = 0f,
                                     bool bUseAbsXYOrigin = false)
