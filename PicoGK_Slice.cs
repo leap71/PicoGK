@@ -545,6 +545,11 @@ namespace PicoGK
             m_oBBox     = new();
         }
 
+        public PolySliceStack(List<PolySlice> oSlices) : this()
+        {
+            AddSlices(oSlices);
+        }
+
         public void AddSlices(List<PolySlice> oSlices)
         {
             foreach (PolySlice oSlice in oSlices)
