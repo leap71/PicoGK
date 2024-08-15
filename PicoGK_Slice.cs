@@ -127,6 +127,20 @@ namespace PicoGK
 
         public List<Vector2> oVertices()    { return m_oVertices; }
 
+        /// <summary>
+        /// Makes sure that the last coordinate is identical to the first
+        /// coordinate, to close the loop
+        /// </summary>
+        public void Close()
+        {
+            if (m_oVertices.Count() == 0)
+                return;
+
+            Vector2 vecDist = m_oVertices.First() - m_oVertices.Last();
+            if (vecDist.Length() > float.Epsilon)
+                m_oVertices.Add(m_oVertices.First());
+        }
+
         public void AsSvgPolyline(out string str)
         {
             str = "<polyline points='";
@@ -197,6 +211,14 @@ namespace PicoGK
         public bool bIsEmpty()
         {
             return m_oContours.Count() == 0;
+        }
+
+        public void Close()
+        {
+            foreach (PolyContour oContour in m_oContours)
+            {
+                oContour.Close();
+            }
         }
 
         public void SaveToSvgFile(  string strPath,
@@ -521,6 +543,11 @@ namespace PicoGK
         {
             m_oSlices   = new();
             m_oBBox     = new();
+        }
+
+        public PolySliceStack(List<PolySlice> oSlices) : this()
+        {
+            AddSlices(oSlices);
         }
 
         public void AddSlices(List<PolySlice> oSlices)

@@ -28,10 +28,11 @@ namespace PicoGKExamples
         /// original voxel size
         /// </summary>
         /// <param name="strVdb">VDB File to read</param>
-        /// <param name="fLayerHeight">Layer height</param>
+        /// <param name="fLayerHeight">Layer height - a typical layer height is 60 micron (0.06f mm) 
+        /// or 30 micron for fine layers (0.03f mm)</param>
         /// <exception cref="Exception">Throws and exception if an error occurs</exception>
         public static void ConvertVdbToCli( string strVdbFile,
-                                            float fLayerHeight=0.6f)
+                                            float fLayerHeight=0.06f)
         {
             float fVoxelSize = 0;
 
