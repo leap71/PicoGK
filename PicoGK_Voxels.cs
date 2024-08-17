@@ -90,6 +90,14 @@ namespace PicoGK
         {}
 
         /// <summary>
+        /// Create a duplicate of the current voxel field
+        /// </summary>
+        public Voxels voxDuplicate()
+        {
+            return new Voxels(this);
+        }
+
+        /// <summary>
         /// Create a voxel field from a supplied scalar field
         /// the scalar field needs to contain a valid discretized
         /// signed distance field for this to work properly
@@ -146,6 +154,56 @@ namespace PicoGK
             => _BoolAdd(m_hThis, voxOperand.m_hThis);
 
         /// <summary>
+        /// Performs a boolean union operation on a copy of the current 
+        /// voxel field and the operand and returns the copy. 
+        /// The current voxel field remains unchanged
+        /// </summary>
+        /// <param name="voxOperand">Voxels to add</param>
+        /// <returns></returns>
+        public Voxels voxBoolAdd(in Voxels voxOperand)
+        {
+            Voxels vox = new(this);
+            vox.BoolAdd(voxOperand);
+            return vox;
+        }
+
+        /// <summary>
+        /// Performs a boolean union of all voxels supplied in the
+        /// container (List, Array, etc.)
+        /// </summary>
+        /// <param name="avoxList">Container containing Voxels to be added</param>
+        public void BoolAddAll(in IEnumerable<Voxels> avoxList)
+        {
+            foreach (Voxels vox in avoxList)
+                BoolAdd(vox);
+        }
+
+        // <summary>
+        /// Performs a boolean union of all voxels supplied in the
+        /// container (List, Array, etc.) on a copy of the current voxel field
+        /// and returns that copy
+        /// </summary>
+        /// <param name="avoxList">Container containing Voxels to be added</param>
+        public Voxels voxBoolAddAll(in IEnumerable<Voxels> avoxList)
+        {
+            Voxels vox = new(this);
+            vox.BoolAddAll(avoxList);
+            return vox;
+        }
+
+        /// <summary>
+        /// Combines all voxel fields in the container and returns the result
+        /// </summary>
+        /// <param name="avoxList">Container with the voxel fields</param>
+        /// <returns>All voxel fields combined</returns>
+        public static Voxels voxCombineAll(in IEnumerable<Voxels> avoxList)
+        {
+            Voxels vox = new();
+            vox.voxBoolAddAll(avoxList);
+            return vox;
+        }
+
+        /// <summary>
         /// Performs a boolean difference between the two voxel fields
         /// Our voxel field's voxel will have all the matter removed
         /// that is set in the operand
@@ -153,6 +211,43 @@ namespace PicoGK
         /// <param name="voxOperand">Voxels to remove from our field</param>
         public void BoolSubtract(in Voxels voxOperand)
             => _BoolSubtract(m_hThis, voxOperand.m_hThis);
+
+        /// <summary>
+        /// Performs a boolean difference operation on a copy of the current 
+        /// voxel field and the operand and returns the copy. 
+        /// The current voxel field remains unchanged
+        /// </summary>
+        /// <param name="voxOperand">Voxels to add</param>
+        /// <returns></returns>
+        public Voxels voxBoolSubtract(in Voxels voxOperand)
+        {
+            Voxels vox = new(this);
+            vox.BoolSubtract(voxOperand);
+            return vox;
+        }
+
+        /// <summary>
+        /// Subtracts on all voxels supplied in the container (List, Array, etc.)
+        /// from the current field
+        /// </summary>
+        /// <param name="avoxList">Container containing Voxels to be subtracted</param>
+        public void BoolSubtractAll(in IEnumerable<Voxels> avoxList)
+        {
+            foreach (Voxels vox in avoxList)
+                BoolSubtract(vox);
+        }
+
+        /// <summary>
+        /// Subtracts on all voxels supplied in the container (List, Array, etc.)
+        /// from a copy of the current field and returns the result
+        /// </summary>
+        /// <param name="avoxList">Container containing Voxels to be subtracted</param>
+        public Voxels voxBoolSubtractAll(in IEnumerable<Voxels> avoxList)
+        {
+            Voxels vox = new(this);
+            vox.BoolSubtractAll(avoxList);
+            return vox;
+        }
 
         /// <summary>
         /// Performs a boolean intersection between two voxel fields.
@@ -164,6 +259,20 @@ namespace PicoGK
             => _BoolIntersect(m_hThis, voxOperand.m_hThis);
 
         /// <summary>
+        /// Performs a boolean intersection operation on a copy of the current 
+        /// voxel field and the operand and returns the copy. 
+        /// The current voxel field remains unchanged
+        /// </summary>
+        /// <param name="voxOperand">Voxels to intersect with</param>
+        /// <returns></returns>
+        public Voxels voxBoolIntersect(in Voxels voxOperand)
+        {
+            Voxels vox = new(this);
+            vox.BoolIntersect(voxOperand);
+            return vox;
+        }
+
+        /// <summary>
         /// Offsets the voxel field by the specified distance.
         /// The surface of the voxel field is moved outward or inward
         /// Outward is positive, inward is negative
@@ -173,7 +282,21 @@ namespace PicoGK
             => _Offset(m_hThis, fDistMM);
 
         /// <summary>
-        /// Offsets the voxel field twice, but the specified distances
+        /// Offsets a copy of the voxel field by the specified distance.
+        /// The surface of the voxel field is moved outward or inward
+        /// Outward is positive, inward is negative.
+        /// </summary>
+        /// <param name="fDistMM">The distance to move the surface outward (positive) or inward (negative) in millimeters</param>
+        /// <returns>Resulting field</returns>
+        public Voxels voxOffset(float fDistMM)
+        {
+            Voxels vox = new(this);
+            vox.Offset(fDistMM);
+            return vox;
+        }
+
+        /// <summary>
+        /// Offsets the voxel field twice, by the specified distances
         /// Outwards is positive, inwards is negative
         /// </summary>
         /// <param name="fDist1MM">First offset distance in mm</param>
@@ -181,6 +304,21 @@ namespace PicoGK
         public void DoubleOffset(   float fDist1MM,
                                     float fDist2MM)
             => _DoubleOffset(m_hThis, fDist1MM, fDist2MM);
+
+
+        /// <summary>
+        /// Offsets a copy of the voxel field twice, by the specified distances
+        /// Outwards is positive, inwards is negative 
+        /// </summary>
+        /// <param name="fDistMM"></param>
+        /// <returns>Returns the resulting field</returns>
+        public Voxels voxDoubleOffset(  float fDist1MM,
+                                        float fDist2MM)
+        {
+            Voxels vox = new(this);
+            vox.DoubleOffset(fDist1MM, fDist2MM);
+            return vox;
+        }
 
         /// <summary>
         /// Offsets the voxel field three times by the specified distance.
@@ -196,8 +334,146 @@ namespace PicoGK
         /// the operations by using a negative number
         /// </summary>
         /// <param name="fDistMM">Distance to move (in mm)</param>
-        public void TripleOffset(  float fDistMM)
+        public void TripleOffset(float fDistMM)
             => _TripleOffset(m_hThis, fDistMM);
+
+        /// <summary>
+        /// Offsets a copy of the voxel field three times by the specified distance.
+        /// First it offsets inwards by the specified distance
+        /// Then it offsets twice the distance outwards
+        /// Then it offsets the distance inwards again
+        /// This is useful to smoothen a voxel field. By offsetting inwards
+        /// you eliminate all convex detail below a certain threshold
+        /// by offsetting outwards, you eliminated concave detail below a threshold
+        /// by offsetting inwards again, you are back to the size of the object
+        /// that you started with, but without the detail
+        /// Usually call this with a positive number, although you can reverse
+        /// the operations by using a negative number
+        /// </summary>
+        /// <param name="fDistMM">Distance to move (in mm)</param>
+        /// <returns>Returns the resulting field</returns>
+        public Voxels voxTripleOffset(float fDistMM)
+        {
+            Voxels vox = new(this);
+            vox.TripleOffset(fDistMM);
+            return vox;
+        }
+
+        /// <summary>
+        /// Same as TripleOffset
+        /// </summary>
+        /// <param name="fDistMM">Distance to move (in mm)</param>
+        /// <returns>Returns the resulting field</returns>
+        public void Smoothen(float fDistMM)
+            => TripleOffset(fDistMM);
+
+        /// <summary>
+        /// Same as TripleOffset
+        /// </summary>
+        /// <param name="fDistMM">Distance to move (in mm)</param>
+        /// <returns>Returns the resulting field</returns>
+        public Voxels voxSmoothen(float fDistMM)
+            => voxTripleOffset(fDistMM);
+
+        /// <summary>
+        /// Similar to DoubleOffset, but allows you to
+        /// specify the offsetted distance to the original
+        /// surface as the second parameter.
+        /// The surface is first offset by fFirstOffsetMM
+        /// Then the surface is offset so that the final
+        /// offset from the surface is fFinalSurfaceDistInMM
+        /// </summary>
+        /// <param name="fFirstOffsetMM">Initial offset</param>
+        /// <param name="fFinalSurfaceDistInMM">absolute final offset value</param>
+        public void OverOffset( float fFirstOffsetMM, 
+                                float fFinalSurfaceDistInMM)
+        {
+            DoubleOffset(   fFirstOffsetMM,
+                            -(fFirstOffsetMM - fFinalSurfaceDistInMM));
+        }
+
+        /// <summary>
+        /// Similar to DoubleOffset, but allows you to
+        /// specify the offsetted distance to the original
+        /// surface as the second parameter.
+        /// The surface is first offset by fFirstOffsetMM
+        /// Then the surface is offset so that the final
+        /// offset from the surface is fFinalSurfaceDistInMM.
+        /// 
+        /// If not specified, the surface is where it was before.
+        /// 
+        /// This function is used to eliminate detail in the voxel
+        /// field. It generates fillet-like results when used
+        /// with a positive first offset.
+        /// </summary>
+        /// <param name="fFirstOffsetMM">Initial offset</param>
+        /// <param name="fFinalSurfaceDistInMM">Absolute final offset from initial surface</param>
+        public Voxels voxOverOffset(    float fFirstOffsetMM, 
+                                        float fFinalSurfaceDistInMM=0)
+        {
+            Voxels vox = new(this);
+            vox.DoubleOffset(   fFirstOffsetMM,
+                                -fFirstOffsetMM + fFinalSurfaceDistInMM);
+
+            return vox;
+        }
+
+        /// <summary>
+        /// Creates a shell of a voxel field. The wall thickness is
+        /// the size of the offset.
+        /// 
+        /// If a positive offset is supplied, the wall is outside the
+        /// object, i.e. the void inside the shell has the shape and
+        /// dimensions of the current object.
+        /// 
+        /// If the offset is negative, the object's dimensions remain
+        /// the same, but a void is created that is created by negatively
+        /// offsetting the object.
+        /// </summary>
+        /// <param name="fOffset"></param>
+        /// <returns></returns>
+        public Voxels voxShell(float fOffset)
+        {
+            if (fOffset < 0)
+            {
+                // Outside remains the same
+                return voxBoolSubtract(voxOffset(fOffset));
+            }
+            
+            return voxOffset(fOffset).voxBoolSubtract(this);
+        }
+
+        /// <summary>
+        /// Creates a shell of a voxel field, by offsetting and subtracting
+        /// copies of the field.
+        /// One of the offsets can be zero, but if both are zero, an empty voxel
+        /// field is the result
+        /// </summary>
+        /// <param name="fNegOffsetMM">Offset to be used to create the void</param>
+        /// <param name="fPosOffsetMM">Offset to be used to create the outer shell</param>
+        /// <param name="fSmoothInnerMM">Optional smoothing parameter that allows you to smoothen the internal void</param>
+        /// <returns></returns>
+        public Voxels voxShell( float fNegOffsetMM, 
+                                float fPosOffsetMM, 
+                                float fSmoothInnerMM = 0f)
+        {
+            if (fNegOffsetMM > fPosOffsetMM)
+            {
+                float fTemp     = fNegOffsetMM;
+                fNegOffsetMM    = fPosOffsetMM;
+                fPosOffsetMM    = fTemp;
+            }
+
+            Voxels voxInner = voxOffset(fNegOffsetMM);
+            
+            if (fSmoothInnerMM > 0)
+                voxInner.voxTripleOffset(fSmoothInnerMM);
+            
+            Voxels voxOuter = voxOffset(fPosOffsetMM);
+            voxOuter.voxBoolSubtract(voxInner);
+
+            return voxOuter;
+        }
 
         /// <summary>
         /// Applies a Gaussian Blur to the voxel field with the specified size
@@ -260,6 +536,20 @@ namespace PicoGK
         public void IntersectImplicit(in IImplicit xImp)
             => _IntersectImplicit(m_hThis, xImp.fSignedDistance);
 
+
+        /// <summary>
+        /// Same as IntersectImplicit, but uses a copy of the current voxel field
+        /// and returns the result.
+        /// </summary>
+        /// <param name="xImp">Implicit function to use</param>
+        /// <returns></returns>
+        public Voxels voxIntersectImplicit(in IImplicit xImp)
+        {
+            Voxels vox = new(this);
+            vox.IntersectImplicit(xImp);
+            return vox;
+        }
+
         /// <summary>
         /// Renders a lattice into the voxel field, combining it with
         /// the existing content
@@ -277,6 +567,18 @@ namespace PicoGK
         public void ProjectZSlice(  float fStartZMM,
                                     float fEndZMM)
             => _ProjectZSlice(  m_hThis, fStartZMM, fEndZMM);
+
+        /// <summary>
+        /// Makes a copy of the voxel field and applies
+        /// the ProjectZSlice function to the copy.
+        /// </summary>
+        public Voxels voxProjectZSlice( float fStartZMM,
+                                        float fEndZMM)
+        {
+            Voxels vox = new(this);
+            vox.ProjectZSlice(fStartZMM, fEndZMM);
+            return vox;    
+        }
 
         /// <summary>
         /// Returns true if the voxel fields contain the same content
@@ -307,6 +609,19 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Uses the CalculateProperties function to calculate the
+        /// bounding box of the voxel field and returns it.
+        /// </summary>
+        /// <returns>Bounding box of the voxels in real world coordinates</returns>
+        public BBox3 oCalculateBoundingBox()
+        {
+            CalculateProperties(    out float _,
+                                    out BBox3 oBox);
+
+            return oBox;                
+        }
+
+        /// <summary>
         /// Returns the normal of the surface found at the specified point.
         /// Use after functions like bClosestPointOnSurface or bRayCastToSurface
         /// </summary>
@@ -327,25 +642,45 @@ namespace PicoGK
         /// of the voxel field
         /// </summary>
         /// <param name="vecSearch">Search position</param>
-        /// <param name="vecSurfacePoint">Point on the surface</param>
+        /// <param name="vecSurfacePoint">Point on the surface of the voxel field which 
+        /// is closest to the supplied point.</param>
         /// <returns>True if point is found, false if field is empty</returns>
         public bool bClosestPointOnSurface( in  Vector3 vecSearch,
                                             out Vector3 vecSurfacePoint)
         {
-            vecSurfacePoint     = new();
+            vecSurfacePoint = new();
             return _bClosestPointOnSurface( m_hThis,
                                             in  vecSearch,
                                             ref vecSurfacePoint);
         }
 
         /// <summary>
-        /// Casts a ray to the surface of a voxel field and finds the
-        /// the point on the surface where the ray intersects
+        /// Returns the closest point from the search point on the surface
+        /// of the voxel field 
+        /// </summary>
+        /// <param name="vecSearch">Search position</param>
+        /// <returns>Point on the surface of the voxel field which is closest
+        /// to the supplied point.</returns>
+        /// <exception cref="Exception">Throws an exception if no point found, 
+        /// which means the voxel field is empty</exception>
+        public Vector3 vecClosestPointOnSurface(in Vector3 vecSearch)
+        {
+            if (!bClosestPointOnSurface(vecSearch, out Vector3 vecSurfacePoint))
+            {
+                throw new Exception("Empty voxel field used in ClosesPointToSurface");
+            }
+
+            return vecSurfacePoint;
+        }
+
+        /// <summary>
+        /// Casts a ray to the surface of a voxel field and finds
+        /// the point on the surface where the ray intersects.
         /// </summary>
         /// <param name="vecSearch">Search point</param>
         /// <param name="vecDirection">Direction to search in</param>
         /// <param name="vecSurfacePoint">Point on the surface</param>
-        /// <returns>True, point found. False, no surface in this direction</returns>
+        /// <returns>True, point found. False, no surface intersection found</returns>
         public bool bRayCastToSurface(  in  Vector3 vecSearch,
                                         in  Vector3 vecDirection,
                                         out Vector3 vecSurfacePoint)
@@ -355,6 +690,28 @@ namespace PicoGK
                                        in  vecSearch,
                                        in  vecDirection,
                                        ref vecSurfacePoint);
+        }
+
+        /// <summary>
+        /// Casts a ray to the surface of a voxel field and finds
+        /// the point on the surface where the ray intersects.
+        /// </summary>
+        /// <param name="vecSearch">Search point</param>
+        /// <param name="vecDirection">Direction to search in</param>
+        /// <returns>Point on surface/returns>
+        /// <exception cref="Exception">Throws an exception of no intersection 
+        /// with surface found.</exception>
+        public Vector3 vecRayCastToSurface( in  Vector3 vecSearch,
+                                            in  Vector3 vecDirection)
+        {
+            if (!bRayCastToSurface( in  vecSearch,
+                                    in  vecDirection,
+                                    out Vector3 vecSurfacePoint))
+            {
+                throw new Exception("No intersection with surface in RayCastToSurface");
+            }
+
+            return vecSurfacePoint;
         }
 
         /// <summary>
