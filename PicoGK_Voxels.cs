@@ -192,6 +192,18 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Combines two voxel fields and returns the result using BoolAdd
+        /// </summary>
+        /// <param name="vox1">First field</param>
+        /// <param name="vox2">Second field</param>
+        /// <returns>Combination of the two fields as new field</returns>
+        public static Voxels voxCombine(    in Voxels vox1, 
+                                            in Voxels vox2)
+        {
+            return vox1.voxBoolAdd(vox2);
+        }
+
+        /// <summary>
         /// Combines all voxel fields in the container and returns the result
         /// </summary>
         /// <param name="avoxList">Container with the voxel fields</param>
@@ -386,7 +398,7 @@ namespace PicoGK
         /// <param name="fFirstOffsetMM">Initial offset</param>
         /// <param name="fFinalSurfaceDistInMM">absolute final offset value</param>
         public void OverOffset( float fFirstOffsetMM, 
-                                float fFinalSurfaceDistInMM)
+                                float fFinalSurfaceDistInMM = 0)
         {
             DoubleOffset(   fFirstOffsetMM,
                             -(fFirstOffsetMM - fFinalSurfaceDistInMM));
@@ -409,7 +421,7 @@ namespace PicoGK
         /// <param name="fFirstOffsetMM">Initial offset</param>
         /// <param name="fFinalSurfaceDistInMM">Absolute final offset from initial surface</param>
         public Voxels voxOverOffset(    float fFirstOffsetMM, 
-                                        float fFinalSurfaceDistInMM=0)
+                                        float fFinalSurfaceDistInMM = 0)
         {
             Voxels vox = new(this);
             vox.DoubleOffset(   fFirstOffsetMM,
@@ -417,6 +429,28 @@ namespace PicoGK
 
             return vox;
         }
+
+        /// <summary>
+        /// Creates a fillet-like effect.
+        /// Same as OverOffset with second value 0
+        /// Since the effect is similar to a fillet, this makes
+        /// a lot of code more readable
+        /// </summary>
+        /// <param name="fRoundingMM"></param>
+        /// <returns></returns>
+        public void Fillet(float fRoundingMM)
+            => OverOffset(fRoundingMM); 
+
+        /// <summary>
+        /// Creates a fillet-like effect.
+        /// Same as OverOffset with second value 0
+        /// Since the effect is similar to a fillet, this makes
+        /// a lot of code more readable
+        /// </summary>
+        /// <param name="fRoundingMM"></param>
+        /// <returns></returns>
+        public Voxels voxFillet(float fRoundingMM)
+            => voxOverOffset(fRoundingMM); 
 
         /// <summary>
         /// Creates a shell of a voxel field. The wall thickness is
