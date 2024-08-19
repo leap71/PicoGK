@@ -285,6 +285,33 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Overloaded operators allow you to do things like
+        /// vox = vox1 + vox2
+        /// </summary>
+        public static Voxels operator +(Voxels voxA, Voxels voxB)
+        {
+            return voxA.voxBoolAdd(voxB);
+        }
+
+        /// <summary>
+        /// Overloaded operators allow you to do things like
+        /// vox = vox1 - vox2
+        /// </summary>
+        public static Voxels operator -(Voxels voxA, Voxels voxB)
+        {
+            return voxA.voxBoolSubtract(voxB);
+        }
+
+        /// <summary>
+        /// Overloaded operator for intersect  (boolean AND)
+        /// vox = vox1 & vox2
+        /// </summary>
+        public static Voxels operator &(Voxels voxA, Voxels voxB)
+        {
+            return voxA.voxBoolIntersect(voxB);
+        }
+
+        /// <summary>
         /// Offsets the voxel field by the specified distance.
         /// The surface of the voxel field is moved outward or inward
         /// Outward is positive, inward is negative
