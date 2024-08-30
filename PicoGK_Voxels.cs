@@ -211,7 +211,7 @@ namespace PicoGK
         public static Voxels voxCombineAll(in IEnumerable<Voxels> avoxList)
         {
             Voxels vox = new();
-            vox.voxBoolAddAll(avoxList);
+            vox.BoolAddAll(avoxList);
             return vox;
         }
 
