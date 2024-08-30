@@ -31,6 +31,12 @@ namespace PicoGKExamples
         {
             try
             {
+                Library.oViewer().SetGroupMaterial(0, "0000FF77", 0.3f, 0.5f);
+                // Transparent Blue for the cube
+
+                Library.oViewer().SetGroupMaterial(1, "FF000044", 0.3f, 0.5f);
+                // Transparent red for the cube
+
                 // Create a 100mm cube at the origin
                 Mesh mshCube1 = Utils.mshCreateCube(new Vector3(100.0f));
 
@@ -43,22 +49,25 @@ namespace PicoGKExamples
                 Voxels voxCube2 = new Voxels(mshCube2);
 
                 // Subtract (cut away), voxCube2 from voxCube1
-                voxCube1.BoolSubtract(voxCube2);
+                voxCube1 = voxCube1 - voxCube2;
+                Library.oViewer().Add(voxCube1);
 
                 // Make a copy of the resulting object
                 Voxels voxShell = new(voxCube1);
 
-                // Offset by 2mm
+                // Offset by 2mm outwards
                 voxShell.Offset(2f);
 
                 // Cut out voxCube1 to create a shell
-                voxShell.BoolSubtract(voxCube1);
+                // using shortened -= syntax
+                // which is the same as voxShell = voxShell - voxCube1
+                voxShell -= voxCube1;
 
                 // Subtract Cube2 again to expose the inside of the shell
-                voxShell.BoolSubtract(voxCube2); 
+                voxShell -= voxCube2; 
 
                 // Add result to viewer
-                Library.oViewer().Add(voxShell);
+                Library.oViewer().Add(voxShell,1);
 
                 voxShell.mshAsMesh().SaveToStlFile(
                     Path.Combine(Library.strLogFolder, "Shell.stl"));
