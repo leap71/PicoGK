@@ -145,6 +145,20 @@ namespace PicoGK
             return new Mesh(this);
         }
 
+
+        /// <summary>
+        /// Create a voxel field with a sphere inside
+        /// </summary>
+        /// <param name="vecCenter">Center of the sphere</param>
+        /// <param name="fRadius">Radius of the Sphere</param>
+        /// <returns></returns>
+        public static Voxels voxSphere(Vector3 vecCenter, float fRadius)
+        {
+            Lattice lat = new();
+            lat.AddSphere(vecCenter, fRadius);
+            return new(lat);
+        }
+
         /// <summary>
         /// Performs a boolean union between two voxel fields
         /// Our voxelfield will have all the voxels set that the operands also has set
