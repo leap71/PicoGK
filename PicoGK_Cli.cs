@@ -48,6 +48,7 @@ namespace PicoGK
     /// </summary>
 	public class CliIo
     {
+        public enum EFormat {UseEmptyFirstLayer, FirstLayerWithContent};
         public class Result
         {
             public PolySliceStack oSlices = new();
@@ -63,6 +64,7 @@ namespace PicoGK
 
         public static void WriteSlicesToCliFile(    PolySliceStack oSlices,
                                                     string strFilePath,
+                                                    EFormat eFormat,
                                                     string strDate = "",
                                                     float fUnitsInMM = 0.0f)
         {
@@ -96,14 +98,22 @@ namespace PicoGK
                                     oSlices.oBBox().vecMax.Y.ToString("00000000.00000") + "," +
                                     oSlices.oSliceAt(oSlices.nCount()-1).fZPos().ToString("00000000.00000");
 
+                    int nSliceCount = oSlices.nCount();
+
+                    if (eFormat == EFormat.UseEmptyFirstLayer)
+                        nSliceCount++;
+
                     oTextWriter.WriteLine("$$DIMENSION/{0}", strDim);
-                    oTextWriter.WriteLine("$$LAYERS/{0}", (oSlices.nCount() + 1).ToString("00000"));
+                    oTextWriter.WriteLine("$$LAYERS/{0}", nSliceCount.ToString("00000"));
                     oTextWriter.WriteLine("$$HEADEREND");
                     oTextWriter.WriteLine("$$GEOMETRYSTART");
 
-                    // Add the zero layer at the bottom
-                    oTextWriter.WriteLine("$$LAYER/0.0");
-
+                    if (eFormat == EFormat.UseEmptyFirstLayer)
+                    {
+                         // Add the zero layer at the bottom
+                        oTextWriter.WriteLine("$$LAYER/0.0");
+                    }
+                   
                     // Now add all the actual layers
                     for (int nLayer = 0; nLayer < oSlices.nCount(); nLayer++)
                     {
@@ -750,7 +760,6 @@ namespace PicoGK
             if (oSlices.Count() == 0)
                 throw new Exception("Voxel field is empty - cannot write .CLI file");
 
-
             int nLast = oSlices.Count()-1;
             while (oSlices[nLast].bIsEmpty())
             {
@@ -780,11 +789,14 @@ namespace PicoGK
         /// the position of the CLI slices are relative to the voxel field
         /// boundaries.</param>
         public void SaveToCliFile(  string strFileName,
-                                    float fLayerHeight = 0f,
-                                    bool bUseAbsXYOrigin = false)
+                                    float fLayerHeight      = 0f,
+                                    CliIo.EFormat eFormat   = CliIo.EFormat.FirstLayerWithContent,
+                                    bool bUseAbsXYOrigin    = false)
         {
             PolySliceStack oStack = oVectorize(fLayerHeight, bUseAbsXYOrigin);
-            CliIo.WriteSlicesToCliFile(oStack, strFileName);
+            CliIo.WriteSlicesToCliFile( oStack, 
+                                        strFileName, 
+                                        eFormat);
         }
     }
 }

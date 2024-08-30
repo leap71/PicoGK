@@ -32,7 +32,8 @@ namespace PicoGKExamples
         /// or 30 micron for fine layers (0.03f mm)</param>
         /// <exception cref="Exception">Throws and exception if an error occurs</exception>
         public static void ConvertVdbToCli( string strVdbFile,
-                                            float fLayerHeight=0.06f)
+                                            float fLayerHeight=0.06f,
+                                            bool bStartWithEmptyLayer=false)
         {
             float fVoxelSize = 0;
 
@@ -78,7 +79,12 @@ namespace PicoGKExamples
                     }
 
                     // Save to CLI file
-                    vox.SaveToCliFile(strCLIFile, fLayerHeight);
+                    vox.SaveToCliFile(  strCLIFile, 
+                                        fLayerHeight, 
+                                        bStartWithEmptyLayer ? 
+                                            CliIo.EFormat.UseEmptyFirstLayer : 
+                                            CliIo.EFormat.FirstLayerWithContent);
+
                     bFound = true;
                     break;
                 }
