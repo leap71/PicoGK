@@ -27,88 +27,63 @@ namespace PicoGKExamples
 
     class BooleanShowCase
     {
-        public class Sphere : IImplicit
-        {
-            public Sphere(  float fRadius,
-                            Vector3 vecCenter)
-            {
-                m_fRadius   = fRadius;
-                m_vecC      = vecCenter;
-                oBB = new BBox3(    vecCenter - new Vector3(fRadius),
-                                    vecCenter + new Vector3(fRadius));
-            }
-
-            public float fSignedDistance(in Vector3 vecSample)
-            {
-                Vector3 vecPt = vecSample - m_vecC;
-                // Move sample point to origin by subtracting center
-
-                return float.Sqrt(  vecPt.X * vecPt.X +
-                                    vecPt.Y * vecPt.Y +
-                                    vecPt.Z * vecPt.Z) - m_fRadius;
-            }
-
-            public readonly BBox3   oBB;
-            float   m_fRadius;
-            Vector3 m_vecC;
-        }
-
         public static void Task()
         {
             try
             {
-                Library.oViewer().SetGroupMaterial(0, "EE", 0f, 1f);
+                Library.oViewer().SetGroupMaterial(0, "555577", 0.7f, 0.8f);
+                // Dark metallic
 
-                Library.oViewer().SetGroupMaterial(1, "FF000033", 0f, 1f);
+                Library.oViewer().SetGroupMaterial(1, "AA000033", 0.1f, 0);
                 // Transparent Red
 
-                Library.oViewer().SetGroupMaterial(2, "00FF0033", 0f, 1f);
+                Library.oViewer().SetGroupMaterial(2, "00AA0033", 0.1f, 0);
                 // Transparent Green
 
-                Sphere oSphere1A = new Sphere(20f, new Vector3(-5f, 0, 0));
-                Sphere oSphere1B = new Sphere(20f, new Vector3(5f, 0, 0));
+                // --- Boolean Add Showcase ---
 
-                // Boolean Add showcase
+                // Create two voxel fields from spheres
+                Voxels vox1A = Voxels.voxSphere(new Vector3(-10f, 0, 0), 20f);
+                Voxels vox1B = Voxels.voxSphere(new Vector3(10f, 0, 0), 20f);
 
-                Voxels vox1 = new Voxels(oSphere1A, oSphere1A.oBB);
-                vox1.BoolAdd(new Voxels(oSphere1B, oSphere1B.oBB));
+                // add the two voxel fields together
+                Voxels vox1 = vox1A + vox1B;
+
+                // Add the result to the viewer
                 Library.oViewer().Add(vox1);
 
-                Sphere oSphere2A = new Sphere(20f, new Vector3(-5f + 90, 0, 0));
-                Sphere oSphere2B = new Sphere(20f, new Vector3(5f + 90, 0, 0));
+                // --- Boolean Subtract Showcase ---
 
-                // Boolean Subtract showcase
+                // create two voxel fields from spheres
+                Voxels vox2A = Voxels.voxSphere(new Vector3(-10f + 90, 0, 0), 20f);
+                Voxels vox2B = Voxels.voxSphere(new Vector3(10f + 90, 0, 0), 20f);
 
-                Voxels vox2A    = new Voxels(oSphere2A, oSphere2A.oBB);
-                Voxels vox2B    = new Voxels(oSphere2B, oSphere2B.oBB);
-
-                vox2A.BoolSubtract(vox2B);
-
-                Library.oViewer().Add(vox2A);
+                // subtract the voxel fields from each other
+                Voxels vox2 = vox2A - vox2B;
+               
+                Library.oViewer().Add(vox2);
                 Library.oViewer().Add(vox2B, 1);
 
-                // Boolean Intersect showcase
+                // --- Boolean Intersect Showcase ---
 
-                Sphere oSphere3A = new Sphere(20f, new Vector3(-5f + 180, 0, 0));
-                Sphere oSphere3B = new Sphere(20f, new Vector3(5f + 180, 0, 0));
+                // Create two spheres
+                Voxels vox3A = Voxels.voxSphere(new Vector3(-10f + 180, 0, 0), 20f);
+                Voxels vox3B = Voxels.voxSphere(new Vector3(10f + 180, 0, 0), 20f);
 
-                Voxels vox3A    = new Voxels(oSphere3A, oSphere3A.oBB);
-                Voxels vox3B    = new Voxels(oSphere3B, oSphere3B.oBB);
-                Voxels vox3     = new Voxels(vox3A);
-
-                vox3.BoolIntersect(vox3B);
+                // Intersect the two voxel fields with each other
+                Voxels vox3 = vox3A & vox3B;
 
                 Library.oViewer().Add(vox3);
                 Library.oViewer().Add(vox3A, 2);
                 Library.oViewer().Add(vox3B, 2);
 
-                Voxels vox = new Voxels();
+                // --- Save the results ---
 
-                vox.BoolAdd(vox3);
-                vox.BoolAdd(vox2A);
-                vox.BoolAdd(vox1);
+                // Add all three results in one voxel field
+                Voxels voxAll = vox1 + vox2 + vox3;
 
-                Mesh msh = new Mesh(vox);
+                // convert to mesh and save as .STL file
+                Mesh msh = new Mesh(voxAll);
                 msh.SaveToStlFile(  Path.Combine(Library.strLogFolder,
                                     "Booleans.stl"));
             }
