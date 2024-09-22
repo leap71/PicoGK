@@ -351,6 +351,20 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Allows you to query if all viewer actions are complete
+        /// </summary>
+        /// <returns>t
+        /// true: No more viewer actions pending
+        /// false: Viewer actions still pending (busy)</returns>
+        public bool bIsIdle()
+        {
+            lock (m_oActions)
+            {
+                return m_oActions.Count() == 0;
+            }
+        }
+
         public float m_fElevation   = 30.0f;
         public float m_fOrbit       = 45.0f;
         float m_fFov                = 45.0f;
