@@ -113,6 +113,11 @@ namespace PicoGK
 
             lock (m_oActions)
             {
+                // Set idle flag, if we did not encounter
+                // any actions for one entire poll period
+                if (m_oActions.Count() == 0)
+                    m_bIdle = true;
+
                 while (m_oActions.Count > 0)
                 {
                     IViewerAction oAction = m_oActions.Dequeue();
@@ -361,9 +366,14 @@ namespace PicoGK
         {
             lock (m_oActions)
             {
-                return m_oActions.Count() == 0;
+                if (m_oActions.Count() > 0)
+                    m_bIdle = false;
             }
+
+            return m_bIdle;
         }
+
+        bool m_bIdle = false;
 
         public float m_fElevation   = 30.0f;
         public float m_fOrbit       = 45.0f;
