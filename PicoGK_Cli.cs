@@ -46,7 +46,7 @@ namespace PicoGK
     /// The parser could probably be written in a more concise way if it generalized the structure $$ .. / for commands.
     /// But this is generally not a well-though-out format.
     /// </summary>
-	public class CliIo
+	public partial class CliIo
     {
         public enum EFormat {UseEmptyFirstLayer, FirstLayerWithContent};
         public class Result
