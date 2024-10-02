@@ -35,8 +35,30 @@
 
 namespace PicoGK
 {
-    public class CsvTable
+    public interface IDataTable
     {
+        int nMaxColumnCount();
+
+        string strColumnId(int nColumn);
+        
+        bool bFindColumn(  string strColumnName,
+                            out int nColumn);
+
+        int nRowCount();
+
+        string strGetAt( int nRow,
+                         int nColumn);
+
+        void SetColumnIds(IEnumerable<string> astrIds);
+
+        void AddRow(IEnumerable<string> astrData);
+    }
+    public class CsvTable : IDataTable
+    {
+        public CsvTable(IEnumerable<string>? astrColumnIDs = null)
+        {
+            m_oColumnIDs = new(astrColumnIDs ?? []);
+        }
         public CsvTable(  string strFilePath,
                           string strDelimiters = ",")
         {
@@ -167,7 +189,6 @@ namespace PicoGK
             {
                 return false;
             }
-
             
             foreach (List<string> oColumns in m_oRows)
             {
@@ -205,6 +226,27 @@ namespace PicoGK
 
             nColumn = -1;
             return false;
+        }
+
+        public string strColumnId(int nColumn)
+        {
+            if (nColumn > nMaxColumnCount()-1)
+                return "";
+
+            return m_oColumnIDs[nColumn];
+        }
+
+        public void SetColumnIds(IEnumerable<string> astrIds)
+        {
+            m_oColumnIDs = new(astrIds);
+            m_nMaxColumnCount = int.Max(m_nMaxColumnCount, m_oColumnIDs.Count);
+        }
+
+        public void AddRow(IEnumerable<string> astrData)
+        {
+            List<string> oRow = new(astrData);
+            m_oRows.Add(oRow);
+            m_nMaxColumnCount = int.Max(m_nMaxColumnCount, oRow.Count);
         }
 
         List<string>        m_oColumnIDs;
