@@ -187,6 +187,33 @@ namespace PicoGK
             A = 1f;
         }
 
+        public string strAsHexCode()
+        {
+            ColorRgba32 clr = this;
+            string strResult;
+
+            if (clr.R == clr.G && clr.G == clr.B)
+            {
+                // grayscale
+                strResult = $"{clr.R:x2}";
+            }
+            else
+            {
+                // rgb
+                strResult = $"{clr.R:x2}{clr.G:x2}{clr.B:x2}";
+            }
+
+            if (clr.A != 1)
+                strResult += $"{clr.A:x2}";
+
+            return strResult;
+        }
+
+        public override string ToString()
+        {
+            return strAsHexCode();
+        }
+
         public static ColorFloat clrWeighted(   ColorFloat clr1,
                                                 ColorFloat clr2,
                                                 float fWeight)
