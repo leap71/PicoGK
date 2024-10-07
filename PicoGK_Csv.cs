@@ -57,7 +57,7 @@ namespace PicoGK
     {
         public CsvTable(IEnumerable<string>? astrColumnIDs = null)
         {
-            m_oColumnIDs = new(astrColumnIDs ?? []);
+            m_oColumnIDs = new(astrColumnIDs ?? new List<string>());
         }
         public CsvTable(  string strFilePath,
                           string strDelimiters = ",")
