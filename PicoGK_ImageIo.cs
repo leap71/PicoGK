@@ -203,19 +203,20 @@ namespace PicoGK
 
             for (int y = 0; y < sHeader.ushImageHeight; y++)
             {
+                int iY = sHeader.bYAxisFlipped() ? sHeader.ushImageHeight - y - 1 : y;
                 for (int x = 0; x < sHeader.ushImageWidth; x++)
                 {
                     if (bColor)
                     {
                         oReader.Read(MemoryMarshal.AsBytes(oBgrSpan));
-                        img.SetBgr24(x, y, sClr);
+                        img.SetBgr24(x, iY, sClr);
                     }
                     else
                     {
                         byte[] aby = new byte[1];
 
                         oReader.Read(aby);
-                        img.SetValue(x, y, aby[0] / 255.0f);
+                        img.SetValue(x, iY, aby[0] / 255.0f);
                     }
                 }
             }
@@ -226,40 +227,46 @@ namespace PicoGK
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct STgaHeader
         {
-            byte byIDLength;
-            byte byColorMapType;
-            public byte byImageType;
-            byte byColorMapSpec1;
-            byte byColorMapSpec2;
-            byte byColorMapSpec3;
-            byte byColorMapSpec4;
-            byte byColorMapSpec5;
-            ushort ushXOrigin;
-            ushort ushYOrigin;
-            public ushort ushImageWidth;
-            public ushort ushImageHeight;
-            public byte byPixelDepth;
-            byte byImageDesc;
+            byte            byIDLength;
+            byte            byColorMapType;
+            public byte     byImageType;
+            byte            byColorMapSpec1;
+            byte            byColorMapSpec2;
+            byte            byColorMapSpec3;
+            byte            byColorMapSpec4;
+            byte            byColorMapSpec5;
+            ushort          ushXOrigin;
+            ushort          ushYOrigin;
+            public ushort   ushImageWidth;
+            public ushort   ushImageHeight;
+            public byte     byPixelDepth;
+            byte            byImageDesc;
+
+            public bool bYAxisFlipped()
+            {
+                // Check if the 5th bit is set
+                // which indicates reverse Y axis
+                return (byImageDesc & 0x20) == 0;
+            }
 
             public STgaHeader(ushort ushWidth, ushort ushHeight)
             {
-                byIDLength = 0;
-                byColorMapType = 0;
-                byImageType = 3; // Grayscale
+                byIDLength      = 0;
+                byColorMapType  = 0;
+                byImageType     = 3; // Grayscale
                 byColorMapSpec1 = 0;
                 byColorMapSpec2 = 0;
                 byColorMapSpec3 = 0;
                 byColorMapSpec4 = 0;
                 byColorMapSpec5 = 0;
-                ushXOrigin = 0;
-                ushYOrigin = 0;
-                ushImageWidth = ushWidth;
-                ushImageHeight = ushHeight;
-                byPixelDepth = 8; // Grayscale
-                byImageDesc = 32;
+                ushXOrigin      = 0;
+                ushYOrigin      = 0;
+                ushImageWidth   = ushWidth;
+                ushImageHeight  = ushHeight;
+                byPixelDepth    = 8; // Grayscale
+                byImageDesc     = 32;
             }
         }
-
     }
 }
 
