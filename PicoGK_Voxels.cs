@@ -326,6 +326,17 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Intersects the voxel field with the specified bounding box
+        /// so all voxels outside the box are trimmed away
+        /// </summary>
+        /// <param name="oBox"></param>
+        public void Trim(BBox3 oBox)
+        {
+            Voxels voxTrim = new(Utils.mshCreateCube(oBox));
+            BoolIntersect(voxTrim);
+        }
+
+        /// <summary>
         /// Offsets the voxel field by the specified distance.
         /// The surface of the voxel field is moved outward or inward
         /// Outward is positive, inward is negative
@@ -684,16 +695,13 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Uses the CalculateProperties function to calculate the
-        /// bounding box of the voxel field and returns it.
+        /// Calculates the bounding box from an intermediate mesh generated from the voxels
         /// </summary>
         /// <returns>Bounding box of the voxels in real world coordinates</returns>
         public BBox3 oCalculateBoundingBox()
         {
-            CalculateProperties(    out float _,
-                                    out BBox3 oBox);
-
-            return oBox;                
+            Mesh msh = new(this);
+            return msh.oBoundingBox();  
         }
 
         /// <summary>
