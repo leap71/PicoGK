@@ -220,6 +220,34 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Adds a quad, defined by four corner vertices
+        /// Helper function, which calls nAddTriangle in
+        /// the background.
+        /// </summary>
+        public void AddQuad(    in Vector3 vec0,
+                                in Vector3 vec1,
+                                in Vector3 vec2,
+                                in Vector3 vec3,
+                                bool bFlipped = false)
+        {
+            int n0 = nAddVertex(vec0);
+            int n1 = nAddVertex(vec1);
+            int n2 = nAddVertex(vec2);
+            int n3 = nAddVertex(vec3);
+
+            if (bFlipped)
+            {
+                nAddTriangle(n0, n2, n1);
+                nAddTriangle(n0, n3, n2);
+            }
+            else
+            {
+                nAddTriangle(n0, n1, n2);
+                nAddTriangle(n0, n2, n3);
+            }
+        }
+
+        /// <summary>
         /// Get the triangle with the specified index
         /// </summary>
         /// <param name="nTriangle">Triangle index in the mesh</param>
