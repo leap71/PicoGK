@@ -275,6 +275,10 @@ namespace PicoGK
         private static extern void _TripleOffset(   IntPtr hThis,
                                                     float fOffset);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_Fillet")]
+        private static extern void _IterativeFillet(    IntPtr hThis,
+                                                        int nIterations);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_Gaussian")]
         private static extern void _Gaussian( IntPtr hThis,
                                             float fDistance);

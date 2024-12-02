@@ -57,6 +57,20 @@ namespace PicoGK
         public abstract float fSignedDistance(in Vector3 vec);
     }
 
+    /// <summary>
+    /// Function signature for signed distance implicts
+    /// similar to IImplicit, but contains a bounding box
+    /// interface to query for the area to be rendered
+    /// </summary>
+    public interface IBoundedImplicit : IImplicit
+    {
+        /// <summary>
+        /// The bounding box of the area covered by the
+        /// implicit function
+        /// </summary>
+        BBox3 oBBox {get;}
+    }
+
     public partial class Voxels
     {
         /// <summary>
@@ -116,6 +130,16 @@ namespace PicoGK
                         in BBox3 oBounds) : this()
         {
             RenderImplicit(xImplicit, oBounds);
+        }
+
+        /// <summary>
+        /// Creates a new voxel field and renders it using the
+        /// bounded implicit function specified
+        /// </summary>
+        /// <param name="oImplicit">Object producing a signed distance field</param>
+        public Voxels(  in IBoundedImplicit xImplicit) : this()
+        {
+            RenderImplicit(xImplicit, xImplicit.oBBox);
         }
 
         /// <summary>
@@ -562,11 +586,25 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Iteratively fillets a voxel field using a new function in openvdb. We are still determining
+        /// whether this makes sense in a computational geometry use case, so proceed with caution.
+        /// The function smoothens areas with concave curvature, and doesn't touch anything else.
+        /// But the amound of smoothening is inherently dependent on the current voxel resolution, so
+        /// iterations might need to change, depending on the voxel size you use.
+        /// </summary>
+        /// <param name="nIterations">Number of times the fillet operation is applied. In the limit
+        /// the result will approach the convex hull of the object</param>
+        [Obsolete("This feature is experimental and may change or be removed in future versions.", false)]
+        public void IterativeFillet(int nIterations)
+            => _IterativeFillet(m_hThis, nIterations);
+
+        /// <summary>
         /// Applies a Gaussian Blur to the voxel field with the specified size
         /// EXPERIMENTAL - We may remove this function again, if we determine
         /// it isn't suitable for engineering applications
         /// </summary>
         /// <param name="fDistMM">The size of the Gaussian kernel applied</param>
+        [Obsolete("This feature is experimental and may change or be removed in future versions.", false)]
         public void Gaussian(float fSizeMM)
             => _Gaussian(m_hThis, fSizeMM);
 
@@ -576,6 +614,7 @@ namespace PicoGK
         /// it isn't suitable for engineering applications
         /// </summary>
         /// <param name="fDistMM">The size of the median average kernel applied</param>
+        [Obsolete("This feature is experimental and may change or be removed in future versions.", false)]
         public void Median(float fSizeMM)
             => _Median(m_hThis, fSizeMM);
 
@@ -585,6 +624,7 @@ namespace PicoGK
         /// it isn't suitable for engineering applications
         /// </summary>
         /// <param name="fDistMM">The size of the mean average kernel applied</param>
+        [Obsolete("This feature is experimental and may change or be removed in future versions.", false)]
         public void Mean(float fSizeMM)
             => _Mean(m_hThis, fSizeMM);
 
