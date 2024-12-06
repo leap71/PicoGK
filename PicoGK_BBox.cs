@@ -107,6 +107,25 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Checks whether point is inside the bounding box
+        /// </summary>
+        public bool bContains(Vector2 vec)
+        {
+            if (bIsEmpty())
+                return false;
+
+            if (    (vec.X < vecMin.X) ||
+                    (vec.Y < vecMin.Y) ||
+                    (vec.X > vecMax.X) ||
+                    (vec.Y > vecMax.Y))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Include the specified vector in the bounding box
         /// </summary>
         /// <param name="vec">Vector to include</param>
@@ -263,6 +282,27 @@ namespace PicoGK
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Checks whether the specified point is inside the bounding box
+        /// </summary>
+        public bool bContains(Vector3 vec)
+        {
+            if (bIsEmpty())
+                return false;
+
+            if (    (vec.X < vecMin.X) ||
+                    (vec.Y < vecMin.Y) ||
+                    (vec.Z < vecMin.Z) ||
+                    (vec.X > vecMax.X) ||
+                    (vec.Y > vecMax.Y) ||
+                    (vec.Z > vecMax.Z))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
