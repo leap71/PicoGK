@@ -57,6 +57,20 @@ namespace PicoGK
         public abstract float fSignedDistance(in Vector3 vec);
     }
 
+    /// <summary>
+    /// Interface for a bounded implicit function. Like IImplicit, but
+    /// allows querying the bounding box of the function. Use when the
+    /// implicit defines a shape that has bounds (say, a sphere), vs.
+    /// an unbounded function (a gyroid)
+    /// </summary>
+    public interface IBoundedImplicit : IImplicit
+    {
+        /// <summary>
+        /// Access the bounding box of the implicit function
+        /// </summary>
+        BBox3 oBounds {get;}
+    }
+
     public partial class Voxels
     {
         /// <summary>
@@ -116,6 +130,16 @@ namespace PicoGK
                         in BBox3 oBounds) : this()
         {
             RenderImplicit(xImplicit, oBounds);
+        }
+
+        /// <summary>
+        /// Creates a new voxel field and renders it using the
+        /// bounded implicit function specified
+        /// </summary>
+        /// <param name="oImplicit">Object producing a signed distance field</param>
+        public Voxels(  in IBoundedImplicit xImplicit) : this()
+        {
+            RenderImplicit(xImplicit, xImplicit.oBounds);
         }
 
         /// <summary>
