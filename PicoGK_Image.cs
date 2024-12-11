@@ -131,6 +131,42 @@ namespace PicoGK
             SetValue(x, y, new ColorFloat(sClr));
         }
 
+        /// <summary>
+        /// Returns the interpolated color value at a normalized
+        /// coordinate going from 0..1
+        /// </summary>
+        /// <param name="fTX">X coordinate 0..1</param>
+        /// <param name="fTY">Y coordinate 0..1</param>
+        /// <returns></returns>
+        public ColorFloat clrGetAtNormalized(float fTX, float fTY)
+        {
+            float fRealX = fTX * nWidth-1;
+            float fRealY = fTY * nHeight-1;
+            
+            int x0 = (int) Math.Floor(fRealX);
+            int x1 = x0 + 1;
+            int y0 = (int) Math.Floor(fRealY);
+            int y1 = y0 + 1;
+
+            x0 = int.Clamp(x0, 0, nWidth - 1);
+            x1 = int.Clamp(x1, 0, nWidth - 1);
+            y0 = int.Clamp(y0, 0, nHeight - 1);
+            y1 = int.Clamp(y1, 0, nHeight - 1);
+
+            float dx = fRealX - x0;
+            float dy = fRealY - y0;
+
+            ColorFloat clr00 = clrValue(x0, y0);
+            ColorFloat clr10 = clrValue(x1, y0);
+            ColorFloat clr01 = clrValue(x0, y1);
+            ColorFloat clr11 = clrValue(x1, y1);
+
+            ColorFloat clr0 = ColorFloat.clrWeighted(clr00, clr10, dx);
+            ColorFloat clr1 = ColorFloat.clrWeighted(clr01, clr11, dx);
+
+            return ColorFloat.clrWeighted(clr0, clr1, dy);
+        }
+
         public void DrawLine(int x0, int y0, int x1, int y1, ColorFloat clr)
         {
             int dx = Math.Abs(x1 - x0);
