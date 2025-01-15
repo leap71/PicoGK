@@ -40,8 +40,11 @@ namespace PicoGK
 {
     public class LogFile : IDisposable
     {
-        public LogFile(in string strFileName = "")
+        public LogFile( in string strFileName = "",
+                        in bool bOutputToConsole = true)
         {
+            m_bOutputToConsole = bOutputToConsole;
+
             string strFile = strFileName;
 
             if (strFile == "")
@@ -99,7 +102,9 @@ namespace PicoGK
             {
                 foreach (string str in lines)
                 {
-                    Console.WriteLine(strPrefix + str);
+                    if (m_bOutputToConsole)
+                        Console.WriteLine(strPrefix + str);
+                        
                     m_oWriter?.WriteLine(strPrefix + str);
 
                     m_oWriter?.Flush();
@@ -159,6 +164,7 @@ namespace PicoGK
         Stopwatch m_oStopwatch;
         float m_fTimeStartSeconds;
         float m_fLastTimeSeconds;
+        bool m_bOutputToConsole;
         bool m_bDisposed = false;
 
     }
