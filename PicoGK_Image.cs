@@ -33,9 +33,6 @@
 // limitations under the License.   
 //
 
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
 namespace PicoGK
 {
     public abstract partial class Image
@@ -264,8 +261,11 @@ namespace PicoGK
                             int _nHeight,
                             EType _eType)
         {
-            Debug.Assert(_nWidth > 0);
-            Debug.Assert(_nHeight > 0);
+            if (_nWidth < 1)
+                throw new ArgumentOutOfRangeException("Image width must be larger 0");
+
+            if (_nHeight < 1)
+                throw new ArgumentOutOfRangeException("Image width must be larger 0");
 
             nWidth = _nWidth;
             nHeight = _nHeight;
@@ -472,8 +472,11 @@ namespace PicoGK
                                                             ImageGrayScale oImg2,
                                                             float fWeight = 0.5f)
         {
-            Debug.Assert(oImg1.nWidth == oImg2.nWidth);
-            Debug.Assert(oImg1.nHeight == oImg2.nHeight);
+            if (oImg1.nWidth != oImg2.nWidth)
+                throw new ArgumentOutOfRangeException("Interpolation between images requires same width and height");
+
+            if (oImg1.nHeight != oImg2.nHeight)
+                throw new ArgumentOutOfRangeException("Interpolation between images requires same width and height");
 
             if (fWeight <= 0.0f)
                 return oImg1;
