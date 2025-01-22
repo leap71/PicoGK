@@ -316,7 +316,7 @@ namespace PicoGK
 
                     int nLutIndex = 0;
 
-                    if (afCorners[0] < 0.0) nLutIndex = 1;
+                    if (afCorners[0] < 0.0) nLutIndex |= 1;
                     if (afCorners[1] < 0.0) nLutIndex |= 2;
                     if (afCorners[2] < 0.0) nLutIndex |= 4;
                     if (afCorners[3] < 0.0) nLutIndex |= 8;
@@ -487,8 +487,8 @@ namespace PicoGK
 
         public float fZPos()                    => m_fZPos;
         public BBox2 oBBox()                    => m_oBBox;
-        public int nCountours()                 => m_oContours.Count;
-        public PolyContour oCountourAt(int i)   => m_oContours[i];
+        public int nContours()                 => m_oContours.Count;
+        public PolyContour oContourAt(int i)   => m_oContours[i];
 
         List<PolyContour>   m_oContours;
         float               m_fZPos;
@@ -533,7 +533,8 @@ namespace PicoGK
 
         static float fZeroCrossing(float fA, float fB)
         {
-            return Math.Abs(fA) / (Math.Abs(fA) + Math.Abs(fB));
+            // add small number to avoid division by zero
+            return Math.Abs(fA) / (Math.Abs(fA) + Math.Abs(fB)) + 1e-6f;
         }
     }
 
@@ -576,9 +577,9 @@ namespace PicoGK
 
             foreach (PolySlice oSlice in m_oSlices)
             {  
-                for (int n = 0; n < oSlice.nCountours(); n++)
+                for (int n = 0; n < oSlice.nContours(); n++)
                 {
-                    PolyContour oContour = oSlice.oCountourAt(n);
+                    PolyContour oContour = oSlice.oContourAt(n);
 
                     ColorFloat? clr = clrDegenerate;
 

@@ -122,9 +122,9 @@ namespace PicoGK
 
                         for (int nPass = 0; nPass < 3; nPass++)
                         {
-                            for (int nPolyline = 0; nPolyline < oSlice.nCountours(); nPolyline++)
+                            for (int nPolyline = 0; nPolyline < oSlice.nContours(); nPolyline++)
                             {
-                                PolyContour oPoly = oSlice.oCountourAt(nPolyline);
+                                PolyContour oPoly = oSlice.oContourAt(nPolyline);
 
                                 if ((nPass == 0) && (oPoly.eWinding() != PolyContour.EWinding.COUNTERCLOCKWISE))
                                 {
