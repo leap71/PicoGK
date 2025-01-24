@@ -200,8 +200,8 @@ namespace PicoGK
             return $"<Min: {vecMin} | Max: {vecMax}>";
         }
 
-        public Vector2 vecMin;
-        public Vector2 vecMax;
+        public Vector2 vecMin   = new();
+        public Vector2 vecMax   = new();
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -431,6 +431,7 @@ namespace PicoGK
             return new Vector3( vecMin.X + oRand.NextSingle() * (vecMax.X - vecMin.X),
                                 vecMin.Y + oRand.NextSingle() * (vecMax.Y - vecMin.Y),
                                 vecMin.Z + oRand.NextSingle() * (vecMax.Z - vecMin.Z));
+
         }
 
         /// <summary>
@@ -452,7 +453,7 @@ namespace PicoGK
             return $"<Min: {vecMin} | Max: {vecMax}>";
         }
 
-        public Vector3 vecMin;
-        public Vector3 vecMax;
+        public Vector3 vecMin   = new();
+        public Vector3 vecMax   = new();
     }
 }
