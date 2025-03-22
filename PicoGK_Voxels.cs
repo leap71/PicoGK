@@ -879,6 +879,24 @@ namespace PicoGK
                                     ref nZSize);
         }
 
+         /// <summary>
+        /// Query the real world origin of a voxel slice, which is also
+        /// the origin of the actual voxel field in space
+        /// </summary>
+        /// <param name="nZSlice">Slice you are looking for</param>
+        /// <returns>Real world coordinates of the origin of the slice</returns>
+        public Vector3 vecZSliceOrigin(int nZSlice=0)
+        {
+            GetVoxelDimensions( out int nXOrigin,
+                                out int nYOrigin,
+                                out int nZOrigin,
+                                out _,
+                                out _,
+                                out _);
+
+            return Library.vecVoxelsToMm(nXOrigin, nYOrigin, nZOrigin + nZSlice);
+        }
+
         public enum ESliceMode
         {
             SignedDistance,
