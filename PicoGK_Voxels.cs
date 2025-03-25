@@ -897,6 +897,16 @@ namespace PicoGK
             return Library.vecVoxelsToMm(nXOrigin, nYOrigin, nZOrigin + nZSlice);
         }
 
+        /// <summary>
+        /// Return the number of slices in this voxel field
+        /// </summary>
+        /// <returns>Number of slices in the voxel field (equivalent to nZSice)</returns>
+        public int nSliceCount()
+        {
+            GetVoxelDimensions(out _, out _, out int nCount);
+            return nCount;
+        }
+
         public enum ESliceMode
         {
             SignedDistance,
