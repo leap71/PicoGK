@@ -209,6 +209,12 @@ namespace PicoGK
             return strResult;
         }
 
+        public string strAsABGRHexCode()
+        {
+            ColorRgba32 clr = this;
+            return $"{clr.A:x2}{clr.B:x2}{clr.G:x2}{clr.R:x2}";
+        }
+
         public override string ToString()
         {
             return strAsHexCode();
