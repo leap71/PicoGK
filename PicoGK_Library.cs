@@ -114,7 +114,8 @@ namespace PicoGK
                                 string strLogFolder     = "",
                                 string strLogFileName   = "",
                                 string strSrcFolder     = "",
-                                string strLightsFile    = "")
+                                string strLightsFile    = "",
+                                bool bEndAppWithTask    = false)
         {
             lock(mtxRunOnce)
             {
@@ -249,6 +250,22 @@ namespace PicoGK
                     while (oViewer.bPoll())
                     {
                         Thread.Sleep(5); // 200 Hz is plenty
+
+                        if (bEndAppWithTask)
+                        {
+                            // Close app when task ends
+
+                            if (!oThread.IsAlive)
+                            {
+                                // Task is done
+                                // Check if viewer has pending actions
+                                // if not, we are done
+                                if (oViewer.bIsIdle())
+                                    break;
+
+                                // Otherwise we do another cycle
+                            }
+                        }
                     }
 
                     m_bAppExit = true;
