@@ -1,23 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <!-- NuGet Metadata -->
     <PackageId>PicoGK</PackageId>
     <RootNamespace>PicoGK</RootNamespace>
-    <Version>1.7.6</Version>
+    <Version>1.7.7</Version>
     <Authors>LEAP 71</Authors>
     <Company>LEAP 71</Company>
     <Description>Compact and robust geometry kernel for Computational Engineering</Description>
-    <RepositoryUrl>https://github.com/LEAP71/PicoGK</RepositoryUrl>
     <PackageProjectUrl>https://github.com/LEAP71/PicoGK/releases</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/LEAP71/PicoGK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>geometry;computational;kernel;engineering</PackageTags>
+
+    <!-- Symbol & Debugging -->
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <RepositoryType>git</RepositoryType>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
 
