@@ -1,3 +1,13 @@
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Except for runtime files
+
+!native/**/*.dll
+!native/**/*.dylib
+
 # globs
 Makefile.in
 *.userprefs
@@ -474,11 +484,6 @@ xcuserdata/
 # Precompiled Headers
 *.gch
 *.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
 
 # Fortran module files
 *.mod
