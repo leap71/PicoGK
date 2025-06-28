@@ -155,7 +155,12 @@ namespace PicoGK
 
         public void LoadLightSetup(string strFilePath)
         {
-            using (ZipArchive oZip = ZipFile.OpenRead(strFilePath))
+            LoadLightSetup(File.OpenRead(strFilePath));
+        }
+
+        public void LoadLightSetup(Stream oStream)
+        {
+            using (ZipArchive oZip = new(oStream, ZipArchiveMode.Read))
             {
                 // Find the entry for the diffTexture
                 ZipArchiveEntry? oDiffuseEntry = oZip.GetEntry("Diffuse.dds");
