@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>PicoGK</PackageId>
+    <RootNamespace>PicoGK</RootNamespace>
+    <Version>1.7.6</Version>
+    <Authors>LEAP 71</Authors>
+    <Company>LEAP 71</Company>
+    <Description>Compact and robust geometry kernel for Computational Engineering</Description>
+    <RepositoryUrl>https://github.com/LEAP71/PicoGK</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/LEAP71/PicoGK</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <None Include="native/osx-arm64/*.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native" />
+    <None Include="native/win-x64/*.dll" Pack="true" PackagePath="runtimes/win-x64/native" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ViewerEnvironment/PicoGKDefaultEnv.zip">
+      <LogicalName>PicoGK.Resources.Environment.zip</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+
+</Project>
