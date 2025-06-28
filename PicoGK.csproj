@@ -11,7 +11,7 @@
     <Company>LEAP 71</Company>
     <Description>Compact and robust geometry kernel for Computational Engineering</Description>
     <RepositoryUrl>https://github.com/LEAP71/PicoGK</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/LEAP71/PicoGK</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/LEAP71/PicoGK/releases</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
