@@ -553,7 +553,7 @@ namespace PicoGK
             strSearched = "";
 
             string strLightsFile    = Path.Combine( Utils.strPicoGKSourceCodeFolder(), 
-                                                    "ViewerEnvironment/PicoGKDefaultEnv.zip");
+                                                    "assets/ViewerEnvironment.zip");
 
             if (File.Exists(strLightsFile))
                 return strLightsFile;
@@ -563,14 +563,14 @@ namespace PicoGK
             if (strInputFolder == "")
             {
                 strLightsFile = Path.Combine(   Utils.strDocumentsFolder(), 
-                                                "PicoGKDefaultEnv.zip");
+                                                "ViewerEnvironment.zip");
 
                 strSearched += strLightsFile + "\n";
             }
             else
             {
                 strLightsFile = Path.Combine(   strInputFolder, 
-                                                "PicoGKDefaultEnv.zip");
+                                                "ViewerEnvironment.zip");
 
                 strSearched += strLightsFile + "\n";
             }
