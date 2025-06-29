@@ -16,7 +16,7 @@ namespace PicoGK
                         try
                         {
                             // Try to load from embedded resource (when in Nuget mode)
-                            using Stream? oStream = typeof(Library).Assembly.GetManifestResourceStream("PicoGK.Resources.font.ttf");
+                            using Stream? oStream = typeof(Library).Assembly.GetManifestResourceStream("PicoGK.Resources.Font.ttf");
 
                             if (oStream is null)
                             {
@@ -32,9 +32,11 @@ namespace PicoGK
                             
                         catch
                         {
-                            // No font available, default to SkiaSharp's font
-                            g_oTypeFace = SKTypeface.CreateDefault();
+                            
                         }
+
+                        if (g_oTypeFace == null)
+                            g_oTypeFace = SKTypeface.CreateDefault();
                     }
 
                     return g_oTypeFace;
