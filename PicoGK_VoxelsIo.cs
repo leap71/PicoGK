@@ -88,7 +88,7 @@ namespace PicoGK
         /// </exception>
         public void SaveToVdbFile(string strFileName)
 		{
-			OpenVdbFile oFile = new();
+			using OpenVdbFile oFile = new();
 			oFile.nAdd(this);
 			oFile.SaveToFile(strFileName);
 		}
