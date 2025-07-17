@@ -295,16 +295,6 @@ namespace PicoGK
         public FieldMetadata(IntPtr hSource)
         {
             m_hThis = hSource;
-
-            // These values are added to every field we store from PicoGK
-            // this allows us to deal with future extensions, and also
-            // informs the user about the voxel size used in the field
-            // Note - all values we save to the metadata is in SI unites
-            // so we divide the voxel size in mm by 1000 to get the voxel size
-            // in meters
-            _SetValue("PicoGK.Library", Library.strName());
-            _SetValue("PicoGK.Version", Library.strVersion());
-            _SetValue("PicoGK.VoxelSize", Library.fVoxelSizeMM / 1000f);
         }
 
         /// <summary>
