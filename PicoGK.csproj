@@ -9,7 +9,7 @@
     <!-- NuGet Metadata -->
     <PackageId>PicoGK</PackageId>
     <RootNamespace>PicoGK</RootNamespace>
-    <Version>1.7.7.1</Version>
+    <Version>1.7.7.2</Version>
     <Authors>LEAP 71</Authors>
     <Company>LEAP 71</Company>
     <Description>Compact and robust geometry kernel for Computational Engineering</Description>
