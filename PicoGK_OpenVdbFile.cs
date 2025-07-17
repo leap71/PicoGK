@@ -126,7 +126,23 @@ namespace PicoGK
         /// Throws exception if unable to save
         /// </exception>
         public void SaveToFile(string strFileName)
-        {
+        {   
+            // Before saving, update all the built-in metadata:
+            // These values are added to every field we store from PicoGK
+            // to allow us to deal with future extensions, and also
+            // inform the user about the voxel size used in the field
+            // Note - all values we save to the metadata are in SI unites
+            // so we divide the voxel size in mm by 1000 to get the voxel size
+            // in meters
+
+            for (int n=0; n<nFieldCount(); n++)
+            {
+                IFieldWithMetadata xData = xField(n);
+                xData.oMetaData()._SetValue("PicoGK.Library",   Library.strName());
+                xData.oMetaData()._SetValue("PicoGK.Version",   Library.strVersion());
+                xData.oMetaData()._SetValue("PicoGK.VoxelSize", Library.fVoxelSizeMM / 1000f);
+            }
+
             if (!_bSaveToFile(m_hThis, strFileName))
             {
                 throw new IOException($"Failed to save VDB file to {strFileName}");
