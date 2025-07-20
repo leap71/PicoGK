@@ -37,6 +37,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Reflection;
 
 namespace PicoGK
 {
@@ -114,7 +115,8 @@ namespace PicoGK
                                 string strLogFolder     = "",
                                 string strLogFileName   = "",
                                 string strSrcFolder     = "",
-                                string strLightsFile    = "")
+                                string strLightsFile    = "",
+                                bool bEndAppWithTask    = false)
         {
             lock(mtxRunOnce)
             {
@@ -179,23 +181,6 @@ namespace PicoGK
                     Log($"--------------------------------");
                     throw new Exception("Failed to load PicoGK Library");
                 }
-
-                string strSearched = "";
-
-                if (strLightsFile == "")
-                    strLightsFile = strFindLightSetupFile(  strSrcFolder, 
-                                                            out strSearched);
-
-                if (!File.Exists(strLightsFile))
-                {
-                    strSearched += strLightsFile + "\n";
-
-                    Log($"Could not find a lights file - your viewer will look quite dark.");
-                    Log($"Searched in:");
-                    Log($"{strSearched}");
-                    Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
-                    Log("or providing the file as a parameter at Library.Go()");
-                }
             
                 Log("Creating Viewer");
 
@@ -226,7 +211,47 @@ namespace PicoGK
 
                     try
                     {
-                        oViewer.LoadLightSetup(strLightsFile);
+                        // Load lights
+
+                        string strSearched = "";
+
+                        if (strLightsFile == "")
+                        {
+                            // No lights file specified, let's try to load the embedded environment first
+
+                            try
+                            {
+                                Log($"Loading lights embedded environment");
+
+                                Assembly oAssembly = typeof(Library).Assembly;
+                                using Stream oStream = oAssembly.GetManifestResourceStream("PicoGK.Resources.Environment.zip")
+                                                                 ?? throw new FileNotFoundException("Embedded environmet not found.");
+                                oViewer.LoadLightSetup(oStream);
+                            }
+
+                            catch (Exception)
+                            {
+                                Log($"Could not load lights embedded environment, trying to load from disk instead.");
+
+                                strLightsFile = strFindLightSetupFile(  strSrcFolder, 
+                                                                out strSearched);
+
+                                if (!File.Exists(strLightsFile))
+                                {
+                                    strSearched += strLightsFile + "\n";
+
+                                    Log($"Could not find a lights file - your viewer will look quite dark.");
+                                    Log($"Searched in:");
+                                    Log($"{strSearched}");
+                                    Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
+                                    Log("or providing the file as a parameter at Library.Go()");
+                                }
+
+                                Log($"Using light setup {strLightsFile} from disk");
+                                oViewer.LoadLightSetup(strLightsFile);
+                            }
+                        }
+                        
                         oViewer.SetBackgroundColor("FF");
                     }
 
@@ -249,6 +274,22 @@ namespace PicoGK
                     while (oViewer.bPoll())
                     {
                         Thread.Sleep(5); // 200 Hz is plenty
+
+                        if (bEndAppWithTask)
+                        {
+                            // Close app when task ends
+
+                            if (!oThread.IsAlive)
+                            {
+                                // Task is done
+                                // Check if viewer has pending actions
+                                // if not, we are done
+                                if (oViewer.bIsIdle())
+                                    break;
+
+                                // Otherwise we do another cycle
+                            }
+                        }
                     }
 
                     m_bAppExit = true;

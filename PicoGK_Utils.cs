@@ -149,7 +149,7 @@ namespace PicoGK
         /// <returns>The assumed path to the source code root</returns>
         static public string strProjectRootFolder()
         {
-            string strPath = strStripQuotesFromPath(Environment.CommandLine);
+            string strPath = AppContext.BaseDirectory;
 
             for (int n = 0; n < 4; n++)
             {
