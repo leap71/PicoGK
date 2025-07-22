@@ -83,7 +83,7 @@ namespace PicoGK
             m_fnScrollWheelCB   = ScrollWheelCB;
             m_fnWindowSizeCB    = WindowSizeCB;
 
-            m_hThis = _hCreate( strTitle,
+            hThis = _hCreate(   strTitle,
                                 vecSize,
                                 m_fnInfoCB,
                                 m_fnUpdateCB,
@@ -93,7 +93,7 @@ namespace PicoGK
                                 m_fnScrollWheelCB,
                                 m_fnWindowSizeCB);
          
-            Debug.Assert(m_hThis != IntPtr.Zero);
+            Debug.Assert(hThis != IntPtr.Zero);
         }
 
         public bool bPoll()
@@ -132,17 +132,17 @@ namespace PicoGK
                 {
                     if (m_oTimeLapse.bDue(out string strScreenShotPath))
                     {
-                        _RequestScreenShot(m_hThis, strScreenShotPath);
+                        _RequestScreenShot(hThis, strScreenShotPath);
                         bUpdateNeeded = true;
                     }
                 }
             }
 
             if (bUpdateNeeded)
-                _RequestUpdate(m_hThis);
+                _RequestUpdate(hThis);
 
-            Debug.Assert(_bIsValid(m_hThis));
-            return _bPoll(m_hThis);
+            Debug.Assert(_bIsValid(hThis));
+            return _bPoll(hThis);
         }
 
         public void RequestUpdate()
@@ -389,6 +389,8 @@ namespace PicoGK
         int m_iMainThreadID = -1;
 
         ColorFloat m_clrBackground = new(0.3f);
+
+        /// TODO Remove
         List<Mesh> m_oMeshes = new();
         List<PolyLine> m_oPolyLines = new();
         Dictionary<Voxels, Mesh> m_oVoxels = new();
@@ -428,9 +430,10 @@ namespace PicoGK
                 m_oMeshes.Add(msh);
             }
 
-            _AddMesh(   m_hThis,
+            _AddMesh(   msh.lib.hThis,
+                        hThis,
                         nGroupID,
-                        msh.m_hThis);
+                        msh.hThis);
         }
 
         void DoRemove(Mesh msh)
@@ -445,8 +448,9 @@ namespace PicoGK
 
                 m_oMeshes.Remove(msh);
 
-                _RemoveMesh(m_hThis,
-                                msh.m_hThis);
+                _RemoveMesh(    msh.lib.hThis,
+                                hThis,
+                                msh.hThis);
             }
 
             RecalculateBoundingBox();
@@ -465,8 +469,9 @@ namespace PicoGK
 
                 m_oPolyLines.Remove(poly);
 
-                _RemovePolyLine(    m_hThis,
-                                    poly.m_hThis);
+                _RemovePolyLine(    poly.lib.hThis,
+                                    hThis,
+                                    poly.hThis);
             }
 
             RecalculateBoundingBox();
@@ -504,7 +509,7 @@ namespace PicoGK
         {
             try
             {
-                Debug.Assert(hViewer == m_hThis);
+                Debug.Assert(hViewer == hThis);
 
                 if (!m_oBBox.bIsEmpty())
                 {
@@ -566,7 +571,7 @@ namespace PicoGK
                             int iAction,
                             int iModifiers)
         {
-            Debug.Assert(hViewer == m_hThis);
+            Debug.Assert(hViewer == hThis);
 
             EKeys eKey = (EKeys)iKey;
 
@@ -588,7 +593,7 @@ namespace PicoGK
         void MouseMovedCB(IntPtr hViewer,
                             in Vector2 vecMousePos)
         {
-            Debug.Assert(hViewer == m_hThis);
+            Debug.Assert(hViewer == hThis);
             if (m_bOrbit)
             {
                 Vector2 vecDist = vecMousePos - m_vecPrevPos;
@@ -608,7 +613,7 @@ namespace PicoGK
                             int iModifiers,
                             in Vector2 vecMousePos)
         {
-            Debug.Assert(hViewer == m_hThis);
+            Debug.Assert(hViewer == hThis);
             if (iAction == 1)
             {
                 m_bOrbit = true;
@@ -629,7 +634,7 @@ namespace PicoGK
                             in Vector2 vecScrollWheel,
                             in Vector2 vecMousePos)
         {
-            Debug.Assert(hViewer == m_hThis);
+            Debug.Assert(hViewer == hThis);
 
             m_fZoom -= vecScrollWheel.Y / 50f;
 
@@ -642,7 +647,7 @@ namespace PicoGK
         void WindowSizeCB(  IntPtr hViewer,
                             in Vector2 vecWindowSize)
         {
-            Debug.Assert(hViewer == m_hThis);
+            Debug.Assert(hViewer == hThis);
 
             RequestUpdate();
         }

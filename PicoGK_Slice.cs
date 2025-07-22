@@ -560,7 +560,8 @@ namespace PicoGK
             }
         }
 
-        public void AddToViewer(    Viewer oViewer,
+        public void AddToViewer(    Library lib,
+                                    Viewer oViewer,
                                     ColorFloat? clrOutside      = null,
                                     ColorFloat? clrInside       = null,
                                     ColorFloat? clrDegenerate   = null,
@@ -588,7 +589,7 @@ namespace PicoGK
                     else if (oContour.eWinding() == PolyContour.EWinding.COUNTERCLOCKWISE)
                         clr = clrOutside;
 
-                    PolyLine oPolyLine = new PolyLine((ColorFloat)clr);
+                    PolyLine oPolyLine = new PolyLine(lib, (ColorFloat)clr);
 
                     foreach (Vector2 vec in oContour.oVertices())
                     {

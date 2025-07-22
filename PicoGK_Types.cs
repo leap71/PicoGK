@@ -41,6 +41,44 @@ namespace PicoGK
     // the PicoGK C++ types. Do not add data members to these classes, even
     // if they are defined as "partial" to be extended with additional methods 
 
+    public readonly record struct LibHandle(long Value);
+    public readonly record struct MshHandle(long Value);
+    public readonly record struct VoxHandle(long Value);
+    public readonly record struct LatHandle(long Value);
+    public readonly record struct PolyHandle(long Value);
+    public readonly record struct VdbHandle(long Value);
+    public readonly record struct VdbMetaHandle(IntPtr Value);
+    public readonly record struct ScalarFieldHandle(IntPtr Value);
+    public readonly record struct VectorFieldHandle(IntPtr Value);
+
+    public class PicoGKAllocException : Exception
+    {
+        public PicoGKAllocException()
+        {
+
+        }
+
+        public PicoGKAllocException(string? message)
+        : base(message)
+        {
+
+        }
+    }
+
+    public class PicoGKLibraryMismatchException : Exception
+    {
+        public PicoGKLibraryMismatchException()
+        {
+
+        }
+
+        public PicoGKLibraryMismatchException(string? message)
+        : base(message)
+        {
+
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public partial struct Coord
     {

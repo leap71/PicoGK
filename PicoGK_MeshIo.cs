@@ -62,7 +62,8 @@ namespace PicoGK
         public static Mesh mshFromStlFile(  string strFilePath,
                                             EStlUnit eLoadUnit = EStlUnit.AUTO, // use units from file, or mm when not spec'd
                                             float fPostScale = 1.0f,
-                                            Vector3? vecPostOffsetMM = null)
+                                            Vector3? vecPostOffsetMM = null,
+                                            Library? libSet = null)
         {
             Mesh oMesh;
 
@@ -71,7 +72,8 @@ namespace PicoGK
                 oMesh = mshFromStlFile( oFile,
                                         eLoadUnit,
                                         fPostScale,
-                                        vecPostOffsetMM);
+                                        vecPostOffsetMM,
+                                        libSet);
             }
 
             return oMesh;
@@ -81,9 +83,10 @@ namespace PicoGK
         public static Mesh mshFromStlFile(  FileStream  oFile,
                                             EStlUnit    eLoadUnit       = EStlUnit.AUTO, // use units from file, or mm when not spec'd
                                             float       fPostScale      = 1.0f,
-                                            Vector3?    vecPostOffsetMM = null)
+                                            Vector3?    vecPostOffsetMM = null,
+                                            Library?    lib             = null)
         {
-            string strHeader = "";
+           string strHeader = "";
 
             Vector3 vecOffset = new Vector3(0.0f);
 
@@ -153,7 +156,7 @@ namespace PicoGK
                     }
                 }
 
-                Mesh oMesh = new Mesh();
+                Mesh oMesh = new Mesh(lib ?? Library.oLibrary());
                 oMesh.m_strLoadHeaderData = strOriginal;
                 oMesh.m_eLoadUnits = eLoadUnit;
 

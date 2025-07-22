@@ -50,22 +50,32 @@ namespace PicoGK
         /// Create a VectorField object from an existing handle
         /// (for internal use)
         /// </summary>
-        internal VectorField(IntPtr hField)
+        internal VectorField(   Library libSet,
+                                VectorFieldHandle hField)
         {
-            m_hThis = hField;
-            Debug.Assert(m_hThis != IntPtr.Zero);
-            Debug.Assert(_bIsValid(m_hThis));
+            lib     = libSet;
+            hThis   = hField;
 
-            m_oMetadata = new(FieldMetadata._hFromVectorField(m_hThis));
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+
+            m_oMetadata = new(  lib, 
+                                FieldMetadata._hFromVectorField(    lib.hThis, 
+                                                                    hThis));
+
             m_oMetadata._SetValue("PicoGK.Class", "VectorField");
         }
 
         /// <summary>
         /// Default constructor, builds a new empty field
         /// </summary>
-        public VectorField()
-            : this(_hCreate())
-        {}
+        public VectorField(Library libSet)
+            : this( libSet, 
+                    _hCreate(libSet.hThis))
+        {
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+        }
 
         /// <summary>
         /// Copy constructor, create a duplicate
@@ -73,16 +83,26 @@ namespace PicoGK
         /// </summary>
         /// <param name="oSource">Source to copy from</param>
         public VectorField(in VectorField oSource)
-            : this(_hCreateCopy(oSource.m_hThis))
-        {}
+            : this(  oSource.lib, 
+                    _hCreateCopy(   oSource.lib.hThis, 
+                                    oSource.hThis))
+        {
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+        }
 
         /// <summary>
         /// Creates a gradient field from an existing voxel field
         /// </summary>
         /// <param name="oVoxels">Voxels to create gradients from</param>
-        public VectorField(Voxels oVoxels)
-            : this(_hCreateFromVoxels(oVoxels.m_hThis))
-        {}
+        public VectorField(Voxels vox)
+            : this( vox.lib, 
+                    _hCreateFromVoxels( vox.lib.hThis, 
+                                        vox.hThis))
+        {
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+        }
 
         /// <summary>
         /// Creates a vector field from an existing voxel field
@@ -94,11 +114,18 @@ namespace PicoGK
         /// to be used for the definition of "inside" - usually 0.5 is a good
         /// value - the surface is at exactly 0 and a value of
         /// 1.0 means you are 1 voxel outside from the surface.</param>
-        public VectorField( Voxels oVoxels,
+        public VectorField( Voxels vox,
                             Vector3 vecValue,
                             float fSdThreshold = 0.5f)
-            : this(_hBuildFromVoxels(oVoxels.m_hThis, vecValue, fSdThreshold))
-        {}
+            : this( vox.lib, 
+                    _hBuildFromVoxels(  vox.lib.hThis, 
+                                        vox.hThis, 
+                                        vecValue, 
+                                        fSdThreshold))
+        {
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+        }
 
         /// <summary>
         /// Sets the value at the specified position in mm
@@ -111,7 +138,10 @@ namespace PicoGK
         public void SetValue(   Vector3 vecPosition,
                                 Vector3 vecValue)
         {
-            _SetValue(m_hThis, vecPosition, vecValue);
+            _SetValue(  lib.hThis, 
+                        hThis, 
+                        vecPosition, 
+                        vecValue);
         }
 
         /// <summary>
@@ -129,7 +159,10 @@ namespace PicoGK
                                 out Vector3 vecValue)
         {
             vecValue = Vector3.Zero;
-            return (_bGetValue(m_hThis, vecPosition, ref vecValue));
+            return _bGetValue(  lib.hThis, 
+                                hThis, 
+                                vecPosition, 
+                                ref vecValue);
         }
 
         /// <summary>
@@ -138,7 +171,9 @@ namespace PicoGK
         /// <param name="vecPosition">Position of the value in space</param>
         public void RemoveValue(Vector3 vecPosition)
         {
-            _RemoveValue(m_hThis, vecPosition);
+            _RemoveValue(   lib.hThis, 
+                            hThis, 
+                            vecPosition);
         }
 
         /// <summary>
@@ -148,7 +183,9 @@ namespace PicoGK
         /// <param name="xTraverse">The interface containing the callback</param>
         public void TraverseActive(ITraverseVectorField xTraverse)
         {
-            _TraverseActive(m_hThis, xTraverse.InformActiveValue);
+            _TraverseActive(    lib.hThis, 
+                                hThis, 
+                                xTraverse.InformActiveValue);
         }
 
         public FieldMetadata m_oMetadata;

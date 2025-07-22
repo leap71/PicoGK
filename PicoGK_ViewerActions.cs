@@ -57,7 +57,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _SetGroupVisible(   oViewer.m_hThis,
+                _SetGroupVisible(   oViewer.hThis,
                                     m_nGroupID,
                                     m_bVisible);
             }
@@ -77,7 +77,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _SetGroupStatic(    oViewer.m_hThis,
+                _SetGroupStatic(    oViewer.hThis,
                                     m_nGroupID,
                                     m_bStatic);
             }
@@ -101,7 +101,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _SetGroupMaterial(  oViewer.m_hThis,
+                _SetGroupMaterial(  oViewer.hThis,
                                     m_nGroupID,
                                     m_clr,
                                     m_fMetallic,
@@ -125,7 +125,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _SetGroupMatrix(    oViewer.m_hThis,
+                _SetGroupMatrix(    oViewer.hThis,
                                     m_nGroupID,
                                     m_mat);
             }
@@ -143,7 +143,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _RequestUpdate(oViewer.m_hThis);
+                _RequestUpdate(oViewer.hThis);
             }
         }
 
@@ -156,7 +156,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _RequestScreenShot( oViewer.m_hThis,
+                _RequestScreenShot( oViewer.hThis,
                                     m_strScreenShotPath);
             }
 
@@ -263,9 +263,10 @@ namespace PicoGK
             {
                 oViewer.m_oBBox.Include(m_poly.oBoundingBox());
 
-                _AddPolyLine(oViewer.m_hThis,
+                _AddPolyLine(   m_poly.lib.hThis,
+                                oViewer.hThis,
                                 m_nGroupID,
-                                m_poly.m_hThis);
+                                m_poly.hThis);
 
                 lock (oViewer.m_oPolyLines)
                 {
@@ -286,8 +287,9 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                _RemovePolyLine(    oViewer.m_hThis,
-                                    m_poly.m_hThis);
+                _RemovePolyLine(    m_poly.lib.hThis,
+                                    oViewer.hThis,
+                                    m_poly.hThis);
             }
 
             PolyLine m_poly;
@@ -301,7 +303,9 @@ namespace PicoGK
                 {
                     foreach (PolyLine oPoly in oViewer.m_oPolyLines)
                     {
-                        _RemovePolyLine(oViewer.m_hThis, oPoly.m_hThis);
+                        _RemovePolyLine(    oPoly.lib.hThis,
+                                            oViewer.hThis, 
+                                            oPoly.hThis);
                     }
 
                     oViewer.m_oPolyLines.Clear();
@@ -316,7 +320,9 @@ namespace PicoGK
                 {
                     foreach (Mesh oMesh in oViewer.m_oMeshes)
                     {
-                        _RemoveMesh(oViewer.m_hThis, oMesh.m_hThis);
+                        _RemoveMesh(    oMesh.lib.hThis,
+                                        oViewer.hThis, 
+                                        oMesh.hThis);
                     }
 
                     oViewer.m_oMeshes.Clear();
@@ -393,7 +399,7 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                if (!_bLoadLightSetup(  oViewer.m_hThis,
+                if (!_bLoadLightSetup(  oViewer.hThis,
                                         m_abyDiffuseDds,
                                         m_abyDiffuseDds.Length,
                                         m_abySpecularDds,

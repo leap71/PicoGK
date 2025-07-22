@@ -43,10 +43,13 @@ namespace PicoGK
         /// <summary>
         /// Create an empty Mesh
         /// </summary>
-        public Mesh()
+        public Mesh(Library libSet)
         {
-            m_hThis = _hCreate();
-            Debug.Assert(m_hThis != IntPtr.Zero);
+            lib     = libSet;
+            hThis   = _hCreate(lib.hThis);
+            
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
         }
 
         /// <summary>
@@ -55,8 +58,9 @@ namespace PicoGK
         /// <param name="vox">Voxels to create a mesh from</param>
         public Mesh(in Voxels vox)
         {
-            m_hThis = _hCreateFromVoxels(vox.m_hThis);
-            Debug.Assert(m_hThis != IntPtr.Zero);
+            lib = vox.lib;
+            hThis = _hCreateFromVoxels( vox.lib.hThis, 
+                                        vox.hThis);
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace PicoGK
         public Mesh mshCreateTransformed(   Vector3 vecScale,
                                             Vector3 vecOffset)
         {
-            Mesh mshTrans = new Mesh();
+            Mesh mshTrans = new Mesh(lib);
             for (int n = 0; n < nTriangleCount(); n++)
             {
                 GetTriangle(    n,
@@ -97,7 +101,7 @@ namespace PicoGK
         /// <returns>A new mesh that has the transformation applied</returns>
         public Mesh mshCreateTransformed(Matrix4x4 matTrans)
         {
-            Mesh mshTrans = new Mesh();
+            Mesh mshTrans = new Mesh(lib);
             for (int n = 0; n < nTriangleCount(); n++)
             {
                 GetTriangle(    n,
@@ -123,7 +127,7 @@ namespace PicoGK
         public Mesh mshCreateMirrored(  Vector3 vecPlanePoint,
 									    Vector3 vecPlaneNormal)
 		{
-			Mesh mshResult = new();
+			Mesh mshResult = new(lib);
 
             vecPlaneNormal = vecPlaneNormal.vecNormalized();
 
@@ -146,7 +150,7 @@ namespace PicoGK
         /// <returns>The index of the vertex (to be used in triangles)</returns>
         public int nAddVertex(in Vector3 vec)
         {
-            return _nAddVertex(m_hThis, vec);
+            return _nAddVertex(lib.hThis, hThis, vec);
         }
 
         public void AddVertices(    in  IEnumerable<Vector3> avecVertices,
@@ -170,7 +174,10 @@ namespace PicoGK
         public Vector3 vecVertexAt(int nVertex)
         {
             Vector3 vec = new ();
-            _GetVertex(m_hThis, nVertex, ref vec);
+            _GetVertex( lib.hThis, 
+                        hThis, 
+                        nVertex, 
+                        ref vec);
             return vec;
         }
 
@@ -180,7 +187,8 @@ namespace PicoGK
         /// <returns>The number of vertices in the mesh</returns>
         public int nVertexCount()
         {
-            return _nVertexCount(m_hThis);
+            return _nVertexCount(   lib.hThis, 
+                                    hThis);
         }
 
         /// <summary>
@@ -190,7 +198,9 @@ namespace PicoGK
         /// <returns>The triangle index of the added triangle</returns>
         public int nAddTriangle(in Triangle t)
         {
-            return _nAddTriangle(m_hThis, t);
+            return _nAddTriangle(   lib.hThis, 
+                                    hThis, 
+                                    t);
         }
 
         //// <summary>
@@ -211,7 +221,7 @@ namespace PicoGK
         /// <returns>Triangle count in mesh</returns>
         public int nTriangleCount()
         {
-            return _nTriangleCount(m_hThis);
+            return _nTriangleCount(lib.hThis, hThis);
         }
 
         /// <summary>
@@ -282,7 +292,8 @@ namespace PicoGK
         public Triangle oTriangleAt(int nTriangle)
         {
             Triangle t = new();
-            _GetTriangle(   m_hThis,
+            _GetTriangle(   lib.hThis,
+                            hThis,
                             nTriangle,
                             ref t);
 
@@ -305,7 +316,8 @@ namespace PicoGK
             vecB = new();
             vecC = new();
 
-            _GetTriangleV(  m_hThis,
+            _GetTriangleV(  lib.hThis,
+                            hThis,
                             nTriangle,
                             ref vecA,
                             ref vecB,
@@ -338,7 +350,9 @@ namespace PicoGK
         public BBox3 oBoundingBox()
         {
             BBox3 oBBox = new BBox3();
-            _GetBoundingBox(m_hThis, ref oBBox);
+            _GetBoundingBox(    lib.hThis, 
+                                hThis, 
+                                ref oBBox);
             return oBBox;
         }
     }

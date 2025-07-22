@@ -33,399 +33,139 @@
 // limitations under the License.   
 //
 
+
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Reflection;
 
 namespace PicoGK
 {
     public partial class Library : IDisposable
     {
-        /// <summary>
-        /// Returns the library name (from the C++ side)
-        /// </summary>
-        /// <returns>The name of the dynamically loaded C++ library</returns>
-        public static string strName()
+        public Library(float fVoxelSizeMM)
         {
-            StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
-            _GetName(oBuilder);
-            return oBuilder.ToString();
+            hThis               = _hCreateInstance(fVoxelSizeMM);
+            fVoxelSize          = fVoxelSizeMM;
+            m_oTimerMemCheck    = new(_ => MonitorMemory(), null, m_oInterval, m_oInterval);
         }
 
-        /// <summary>
-        /// Returns the library version (from the C++ side)
-        /// </summary>
-        /// <returns>The library version of the C++ library</returns>
-        public static string strVersion()
+        public long nTotalMemUsage()
         {
-            StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
-            _GetVersion(oBuilder);
-            return oBuilder.ToString();
+            return _nTotalMemUsage(hThis);
         }
 
-        /// <summary>
-        /// Returns internal build info, such as build date/time
-        /// of the C++ library
-        /// </summary>
-        /// <returns>Internal build info of the C++ library</returns>
-        public static string strBuildInfo()
+        public long nMeshesMemUsage()
         {
-            StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
-            _GetBuildInfo(oBuilder);
-            return oBuilder.ToString();
+            return _nMeshesMemUsage(hThis);
         }
 
-        /// <summary>
-        /// This is the one library function that you call to run your code
-        /// it sets up the PicoGK library, with the specified voxel size and
-        /// builds the PicoGK environment with viewer, log and other internals
-        /// The fnTask you pass is called after everything is set up correctly
-        /// inside of fnTask, you do your processing, displaying it in
-        /// Library::oTheViewer and logging info with Library::Log()
-        /// </summary>
-        /// <param name="_fVoxelSizeMM">
-        /// The global voxel size in MM, for example 0.1
-        /// </param>
-        /// <param name="fnTask">
-        /// The task to be executed (it will run in a separate thread)
-        /// </param>
-        /// <param name="strLogFolder">
-        /// The folder where you want the log file (defaults to your
-        /// documents folder
-        /// </param>
-        /// <param name="strLogFileName">
-        /// The file name for your log. Defaults to PicoGK_ with date and time
-        /// appended. If your specify the same log file name here, it prevents
-        /// PicoGK from creating a new log file name everytime.
-        /// </param>
-        /// <param name="strSrcFolder">
-        /// This is purely a helper for you, it's not used internally. But you
-        /// can access this folder name throug Library::strSrcFolder, which is
-        /// convenient.
-        /// </param>
-        /// <exception cref="Exception">
-        /// Throws an exception, for a number of scenarios, for example, if the
-        /// library cannot be found, folders, etc. cannot be created, etc.
-        /// Always handle the exception to understand what's going on.
-        /// </exception>
-        public static void Go(  float _fVoxelSizeMM,
-                                ThreadStart fnTask,
-                                string strLogFolder     = "",
-                                string strLogFileName   = "",
-                                string strSrcFolder     = "",
-                                string strLightsFile    = "",
-                                bool bEndAppWithTask    = false)
+        public long nLatticesMemUsage()
         {
-            lock(mtxRunOnce)
-            {
-                if (bRunning)
-                    throw new Exception("PicoGK only supports running one library config at one time");
-
-                bRunning = true;
-            }
-
-            Debug.Assert(_fVoxelSizeMM > 0.0f);
-            fVoxelSizeMM = _fVoxelSizeMM;
-
-            TestAssumptions();
-
-            if (strLogFolder == "")
-                strLogFolder = Utils.strDocumentsFolder();
-
-            if (strLogFileName == "")
-                strLogFileName = "PicoGK.log";
-
-           string strLog = Path.Combine(    strLogFolder,
-                                            strLogFileName);
-
-            using (LogFile oLog = new LogFile(strLog))
-            {
-
-                lock (oMtxLog)
-                {
-                    if (oTheLog is not null)
-                        throw new Exception("You cannot call PicoGK.Library.Go() more than once per app (1)");
-
-                    if (oTheViewer is not null)
-                        throw new Exception("You cannot call PicoGK.Library.Go() more than once per app (2)");
-                    oTheLog = oLog;
-
-                    Library.strLogFolder = strLogFolder;
-                    Library.strSrcFolder = strSrcFolder;
-                }
-
-                Log("Welcome to PicoGK");
-
-                try
-                {
-                    // Create a config using physical coordinates
-                    _Init(fVoxelSizeMM);
-                    // Done creating C++ Library
-                }
-
-                catch (Exception e)
-                {
-                    Log($"-----------------------------------------");
-                    Log($"-- Could not initialize PicoGK Library --");
-                    Log($"-----------------------------------------");
-                    Log($"Most likely cause is that the PicoGK runtime library wasn't found");
-                    Log($"Make sure {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.");
-                    Log($"See PicoGK documentation on GitHub for troubleshooting info");
-                    Log($"Terribly long error string follows (usually devoid of real information):");
-                    Log($"--------------------------------");
-                    Log($"-");
-                    Log($"{e}\n");
-                    Log($"-");
-                    Log($"--------------------------------");
-                    throw new Exception("Failed to load PicoGK Library");
-                }
-            
-                Log("Creating Viewer");
-
-                Viewer? oViewer = null;
-
-                try
-                {
-                    oViewer = new Viewer(   "PicoGK", 
-                                            new Vector2(2048f, 1024f),
-                                            oLog);
-                }
-
-                catch (Exception e)
-                {
-                    Log("Failed to create viewer");
-                    Log(e.ToString());
-
-                    throw new Exception("Failed to create all necessary objects");
-                }
-
-                using (oViewer)
-                {
-                    if (!bSetup())
-                    {
-                        Log("!! Failed to initialize !!");
-                        return;
-                    }
-
-                    try
-                    {
-                        // Load lights
-
-                        string strSearched = "";
-
-                        if (strLightsFile == "")
-                        {
-                            // No lights file specified, let's try to load the embedded environment first
-
-                            try
-                            {
-                                Log($"Loading lights embedded environment");
-
-                                Assembly oAssembly = typeof(Library).Assembly;
-                                using Stream oStream = oAssembly.GetManifestResourceStream("PicoGK.Resources.Environment.zip")
-                                                                 ?? throw new FileNotFoundException("Embedded environmet not found.");
-                                oViewer.LoadLightSetup(oStream);
-                            }
-
-                            catch (Exception)
-                            {
-                                Log($"Could not load lights embedded environment, trying to load from disk instead.");
-
-                                strLightsFile = strFindLightSetupFile(  strSrcFolder, 
-                                                                out strSearched);
-
-                                if (!File.Exists(strLightsFile))
-                                {
-                                    strSearched += strLightsFile + "\n";
-
-                                    Log($"Could not find a lights file - your viewer will look quite dark.");
-                                    Log($"Searched in:");
-                                    Log($"{strSearched}");
-                                    Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
-                                    Log("or providing the file as a parameter at Library.Go()");
-                                }
-
-                                Log($"Using light setup {strLightsFile} from disk");
-                                oViewer.LoadLightSetup(strLightsFile);
-                            }
-                        }
-                        
-                        oViewer.SetBackgroundColor("FF");
-                    }
-
-                    catch (Exception e)
-                    {
-                        Log($"Failed to load Light Setup - your viewer will look dark\n{e.Message}");
-                    }
-                    
-
-                    lock (oMtxViewer)
-                    {
-                        oTheViewer = oViewer;
-                    }
-
-                    Thread oThread = new Thread(fnTask);
-
-                    Log("Starting tasks.\n");
-                    oThread.Start();
-
-                    while (oViewer.bPoll())
-                    {
-                        Thread.Sleep(5); // 200 Hz is plenty
-
-                        if (bEndAppWithTask)
-                        {
-                            // Close app when task ends
-
-                            if (!oThread.IsAlive)
-                            {
-                                // Task is done
-                                // Check if viewer has pending actions
-                                // if not, we are done
-                                if (oViewer.bIsIdle())
-                                    break;
-
-                                // Otherwise we do another cycle
-                            }
-                        }
-                    }
-
-                    m_bAppExit = true;
-                    Log("Viewer Window Closed");
-                }
-            }
-
-            lock(mtxRunOnce)
-            {
-                Debug.Assert(bRunning);
-                bRunning = false;
-            }
+            return _nLatticesMemUsage(hThis);
         }
 
-        /// <summary>
-        /// Checks whether the task started using Go() should continue, and returns true if that's the case or false otherwise.
-        /// If your task can take a non-trivial amount of time, check this function periodically.
-        /// If it returns false, exit the task function as soon as possible.
-        /// </summary>
-        /// <param name="bAppExitOnly">If true, the bContinueTask function will only take into consideration if the application is about to exit. Any pending EndTask() requests will be ignored.</param>
-        /// <returns></returns>
-        public static bool bContinueTask(bool bAppExitOnly = false)
+        public long nPolyLinesMemUsage()
         {
-            return !m_bAppExit && (bAppExitOnly || m_bContinueTask);
+            return _nPolyLinesMemUsage(hThis);
         }
 
-        /// <summary>
-        /// Requests the task started by the Go() function to end.
-        /// Note that it's the responsability of the task to call the bContinueTask() function periodically and to honor these requests.
-        /// </summary>
-        public static void EndTask()
+        public long nVoxelsMemUsage()
         {
-            m_bContinueTask = false;
+            return _nVoxelsMemUsage(hThis);
         }
 
-        /// <summary>
-        /// Cancels any pending request to end the task.
-        /// </summary>
-        public static void CancelEndTaskRequest()
+        public long nVdbFilesMemUsage()
         {
-            m_bContinueTask = true;
+            return _nVdbFilesMemUsage(hThis);
         }
 
-        static bool m_bAppExit = false;
-        static bool m_bContinueTask = true;
-
-        /// <summary>
-        /// Thread-safe loging function
-        /// </summary>
-        /// <param name="strFormat">
-        /// Use like Console.Write and others, so you can do Library.Log($"My variable {fVariable}") etc.
-        /// </param>
-        /// <exception cref="Exception">
-        /// Will throw an exception if called before you call Library::Go, which shouldn't happen
-        /// </exception>
-        public static void Log(in string strFormat, params object[] args)
+        public long nScalarFieldsMemUsage()
         {
-            lock (oMtxLog)
-            {
-                if (oTheLog == null)
-                    throw new Exception("Trying to access Log before Library::Go() was called");
-
-                oTheLog.Log(strFormat, args);
-            }
+            return _nScalarFieldsMemUsage(hThis);
         }
 
-        /// <summary>
-        /// Thread-safe access to the viewer
-        /// </summary>
-        /// <returns>The viewer object</returns>
-        /// <exception cref="Exception">
-        /// Only throws an exception if called before you call Library::Go, which shouldn't happen
-        /// </exception>
-        public static Viewer oViewer()
+        public long nVectorFieldsMemUsage()
         {
-            lock (oMtxViewer)
-            {
-                if (oTheViewer is null)
-                    throw new Exception("Trying to access Viewer before Library::Go() was called");
-
-                return oTheViewer;
-            }
+            return _nVectorFieldsMemUsage(hThis);
         }
 
-        /// <summary>
-        /// This is an alternate way to run the library, instead of using "Go"
-        /// if you use this, you cannot invoke the viewer and the log file functions
-        /// You also cannot use this in a thread
-        /// 
-        /// Use this in headless mode
-        ///
-        /// Example:
-        /// using (PicoGK.Library oLibrary = new(0.1f))
-        /// {
-        ///     PicoGK.Voxels vox = new(PicoGK.Utils.mshCreateCube());
-        ///     vox.mshAsMesh().SaveToStlFile(Path.Combine(PicoGK.Utils.strDocumentsFolder(), "PicoGK.stl"));
-        /// }
-        /// 
-        /// </summary>
-        /// <param name="fVoxelSizeMM">Voxel size in mm</param>
-        /// <exception cref="Exception">Throws an exception if library cannot be initialized</exception>
-        /// 
-        public Library(float _fVoxelSizeMM)
+        public long nVdbMetasMemUsage()
         {
-            lock(mtxRunOnce)
-            {
-                if (bRunning)
-                    throw new Exception("PicoGK only supports running one library config at one time");
-
-                bRunning = true;
-            }
-
-            TestAssumptions();
-
-            Debug.Assert(_fVoxelSizeMM > 0f);
-            fVoxelSizeMM = _fVoxelSizeMM;
-           
-            try
-            {
-                // Create a config using physical coordinates
-                _Init(fVoxelSizeMM);
-                // Done creating C++ Library
-            }
-
-            catch (Exception)
-            {
-                throw new Exception($"Failed to load PicoGK Runtime. Make sure the PicoGK Runtime is installed and {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.\n");
-            }
+            return _nVdbMetasMemUsage(hThis);
         }
 
-        /// <summary>
-        /// This is an internal helper that tests if the data types have the
-        /// memory layout that we assume, so we don't run into interoperability issues
-        /// with the C++ side
-        /// </summary>
-        private static void TestAssumptions()
+        public long nMeshesAllocated()
+        {
+            return _nMeshesAllocated(hThis);
+        }
+
+        public long nLatticesAllocated()
+        {
+            return _nLatticesAllocated(hThis);
+        }
+
+        public long nPolyLinesAllocated()
+        {
+            return _nPolyLinesAllocated(hThis);
+        }
+
+        public long nVoxelsAllocated()
+        {
+            return _nVoxelsAllocated(hThis);
+        }
+
+        public long nVdbFilesAllocated()
+        {
+            return _nVdbFilesAllocated(hThis);
+        }
+
+        public long nScalarFieldsAllocated()
+        {
+            return _nScalarFieldsAllocated(hThis);
+        }
+
+        public long nVectorFieldsAllocated()
+        {
+            return _nVectorFieldsAllocated(hThis);
+        }
+
+        public long nVdbMetasAllocated()
+        {
+            return _nVdbMetasAllocated(hThis);
+        }
+
+        public Vector3 vecVoxelsToMm(   int x,
+                                        int y,
+                                        int z)
+        {
+            Vector3 vecMm = new();
+            Vector3 vecVoxels   = new Vector3(x, y, z);
+            _VoxelsToMm(    hThis,
+                            vecVoxels,
+                            ref vecMm);
+
+            return vecMm;
+        }
+
+         public void MmToVoxels(    Vector3 vecMm,
+                                    out int x,
+                                    out int y,
+                                    out int z)
+        {
+            Vector3 vecResult   = Vector3.Zero;
+
+            _VoxelsToMm(    hThis,
+                            vecMm,
+                            ref vecResult);
+
+            x = (int) (vecResult.X + 0.5f);
+            y = (int) (vecResult.Y + 0.5f);
+            z = (int) (vecResult.Z + 0.5f);
+        }
+
+        public readonly float fVoxelSize;
+
+        public static void TestAssumptions()
         {
             // Test a few assumptions
             // Built in data type Vector3 is implicit,
@@ -457,133 +197,9 @@ namespace PicoGK
             // are well-defined
         }
 
-        /// <summary>
-        /// Logs the information from the library, usually the first line of
-        /// defence, if something is misconfigured, for example the library path
-        /// Also attempts to create all data types - if this blows up, then
-        /// something is wrong with the C++/C# interplay
-        /// </summary>
-        /// <returns></returns>
-        private static bool bSetup()
-        {
-            try
-            {
-                Log($"PicoGK:    {Library.strName()}");
-                Log($"           {Library.strVersion()}");
-                Log($"           {Library.strBuildInfo()}\n");
-                Log($"VoxelSize: {Library.fVoxelSizeMM} (mm)");
-
-                Log("Happy Computational Engineering!\n\n");
-            }
-
-            catch (Exception e)
-            {
-                Log("Failed to get PicoGK library info:\n\n{0}", e.Message);
-                return false;
-            }
-
-            try
-            {
-                Lattice     lat     = new();
-                Voxels      vox     = new();
-                Mesh        msh     = new();
-                Voxels      voxM    = new(msh);
-                Voxels      voxL    = new(lat);
-                PolyLine    oPoly   = new("FF0000");
-            }
-
-            catch (Exception e)
-            {
-                Log("Failed to instantiate basic PicoGK types:\n\n{0}", e.Message);
-                return false;
-            }
-
-            return true;
-        }
-
-        public static Vector3 vecVoxelsToMm(    int x,
-                                                int y,
-                                                int z)
-        {
-            Vector3 vecMm = new();
-            Vector3 vecVoxels   = new Vector3(  (float) x,
-                                                (float) y,
-                                                (float) z);
-            _VoxelsToMm(    in vecVoxels,
-                            ref vecMm);
-
-            return vecMm;
-        }
-
-         public static void MmToVoxels( Vector3 vecMm,
-                                        out int x,
-                                        out int y,
-                                        out int z)
-        {
-            Vector3 vecResult   = Vector3.Zero;
-
-            _VoxelsToMm(    in vecMm,
-                            ref vecResult);
-
-            x = (int) (vecResult.X + 0.5f);
-            y = (int) (vecResult.Y + 0.5f);
-            z = (int) (vecResult.Z + 0.5f);
-        }
-
-        public static   float   fVoxelSizeMM = 0.0f;
-        public static   string  strLogFolder = "";
-        public static   string  strSrcFolder = "";
-
-        private static object   oMtxLog     = new object();
-        private static object   oMtxViewer  = new object();
-        private static LogFile? oTheLog     = null;
-        private static Viewer?  oTheViewer  = null;
-
-        private static object   mtxRunOnce  = new object();
-        private static bool     bRunning    = false;
-
         ~Library()
         {
             Dispose(false);
-        }
-
-        public static string strFindLightSetupFile( string strInputFolder,
-                                                    out string strSearched)
-        {
-            strSearched = "";
-
-            string strLightsFile    = Path.Combine( Utils.strPicoGKSourceCodeFolder(), 
-                                                    "assets/ViewerEnvironment.zip");
-
-            if (File.Exists(strLightsFile))
-                return strLightsFile;
-
-            strSearched += strLightsFile + "\n";
-
-            if (strInputFolder == "")
-            {
-                strLightsFile = Path.Combine(   Utils.strDocumentsFolder(), 
-                                                "ViewerEnvironment.zip");
-
-                strSearched += strLightsFile + "\n";
-            }
-            else
-            {
-                strLightsFile = Path.Combine(   strInputFolder, 
-                                                "ViewerEnvironment.zip");
-
-                strSearched += strLightsFile + "\n";
-            }
-
-            if (!File.Exists(strLightsFile))
-            {
-                strLightsFile = Path.Combine(    Utils.strExecutableFolder(), 
-                                                "ViewerEnvironment.zip");
-
-                strSearched += strLightsFile + "\n";
-            }
-
-            return strLightsFile;
         }
 
         public void Dispose()
@@ -603,18 +219,44 @@ namespace PicoGK
 
             if (bDisposing)
             {
-                _Destroy();
-            }
-
-            lock(mtxRunOnce)
-            {
-                Debug.Assert(bRunning);
-                bRunning = false;
+                m_oTimerMemCheck?.Dispose();
+                _DestroyInstance(hThis);
             }
 
             m_bDisposed = true;
         }
 
         bool m_bDisposed = false;
+
+        internal readonly LibHandle hThis;
+        internal readonly Timer     m_oTimerMemCheck;
+        static readonly TimeSpan    m_oInterval = TimeSpan.FromSeconds(10);
+
+        long m_nUsedMemory = 0;
+
+        void MonitorMemory()
+        {
+            // Monitor Library's memory use over time
+            // and communicate to Garbage Collector
+            // Without this, the Garbage Collector hardly
+            // ever runs, because it is not aware of the
+            // potentially gigabytes of memory allocated
+            // by the PicoGK runtime (the C# objects are all tiny)
+
+            long nNew = nTotalMemUsage();
+            
+            long nDiff = nNew - m_nUsedMemory;
+
+            if (nDiff > 0)
+            {
+                GC.AddMemoryPressure(nDiff);
+            }   
+            else if (nDiff < 0)
+            {
+                GC.RemoveMemoryPressure(-nDiff);
+            }
+
+            m_nUsedMemory = nNew;
+        }
     }
 }

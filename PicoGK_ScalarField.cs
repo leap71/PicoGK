@@ -51,22 +51,28 @@ namespace PicoGK
         /// Create a voxels object from an existing handle
         /// (for internal use)
         /// </summary>
-        internal ScalarField(IntPtr hField)
+        internal ScalarField(   Library libSet, 
+                                ScalarFieldHandle hField)
         {
-            m_hThis = hField;
-            Debug.Assert(m_hThis != IntPtr.Zero);
-            Debug.Assert(_bIsValid(m_hThis));
+            lib     = libSet;
+            hThis   = hField;
 
-            m_oMetadata = new(FieldMetadata._hFromScalarField(m_hThis));
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+            
+            m_oMetadata = new(lib, FieldMetadata._hFromScalarField(lib.hThis, hThis));
             m_oMetadata._SetValue("PicoGK.Class", "ScalarField");
         }
 
         /// <summary>
         /// Default constructor, builds a new empty field
         /// </summary>
-        public ScalarField()
-            : this(_hCreate())
-        {}
+        public ScalarField(Library libSet)
+        : this(libSet, _hCreate(libSet.hThis))
+        {
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
+        }
 
         /// <summary>
         /// Copy constructor, create a duplicate
@@ -74,7 +80,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="oSource">Source to copy from</param>
         public ScalarField(in ScalarField oSource)
-            : this(_hCreateCopy(oSource.m_hThis))
+            : this(oSource.lib, _hCreateCopy(oSource.lib.hThis, oSource.hThis))
         {}
 
         /// <summary>
@@ -88,14 +94,18 @@ namespace PicoGK
         /// to be used for the definition of "inside" - usually 0.5 is a good
         /// value - the surface is at exactly 0 and a value of
         /// 1.0 means you are 1 voxel outside from the surface.</param>
-        public ScalarField(Voxels oVoxels)
-            : this(_hCreateFromVoxels(oVoxels.m_hThis))
+        public ScalarField(Voxels vox)
+            : this(vox.lib, _hCreateFromVoxels(vox.lib.hThis, vox.hThis))
         { }
 
-        public ScalarField( Voxels oVoxels,
+        public ScalarField( Voxels vox,
                             float fValue,
                             float fSdThreshold = 0.5f)
-            : this(_hBuildFromVoxels(oVoxels.m_hThis, fValue, fSdThreshold))
+            : this( vox.lib,
+                    _hBuildFromVoxels(  vox.lib.hThis, 
+                                        vox.hThis, 
+                                        fValue, 
+                                        fSdThreshold))
         {}
 
         /// <summary>
@@ -109,7 +119,7 @@ namespace PicoGK
         public void SetValue(   Vector3 vecPosition,
                                 float   fValue)
         {
-            _SetValue(m_hThis, vecPosition, fValue);
+            _SetValue(lib.hThis, hThis, vecPosition, fValue);
         }
 
         /// <summary>
@@ -127,7 +137,7 @@ namespace PicoGK
                                 out float fValue)
         {
             fValue = 0.0f;
-            return (_bGetValue(m_hThis, vecPosition, ref fValue));
+            return _bGetValue(lib.hThis, hThis, vecPosition, ref fValue);
         }
 
         /// <summary>
@@ -136,7 +146,7 @@ namespace PicoGK
         /// <param name="vecPosition">Position of the value in space</param>
         public void RemoveValue(Vector3 vecPosition)
         {
-            _RemoveValue(m_hThis, vecPosition);
+            _RemoveValue(lib.hThis, hThis, vecPosition);
         }
 
         /// <summary>
@@ -162,7 +172,8 @@ namespace PicoGK
             nYSize      = 0;
             nZSize      = 0;
 
-            _GetVoxelDimensions(    m_hThis,
+            _GetVoxelDimensions(    lib.hThis,
+                                    hThis,
                                     ref nXOrigin,
                                     ref nYOrigin,
                                     ref nZOrigin,
@@ -188,7 +199,8 @@ namespace PicoGK
             nYSize          = 0;
             nZSize          = 0;
 
-            _GetVoxelDimensions(    m_hThis,
+            _GetVoxelDimensions(    lib.hThis,
+                                    hThis,
                                     ref nXOrigin,
                                     ref nYOrigin,
                                     ref nZOrigin,
@@ -215,7 +227,7 @@ namespace PicoGK
             try
             {
                 IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
-                _GetVoxelSlice(m_hThis, nZSlice, afBufferPtr);
+                _GetVoxelSlice(lib.hThis, hThis, nZSlice, afBufferPtr);
             }
             finally
             {
@@ -230,7 +242,7 @@ namespace PicoGK
         /// <param name="xTraverse">The interface containing the callback</param>
         public void TraverseActive(ITraverseScalarField xTraverse)
         {
-            _TraverseActive(m_hThis, xTraverse.InformActiveValue);
+            _TraverseActive(lib.hThis, hThis, xTraverse.InformActiveValue);
         }
 
         /// <summary>
@@ -248,7 +260,7 @@ namespace PicoGK
         public float fSignedDistance(in Vector3 vecPosition)
         {
             bGetValue(vecPosition, out float fValue);
-            return fValue * Library.fVoxelSizeMM;
+            return fValue * lib.fVoxelSize;
         }
 
         /// <summary>
@@ -264,10 +276,12 @@ namespace PicoGK
                                 out int nYSize,
                                 out int nZSize);
 
-            return new( Library.vecVoxelsToMm(iXOrigin, iYOrigin, iZOrigin),
-                        Library.vecVoxelsToMm(  iXOrigin + nXSize,
-                                                iYOrigin + nYSize,
-                                                iZOrigin + nZSize));
+            return new( lib.vecVoxelsToMm(  iXOrigin, 
+                                            iYOrigin, 
+                                            iZOrigin),
+                        lib.vecVoxelsToMm(  iXOrigin + nXSize,
+                                            iYOrigin + nYSize,
+                                            iZOrigin + nZSize));
         }
 
         public FieldMetadata m_oMetadata;

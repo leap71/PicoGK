@@ -92,10 +92,13 @@ namespace PicoGK
         /// <summary>
         /// Creates an empty .VDB file object, with no fields in it
         /// </summary>
-        public OpenVdbFile()
+        public OpenVdbFile(Library libSet)
         {
-            m_hThis = _hCreate();
-            Debug.Assert(m_hThis != IntPtr.Zero);
+            lib     = libSet;
+            hThis = _hCreate(lib.hThis);
+
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
         }
 
         /// <summary>
@@ -106,11 +109,14 @@ namespace PicoGK
         /// <exception cref="FileLoadException">
         /// If file cannot be read, exception is thrown.
         /// </exception>
-        public OpenVdbFile(string strFileName)
+        public OpenVdbFile( Library libSet,
+                            string strFileName)
         {
-            m_hThis = _hCreateFromFile(strFileName);
+            lib = libSet;
+            hThis = _hCreateFromFile(   lib.hThis, 
+                                        strFileName);
 
-            if (m_hThis == IntPtr.Zero)
+            if (!_bIsValid(lib.hThis, hThis))
             {
                 throw new FileLoadException("Failed to load VDB file", strFileName);
             }
@@ -140,10 +146,12 @@ namespace PicoGK
                 IFieldWithMetadata xData = xField(n);
                 xData.oMetaData()._SetValue("PicoGK.Library",   Library.strName());
                 xData.oMetaData()._SetValue("PicoGK.Version",   Library.strVersion());
-                xData.oMetaData()._SetValue("PicoGK.VoxelSize", Library.fVoxelSizeMM / 1000f);
+                xData.oMetaData()._SetValue("PicoGK.VoxelSize", lib.fVoxelSize / 1000f);
             }
 
-            if (!_bSaveToFile(m_hThis, strFileName))
+            if (!_bSaveToFile(  lib.hThis,
+                                hThis, 
+                                strFileName))
             {
                 throw new IOException($"Failed to save VDB file to {strFileName}");
             }
@@ -162,11 +170,14 @@ namespace PicoGK
             if (nIndex >= nFieldCount())
                 throw new ArgumentOutOfRangeException();
 
-            IntPtr hVoxels = _hGetVoxels(m_hThis, nIndex);
-            if (hVoxels == IntPtr.Zero)
+            VoxHandle hVoxels = _hGetVoxels(   lib.hThis, 
+                                                hThis, 
+                                                nIndex);
+                                                
+            if (!Voxels._bIsValid(lib.hThis, hVoxels))
                 throw new Exception($"No voxel field found at index {nIndex}");
 
-            return new Voxels(hVoxels);
+            return new Voxels(lib, hVoxels);
         }
 
         /// <summary>
@@ -205,7 +216,13 @@ namespace PicoGK
                 strFieldName = $"PicoGK.Voxels.{nFieldCount()}";
             }
 
-            return _nAddVoxels(m_hThis, strFieldName, vox.m_hThis);
+            if (vox.lib.hThis != lib.hThis)
+                throw new Exception("Cannot mix objects from different PicoGK library instances");
+
+            return _nAddVoxels( lib.hThis,
+                                hThis, 
+                                strFieldName, 
+                                vox.hThis);
         }
 
         /// <summary>
@@ -221,11 +238,13 @@ namespace PicoGK
             if (nIndex >= nFieldCount())
                 throw new ArgumentOutOfRangeException();
 
-            IntPtr hField = _hGetScalarField(m_hThis, nIndex);
-            if (hField == IntPtr.Zero)
+            ScalarFieldHandle hField = _hGetScalarField(    lib.hThis, 
+                                                            hThis, 
+                                                            nIndex);
+            if (!ScalarField._bIsValid(lib.hThis, hField))
                 throw new Exception($"No scalar field found at index {nIndex}");
 
-            return new ScalarField(hField);
+            return new ScalarField(lib, hField);
         }
 
         /// <summary>
@@ -264,7 +283,7 @@ namespace PicoGK
                 strFieldName = $"PicoGK.ScalarField.{nFieldCount()}";
             }
 
-            return _nAddScalarField(m_hThis, strFieldName, oField.m_hThis);
+            return _nAddScalarField(lib.hThis, hThis, strFieldName, oField.hThis);
         }
 
         /// <summary>
@@ -280,11 +299,12 @@ namespace PicoGK
             if (nIndex >= nFieldCount())
                 throw new ArgumentOutOfRangeException();
 
-            IntPtr hField = _hGetVectorField(m_hThis, nIndex);
-            if (hField == IntPtr.Zero)
+            VectorFieldHandle hField = _hGetVectorField(lib.hThis, hThis, nIndex);
+
+            if (!VectorField._bIsValid(lib.hThis, hField))
                 throw new Exception($"No vector field found at index {nIndex}");
 
-            return new VectorField(hField);
+            return new VectorField(lib, hField);
         }
 
         /// <summary>
@@ -323,7 +343,7 @@ namespace PicoGK
                 strFieldName = $"PicoGK.VectorField.{nFieldCount()}";
             }
 
-            return _nAddVectorField(m_hThis, strFieldName, oField.m_hThis);
+            return _nAddVectorField(lib.hThis, hThis, strFieldName, oField.hThis);
         }
 
         /// <summary>
@@ -332,7 +352,7 @@ namespace PicoGK
         /// <returns>The number of fields in the VdbFile</returns>
         public int nFieldCount()
         {
-            return _nFieldCount(m_hThis);
+            return _nFieldCount(lib.hThis, hThis);
         }
 
         /// <summary>
@@ -349,7 +369,7 @@ namespace PicoGK
                 throw new ArgumentOutOfRangeException();
 
             StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
-            _GetFieldName(m_hThis, nIndex, oBuilder);
+            _GetFieldName(lib.hThis, hThis, nIndex, oBuilder);
             return oBuilder.ToString();
         }
 
@@ -365,7 +385,7 @@ namespace PicoGK
             if (nIndex >= nFieldCount())
                 throw new ArgumentOutOfRangeException();
 
-            return (EFieldType)_nFieldType(m_hThis, nIndex);
+            return (EFieldType)_nFieldType(lib.hThis, hThis, nIndex);
         }
 
         /// <summary>
@@ -383,7 +403,7 @@ namespace PicoGK
 
             // We intentionally use the runtime function, so we can catch
             // values not represented by the enum (default:)
-            switch (_nFieldType(m_hThis, nIndex))
+            switch (_nFieldType(lib.hThis, hThis, nIndex))
             {
                 case -1:
                     return "Unsupported";
@@ -400,7 +420,7 @@ namespace PicoGK
                 default:
                     // Incompatible value returned from runtime
                     Debug.Assert(false);
-                    return $"Unknown #{_nFieldType(m_hThis, nIndex)}";
+                    return $"Unknown #{_nFieldType(lib.hThis, hThis, nIndex)}";
             }
         }
 

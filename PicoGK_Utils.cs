@@ -273,18 +273,20 @@ namespace PicoGK
             return mat;
         }
 
-        static public Mesh mshCreateCube(BBox3 oBox)
+        static public Mesh mshCreateCube(   Library lib,
+                                            BBox3 oBox)
         {
-            return mshCreateCube(oBox.vecSize(), oBox.vecCenter());
+            return mshCreateCube(lib, oBox.vecSize(), oBox.vecCenter());
         }
 
-        static public Mesh mshCreateCube(   Vector3? vecScale       = null,
+        static public Mesh mshCreateCube(   Library lib,
+                                            Vector3? vecScale       = null,
                                             Vector3? vecOffsetMM    = null)
         {
             Vector3 vecS        = vecScale      ?? new Vector3(1.0f);
             Vector3 vecOffset   = vecOffsetMM   ?? new Vector3(0.0f);
 
-            Mesh oMesh = new Mesh();
+            Mesh oMesh = new Mesh(lib);
 
             Vector3[] cubeVertices =
             {
@@ -325,9 +327,10 @@ namespace PicoGK
             return oMesh;
         }
 
-        static public Mesh mshCreateCylinder( Vector3? vecScale     = null,
-                                              Vector3? vecOffsetMM  = null,
-                                              int iSides = 0)
+        static public Mesh mshCreateCylinder(   Library lib,
+                                                Vector3? vecScale     = null,
+                                                Vector3? vecOffsetMM  = null,
+                                                int iSides = 0)
         {
             Vector3 vecS        = vecScale ?? new Vector3(1.0f);
             Vector3 vecOffset   = vecOffsetMM ?? new Vector3(0.0f);
@@ -337,8 +340,8 @@ namespace PicoGK
 
             if (iSides <= 0)
             {
-                float fVoxA = fA / Library.fVoxelSizeMM;
-                float fVoxB = fB / Library.fVoxelSizeMM;
+                float fVoxA = fA / lib.fVoxelSize;
+                float fVoxB = fB / lib.fVoxelSize;
                 //Ramanujan's ellipse perimeter
                 //P ≈ π [ 3 (a + b) - √[(3a + b) (a + 3b) ]]
                 //P ≈ π(a + b) [ 1 + (3h) / (10 + √(4 - 3h) ) ], where h = (a - b)2/(a + b)2
@@ -355,7 +358,7 @@ namespace PicoGK
                 iSides = 3;
             }
 
-            Mesh oMesh = new Mesh();
+            Mesh oMesh = new Mesh(lib);
 
             Vector3 vecBottomCenter = vecOffset;
             vecBottomCenter.Z      -= vecS.Z * 0.5f;
@@ -392,9 +395,10 @@ namespace PicoGK
             return oMesh;
         }
 
-        static public Mesh mshCreateCone(Vector3? vecScale = null,
-                                         Vector3? vecOffsetMM = null,
-                                         int iSides = 0)
+        static public Mesh mshCreateCone(   Library lib,
+                                            Vector3? vecScale = null,
+                                            Vector3? vecOffsetMM = null,
+                                            int iSides = 0)
         {
             Vector3 vecS        = vecScale ?? new Vector3(1.0f);
             Vector3 vecOffset   = vecOffsetMM ?? new Vector3(0.0f);
@@ -404,8 +408,8 @@ namespace PicoGK
 
             if (iSides <= 0)
             {
-                float fVoxA = fA / Library.fVoxelSizeMM;
-                float fVoxB = fB / Library.fVoxelSizeMM;
+                float fVoxA = fA / lib.fVoxelSize;
+                float fVoxB = fB / lib.fVoxelSize;
 
                 float fP =  float.Pi * (3.0f * (fVoxA + fVoxB)
                             - float.Sqrt((3.0f * fVoxA + fVoxB)
@@ -419,7 +423,7 @@ namespace PicoGK
                 iSides = 3;
             }
 
-            Mesh oMesh = new Mesh();
+            Mesh oMesh = new Mesh(lib);
 
             Vector3 vecBottomCenter = vecOffset;
             vecBottomCenter.Z      -= vecS.Z * 0.5f;
@@ -447,13 +451,13 @@ namespace PicoGK
             return oMesh;
         }
 
-        static void GeoSphereTriangle(Vector3 vecA,
-					                  Vector3 vecB,
-					                  Vector3 vecC,
-					                  Vector3 vecOffset,
-					                  Vector3 vecRadii,
-                                      int iRecursionDepth,
-					                  Mesh oTarget)
+        static void GeoSphereTriangle(  Vector3 vecA,
+					                    Vector3 vecB,
+					                    Vector3 vecC,
+					                    Vector3 vecOffset,
+					                    Vector3 vecRadii,
+                                        int iRecursionDepth,
+					                    Mesh oTarget)
         {
 	        if (iRecursionDepth > 0)
 	        {
@@ -489,14 +493,15 @@ namespace PicoGK
                 MathF.Pow(vecABC.Z * vecABC.X, 1.6f)) / 3.0f, 1.0f / 1.6f);
         }
 
-        static public Mesh mshCreateGeoSphere(Vector3? vecScale = null,
-                                              Vector3? vecOffsetMM = null,
-                                              int iSubdivisions = 0)
+        static public Mesh mshCreateGeoSphere(  Library lib,
+                                                Vector3? vecScale = null,
+                                                Vector3? vecOffsetMM = null,
+                                                int iSubdivisions = 0)
         {
             Vector3 vecS        = vecScale ?? new Vector3(1.0f);
             Vector3 vecOffset   = vecOffsetMM ?? new Vector3(0.0f);
 
-            Mesh oMesh          = new Mesh();
+            Mesh oMesh          = new Mesh(lib);
 
             Vector3 vecRadii    = vecS * 0.5f;
             Vector3 vecRadii2   = vecRadii * vecRadii;
@@ -523,8 +528,8 @@ namespace PicoGK
             {
                 int iTargetTriangles = (int) MathF.Ceiling(
                                     fApproxEllipsoidSurfaceArea(vecRadii)
-                                    / Library.fVoxelSizeMM
-                                    / Library.fVoxelSizeMM);
+                                    / lib.fVoxelSize
+                                    / lib.fVoxelSize);
 
                 iSubdivisions = 1;
                 int iTriangles = 80;

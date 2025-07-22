@@ -82,7 +82,7 @@ namespace PicoGK
         /// </summary>
         public int nCount()
         {
-            return _nCount(m_hThis);
+            return _nCount(lib.hThis, hThis);
         }
 
         /// <summary>
@@ -95,10 +95,10 @@ namespace PicoGK
         /// <returns></returns>
         public bool bGetNameAt(int nIndex, out string strValueName)
         {
-            int nLength = _nNameLengthAt(m_hThis, nIndex) + 1;
+            int nLength = _nNameLengthAt(lib.hThis, hThis, nIndex) + 1;
 
             StringBuilder oBuilder = new StringBuilder(nLength);
-            if (!_bGetNameAt(m_hThis, nIndex, oBuilder, nLength))
+            if (!_bGetNameAt(lib.hThis, hThis, nIndex, oBuilder, nLength))
             {
                 strValueName = "";
                 return false;
@@ -115,7 +115,7 @@ namespace PicoGK
         /// <returns>Type of the parameter</returns>
         public EType eTypeAt(string strName)
         {
-            int iType = _nTypeAt(m_hThis, strName);
+            int iType = _nTypeAt(lib.hThis, hThis, strName);
             if (iType > (int) EType.VECTOR)
             {
                 Debug.Assert(false, "Invalid metadata type returned by PicoGKRuntime");
@@ -169,10 +169,10 @@ namespace PicoGK
         public bool bGetValueAt(    string strFieldName,
                                     out string strValue)
         {
-            int nLength = _nStringLengthAt(m_hThis, strFieldName) + 1;
+            int nLength = _nStringLengthAt(lib.hThis, hThis, strFieldName) + 1;
 
             StringBuilder oBuilder = new StringBuilder(nLength);
-            if (!_bGetStringAt(m_hThis, strFieldName, oBuilder, nLength))
+            if (!_bGetStringAt(lib.hThis, hThis, strFieldName, oBuilder, nLength))
             {
                 strValue = "";
                 return false;
@@ -192,7 +192,7 @@ namespace PicoGK
         public bool bGetValueAt(string strFieldName, out float fValue)
         {
             fValue = 0f;
-            return _bGetFloatAt(m_hThis, strFieldName, ref fValue);
+            return _bGetFloatAt(lib.hThis, hThis, strFieldName, ref fValue);
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace PicoGK
         public bool bGetValueAt(string strFieldName, out Vector3 vecValue)
         {
             vecValue = Vector3.Zero;
-            return _bGetVectorAt(m_hThis, strFieldName, ref vecValue);
+            return _bGetVectorAt(lib.hThis, hThis, strFieldName, ref vecValue);
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace PicoGK
         public void RemoveValue(string strFieldName)
         {
             GuardInternalFields(strFieldName);
-            _RemoveValue(m_hThis, strFieldName);
+            _RemoveValue(lib.hThis, hThis, strFieldName);
         }
 
         /// <summary>
@@ -292,9 +292,11 @@ namespace PicoGK
         /// yourself
         /// </summary>
         /// <param name="hSource">This pointer</param>
-        public FieldMetadata(IntPtr hSource)
+        public FieldMetadata(   Library         oLibrary, 
+                                VdbMetaHandle   hSource)
         {
-            m_hThis = hSource;
+            lib     = oLibrary;
+            hThis   = hSource;
         }
 
         /// <summary>
@@ -304,7 +306,7 @@ namespace PicoGK
         /// <param name="strValue">Value to set</param>
         internal void _SetValue(string strFieldName, string strValue)
         {
-            _SetStringValue(m_hThis, strFieldName, strValue);
+            _SetStringValue(lib.hThis, hThis, strFieldName, strValue);
         }
 
         /// <summary>
@@ -314,7 +316,7 @@ namespace PicoGK
         /// <param name="fValue">Value to set</param>
         internal void _SetValue(string strFieldName, float fValue)
         {
-            _SetFloatValue(m_hThis, strFieldName, fValue);
+            _SetFloatValue(lib.hThis, hThis, strFieldName, fValue);
         }
 
         /// <summary>
@@ -324,7 +326,7 @@ namespace PicoGK
         /// <param name="vecValue">Value to set</param>
         internal void _SetValue(string strFieldName, Vector3 vecValue)
         {
-            _SetVectorValue(m_hThis, strFieldName, vecValue);
+            _SetVectorValue(lib.hThis, hThis, strFieldName, vecValue);
         }
 
         /// <summary>
@@ -333,7 +335,7 @@ namespace PicoGK
         /// <param name="strFieldName">Name of the value</param>
         internal void _RemoveValue(string strFieldName)
         {
-            _RemoveValue(m_hThis, strFieldName);
+            _RemoveValue(lib.hThis, hThis, strFieldName);
         }
 
         /// <summary>

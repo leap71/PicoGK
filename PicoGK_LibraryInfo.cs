@@ -33,19 +33,45 @@
 // limitations under the License.   
 //
 
+
+using System.Text;
+
 namespace PicoGK
 {
-    public partial class Config
+    public partial class Library : IDisposable
     {
-        // PicoGK Runtime to load
+        /// <summary>
+        /// Returns the library name (from the C++ side)
+        /// </summary>
+        /// <returns>The name of the dynamically loaded C++ library</returns>
+        public static string strName()
+        {
+            StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
+            _GetName(oBuilder);
+            return oBuilder.ToString();
+        }
 
-        public const string strPicoGKLib = "picogk.25.2"; // dll or dylib
+        /// <summary>
+        /// Returns the library version (from the C++ side)
+        /// </summary>
+        /// <returns>The library version of the C++ library</returns>
+        public static string strVersion()
+        {
+            StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
+            _GetVersion(oBuilder);
+            return oBuilder.ToString();
+        }
 
-        // if you want to load it from a specific location instead of
-        // a standard system path, you can specify it as well
-        // You need to include the full path, filename and extension such as:
-        //
-        // public const string strPicoGKLib = "/Users/myuser/PicoGKRuntime/picogk.1.0.dylib"
-        //
+        /// <summary>
+        /// Returns internal build info, such as build date/time
+        /// of the C++ library
+        /// </summary>
+        /// <returns>Internal build info of the C++ library</returns>
+        public static string strBuildInfo()
+        {
+            StringBuilder oBuilder = new StringBuilder(Library.nStringLength);
+            _GetBuildInfo(oBuilder);
+            return oBuilder.ToString();
+        }
     }
 }

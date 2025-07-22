@@ -46,9 +46,14 @@ namespace PicoGK
         /// Create a new polyline with the specified color
         /// </summary>
         /// <param name="clr"></param>
-        public PolyLine(ColorFloat clr)
+        public PolyLine(    Library libSet,
+                            ColorFloat clr)
         {
-            m_hThis = _hCreate(in clr);
+            lib     = libSet;
+            hThis   = _hCreate(lib.hThis, clr);
+
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
         }
 
         /// <summary>
@@ -59,7 +64,8 @@ namespace PicoGK
         public int nAddVertex(in Vector3 vec)
         {
             m_oBoundingBox.Include(vec);
-            return _nAddVertex( m_hThis,
+            return _nAddVertex( lib.hThis,
+                                hThis,
                                 in vec);
         }
 
@@ -79,7 +85,7 @@ namespace PicoGK
         /// <returns>Number of vertices</returns>
         public int nVertexCount()
         {
-            return _nVertexCount(m_hThis);
+            return _nVertexCount(lib.hThis, hThis);
         }
 
         /// <summary>
@@ -89,7 +95,7 @@ namespace PicoGK
         public Vector3 vecVertexAt(int nIndex)
         {
             Vector3 vec = new();
-            _GetVertex(m_hThis, nIndex, ref vec);
+            _GetVertex(lib.hThis, hThis, nIndex, ref vec);
             return vec;
         }
 
@@ -100,7 +106,7 @@ namespace PicoGK
         public void GetColor(out ColorFloat clr)
         {
             clr = new();
-            _GetColor(m_hThis, ref clr);
+            _GetColor(lib.hThis, hThis, ref clr);
         }
 
         /// <summary>

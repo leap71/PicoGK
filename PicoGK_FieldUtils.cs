@@ -85,9 +85,9 @@ namespace PicoGK
             {
                 for (int y=0; y<nYSize; y++)
                 {
-                    Vector3 vecCoord = Library.vecVoxelsToMm(   nXOrigin + x,
-                                                                nYOrigin + y,
-                                                                nZOrigin + nSlice);
+                    Vector3 vecCoord = oField.lib.vecVoxelsToMm(    nXOrigin + x,
+                                                                    nYOrigin + y,
+                                                                    nZOrigin + nSlice);
 
                     bool bSet = oField.bGetValue(vecCoord, out float fValue);
 
@@ -168,9 +168,9 @@ namespace PicoGK
             {
                 for (int y=0; y<nYSize; y++)
                 {
-                    Vector3 vecCoord = Library.vecVoxelsToMm(   nXOrigin + x,
-                                                                nYOrigin + y,
-                                                                nZOrigin + nSlice);
+                    Vector3 vecCoord = oField.lib.vecVoxelsToMm(    nXOrigin + x,
+                                                                    nYOrigin + y,
+                                                                    nZOrigin + nSlice);
 
                     oField.bGetValue(vecCoord, out float fValue);
 
@@ -286,7 +286,7 @@ namespace PicoGK
                                             float fDirectionFilterTolerance   = 0f,
                                             Vector3? vecScaleBy               = null)
         {
-            VectorField oField = new();
+            VectorField oField = new(vox.lib);
 
             Debug.Assert(fDirectionFilterTolerance >= 0f);
             Debug.Assert(fDirectionFilterTolerance <= 1f);
@@ -431,7 +431,7 @@ namespace PicoGK
 
             m_nCount=0;
 
-            PolyLine poly = new(m_clr);
+            PolyLine poly = new(m_oField.lib, m_clr);
 
             poly.nAddVertex(vecPosition);
 

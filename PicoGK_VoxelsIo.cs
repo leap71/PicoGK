@@ -56,9 +56,10 @@ namespace PicoGK
 		/// <exception cref="FileLoadException">If file is empty or no
 		/// compatible field found, an exception is thrown.
 		/// </exception>
-		public static Voxels voxFromVdbFile(string strFileName)
+		public static Voxels voxFromVdbFile(	Library libSet,
+												string strFileName)
 		{
-			OpenVdbFile oFile = new(strFileName);
+			OpenVdbFile oFile = new(libSet, strFileName);
 
             if (oFile.nFieldCount() == 0)
 			{
@@ -88,7 +89,7 @@ namespace PicoGK
         /// </exception>
         public void SaveToVdbFile(string strFileName)
 		{
-			using OpenVdbFile oFile = new();
+			using OpenVdbFile oFile = new(lib);
 			oFile.nAdd(this);
 			oFile.SaveToFile(strFileName);
 		}

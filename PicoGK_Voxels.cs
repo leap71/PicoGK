@@ -77,22 +77,29 @@ namespace PicoGK
         /// Create a voxels object from an existing handle
         /// (for internal use)
         /// </summary>
-        internal Voxels(IntPtr hVoxels)
+        internal Voxels(    Library libSet,
+                            VoxHandle hVoxels)
         {
-            m_hThis = hVoxels;
-            Debug.Assert(m_hThis != IntPtr.Zero);
-            Debug.Assert(_bIsValid(m_hThis));
+            lib     = libSet;
+            hThis   = hVoxels;
 
-            m_oMetadata = new(FieldMetadata._hFromVoxels(m_hThis));
+            if (!_bIsValid(lib.hThis,hThis))
+                throw new PicoGKAllocException();
+
+            m_oMetadata = new(lib, FieldMetadata._hFromVoxels(lib.hThis, hThis));
             m_oMetadata._SetValue("PicoGK.Class", "Voxels");
         }
 
         /// <summary>
         /// Default constructor, builds a new empty voxel field
         /// </summary>
-        public Voxels()
-            : this(_hCreate())
-        {}
+        public Voxels(Library libSet)
+            : this( libSet, 
+                    _hCreate(libSet.hThis))
+        {
+            if (!_bIsValid(lib.hThis,hThis))
+                throw new PicoGKAllocException();
+        }
 
         /// <summary>
         /// Copy constructor, create a duplicate
@@ -100,7 +107,9 @@ namespace PicoGK
         /// </summary>
         /// <param name="oSource">Source to copy from</param>
         public Voxels(in Voxels voxSource)
-            : this(_hCreateCopy(voxSource.m_hThis))
+            : this( voxSource.lib,
+                    _hCreateCopy(   voxSource.lib.hThis,
+                                    voxSource.hThis))
         {}
 
         /// <summary>
@@ -118,7 +127,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="oSource">Source to copy from</param>
         public Voxels(in ScalarField oSource)
-            : this(oSource, oSource.oBoundingBox())
+            : this(oSource.lib, oSource, oSource.oBoundingBox())
         {}
 
         /// <summary>
@@ -126,8 +135,9 @@ namespace PicoGK
         /// implicit function specified
         /// </summary>
         /// <param name="oImplicit">Object producing a signed distance field</param>
-        public Voxels(  in IImplicit xImplicit,
-                        in BBox3 oBounds) : this()
+        public Voxels(  Library libSet,
+                        in IImplicit xImplicit,
+                        in BBox3 oBounds) : this(libSet)
         {
             RenderImplicit(xImplicit, oBounds);
         }
@@ -137,7 +147,8 @@ namespace PicoGK
         /// bounded implicit function specified
         /// </summary>
         /// <param name="oImplicit">Object producing a signed distance field</param>
-        public Voxels(  in IBoundedImplicit xImplicit) : this()
+        public Voxels(  Library libSet,
+                        in IBoundedImplicit xImplicit) : this(libSet)
         {
             RenderImplicit(xImplicit, xImplicit.oBounds);
         }
@@ -146,7 +157,7 @@ namespace PicoGK
         /// Creates a new voxel field form a mesh
         /// </summary>
         /// <param name="msh">The mesh that is rendered into the voxels</param>
-        public Voxels(in Mesh msh) : this()
+        public Voxels(in Mesh msh) : this(msh.lib)
         {
             RenderMesh(msh);
         }
@@ -155,7 +166,7 @@ namespace PicoGK
         /// Creates a new voxel field from a lattice
         /// </summary>
         /// <param name="lat">The lattice used</param>
-        public Voxels(in Lattice lat) : this()
+        public Voxels(in Lattice lat) : this(lat.lib)
         {
             RenderLattice(lat);
         }
@@ -176,9 +187,11 @@ namespace PicoGK
         /// <param name="vecCenter">Center of the sphere</param>
         /// <param name="fRadius">Radius of the Sphere</param>
         /// <returns></returns>
-        public static Voxels voxSphere(Vector3 vecCenter, float fRadius)
+        public static Voxels voxSphere( Library libSet,
+                                        Vector3 vecCenter, 
+                                        float fRadius)
         {
-            Lattice lat = new();
+            Lattice lat = new(libSet);
             lat.AddSphere(vecCenter, fRadius);
             return new(lat);
         }
@@ -189,7 +202,14 @@ namespace PicoGK
         /// </summary>
         /// <param name="voxOperand">Voxels to add to our field</param>
         public void BoolAdd(in Voxels voxOperand)
-            => _BoolAdd(m_hThis, voxOperand.m_hThis);
+        {
+            if (voxOperand.lib.hThis != lib.hThis)
+                throw new PicoGKLibraryMismatchException();
+
+            _BoolAdd(   lib.hThis,
+                        hThis, 
+                        voxOperand.hThis);
+        }
 
         /// <summary>
         /// Performs a boolean union operation on a copy of the current 
@@ -246,9 +266,10 @@ namespace PicoGK
         /// </summary>
         /// <param name="avoxList">Container with the voxel fields</param>
         /// <returns>All voxel fields combined</returns>
-        public static Voxels voxCombineAll(in IEnumerable<Voxels> avoxList)
+        public static Voxels voxCombineAll( Library libSet,
+                                            in IEnumerable<Voxels> avoxList)
         {
-            Voxels vox = new();
+            Voxels vox = new(libSet);
             vox.BoolAddAll(avoxList);
             return vox;
         }
@@ -260,7 +281,12 @@ namespace PicoGK
         /// </summary>
         /// <param name="voxOperand">Voxels to remove from our field</param>
         public void BoolSubtract(in Voxels voxOperand)
-            => _BoolSubtract(m_hThis, voxOperand.m_hThis);
+        {
+            if (voxOperand.lib.hThis != lib.hThis)
+                throw new PicoGKLibraryMismatchException();
+
+            _BoolSubtract(lib.hThis, hThis, voxOperand.hThis);
+        }
 
         /// <summary>
         /// Performs a boolean difference operation on a copy of the current 
@@ -306,7 +332,12 @@ namespace PicoGK
         /// </summary>
         /// <param name="voxOperand">Voxels masking our voxel field</param>
         public void BoolIntersect(in Voxels voxOperand)
-            => _BoolIntersect(m_hThis, voxOperand.m_hThis);
+        {
+            if (voxOperand.lib.hThis != lib.hThis)
+                throw new PicoGKLibraryMismatchException();
+
+            _BoolIntersect(lib.hThis, hThis, voxOperand.hThis);
+        }
 
         /// <summary>
         /// Performs a boolean intersection operation on a copy of the current 
@@ -356,7 +387,7 @@ namespace PicoGK
         /// <param name="oBox"></param>
         public void Trim(BBox3 oBox)
         {
-            Voxels voxTrim = new(Utils.mshCreateCube(oBox));
+            Voxels voxTrim = new(Utils.mshCreateCube(lib, oBox));
             BoolIntersect(voxTrim);
         }
 
@@ -367,7 +398,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="fDistMM">The distance to move the surface outward (positive) or inward (negative) in millimeters</param>
         public void Offset(float fDistMM)
-            => _Offset(m_hThis, fDistMM);
+            => _Offset(lib.hThis, hThis, fDistMM);
 
         /// <summary>
         /// Offsets a copy of the voxel field by the specified distance.
@@ -391,7 +422,7 @@ namespace PicoGK
         /// <param name="fDist2MM">Second distance in mm</param>
         public void DoubleOffset(   float fDist1MM,
                                     float fDist2MM)
-            => _DoubleOffset(m_hThis, fDist1MM, fDist2MM);
+            => _DoubleOffset(lib.hThis, hThis, fDist1MM, fDist2MM);
 
 
         /// <summary>
@@ -423,7 +454,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="fDistMM">Distance to move (in mm)</param>
         public void TripleOffset(float fDistMM)
-            => _TripleOffset(m_hThis, fDistMM);
+            => _TripleOffset(lib.hThis, hThis, fDistMM);
 
         /// <summary>
         /// Offsets a copy of the voxel field three times by the specified distance.
@@ -586,39 +617,17 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Applies a Gaussian Blur to the voxel field with the specified size
-        /// EXPERIMENTAL - We may remove this function again, if we determine
-        /// it isn't suitable for engineering applications
-        /// </summary>
-        /// <param name="fDistMM">The size of the Gaussian kernel applied</param>
-        public void Gaussian(float fSizeMM)
-            => _Gaussian(m_hThis, fSizeMM);
-
-        /// <summary>
-        /// Applies a median avergage to the voxel field with the specified size
-        /// EXPERIMENTAL - We may remove this function again, if we determine
-        /// it isn't suitable for engineering applications
-        /// </summary>
-        /// <param name="fDistMM">The size of the median average kernel applied</param>
-        public void Median(float fSizeMM)
-            => _Median(m_hThis, fSizeMM);
-
-        /// <summary>
-        /// Applies a mean avergage to the voxel field with the specified size
-        /// EXPERIMENTAL - We may remove this function again, if we determine
-        /// it isn't suitable for engineering applications
-        /// </summary>
-        /// <param name="fDistMM">The size of the mean average kernel applied</param>
-        public void Mean(float fSizeMM)
-            => _Mean(m_hThis, fSizeMM);
-
-        /// <summary>
         /// Renders a mesh into the voxel field, combining it with
         /// the existing content
         /// </summary>
         /// <param name="msh">The mesh to render (needs to be a closed surface)</param>
         public void RenderMesh(in Mesh msh)
-            => _RenderMesh(m_hThis, msh.m_hThis);
+        {
+            if (msh.lib.hThis != lib.hThis)
+                throw new PicoGKLibraryMismatchException();
+
+            _RenderMesh(lib.hThis, hThis, msh.hThis);
+        }
 
         /// <summary>
         /// Render an implicit signed distance function into the voxels
@@ -630,7 +639,7 @@ namespace PicoGK
         /// <param name="oBounds">Bounding box in which to render the implicit</param>
         public void RenderImplicit( in IImplicit xImp,
                                     in BBox3 oBounds)
-            => _RenderImplicit(m_hThis, in oBounds, xImp.fSignedDistance);
+            => _RenderImplicit(lib.hThis, hThis, in oBounds, xImp.fSignedDistance);
 
         /// <summary>
         /// Render an implicit signed distance function into the voxels
@@ -644,7 +653,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="xImp">Implicit object with signed distance function</param>
         public void IntersectImplicit(in IImplicit xImp)
-            => _IntersectImplicit(m_hThis, xImp.fSignedDistance);
+            => _IntersectImplicit(lib.hThis, hThis, xImp.fSignedDistance);
 
 
         /// <summary>
@@ -666,7 +675,12 @@ namespace PicoGK
         /// </summary>
         /// <param name="lat">The lattice to render</param>
         public void RenderLattice(in Lattice lat)
-            => _RenderLattice(m_hThis, lat.m_hThis);
+        {
+            if (lat.lib.hThis != lib.hThis)
+                throw new PicoGKLibraryMismatchException();
+
+            _RenderLattice(lib.hThis, hThis, lat.hThis);
+        }
 
         /// <summary>
         /// Projects the slices at the start Z position upwards or downwards,
@@ -676,7 +690,7 @@ namespace PicoGK
         /// <param name="fEndZMM">End voxel slice in mm</param>
         public void ProjectZSlice(  float fStartZMM,
                                     float fEndZMM)
-            => _ProjectZSlice(  m_hThis, fStartZMM, fEndZMM);
+            => _ProjectZSlice(lib.hThis, hThis, fStartZMM, fEndZMM);
 
         /// <summary>
         /// Makes a copy of the voxel field and applies
@@ -696,7 +710,12 @@ namespace PicoGK
         /// <param name="voxOther">Voxels to compare to</param>
         /// <returns></returns>
         public bool bIsEqual(in Voxels voxOther)
-            => _bIsEqual(m_hThis, voxOther.m_hThis);
+        {
+            if (voxOther.lib.hThis != lib.hThis)
+                throw new PicoGKLibraryMismatchException();
+
+            return _bIsEqual(lib.hThis, hThis, voxOther.hThis);
+        }
 
         /// <summary>
         /// This function evaluates the entire voxel field and returns
@@ -713,7 +732,8 @@ namespace PicoGK
             oBBox           = new();
             fVolumeCubicMM  = 0f;
 
-           _CalculateProperties(    m_hThis,
+           _CalculateProperties(    lib.hThis,
+                                    hThis,
                                     ref fVolumeCubicMM,
                                     ref oBBox);
         }
@@ -740,7 +760,10 @@ namespace PicoGK
         public Vector3 vecSurfaceNormal(in Vector3 vecSurfacePoint)
         {
             Vector3 vecNormal = Vector3.Zero;
-            _GetSurfaceNormal(m_hThis, vecSurfacePoint, ref vecNormal);
+            _GetSurfaceNormal(  lib.hThis, 
+                                hThis, 
+                                vecSurfacePoint, 
+                                ref vecNormal);
             return vecNormal;
         }
 
@@ -756,7 +779,8 @@ namespace PicoGK
                                             out Vector3 vecSurfacePoint)
         {
             vecSurfacePoint = new();
-            return _bClosestPointOnSurface( m_hThis,
+            return _bClosestPointOnSurface( lib.hThis,
+                                            hThis,
                                             in  vecSearch,
                                             ref vecSurfacePoint);
         }
@@ -793,10 +817,11 @@ namespace PicoGK
                                         out Vector3 vecSurfacePoint)
         {
             vecSurfacePoint     = new();
-            return _bRayCastToSurface( m_hThis,
-                                       in  vecSearch,
-                                       in  vecDirection,
-                                       ref vecSurfacePoint);
+            return _bRayCastToSurface(  lib.hThis,
+                                        hThis,
+                                        in  vecSearch,
+                                        in  vecDirection,
+                                        ref vecSurfacePoint);
         }
 
         /// <summary>
@@ -844,7 +869,8 @@ namespace PicoGK
             nYSize      = 0;
             nZSize      = 0;
 
-            _GetVoxelDimensions(    m_hThis,
+            _GetVoxelDimensions(    lib.hThis,
+                                    hThis,
                                     ref nXOrigin,
                                     ref nYOrigin,
                                     ref nZOrigin,
@@ -870,7 +896,8 @@ namespace PicoGK
             nYSize          = 0;
             nZSize          = 0;
 
-            _GetVoxelDimensions(    m_hThis,
+            _GetVoxelDimensions(    lib.hThis,
+                                    hThis,
                                     ref nXOrigin,
                                     ref nYOrigin,
                                     ref nZOrigin,
@@ -894,7 +921,7 @@ namespace PicoGK
                                 out _,
                                 out _);
 
-            return Library.vecVoxelsToMm(nXOrigin, nYOrigin, nZOrigin + nZSlice);
+            return lib.vecVoxelsToMm(nXOrigin, nYOrigin, nZOrigin + nZSlice);
         }
 
         /// <summary>
@@ -934,7 +961,7 @@ namespace PicoGK
             try
             {
                 IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
-                _GetVoxelSlice(m_hThis, nZSlice, afBufferPtr, ref fBackground);
+                _GetVoxelSlice(lib.hThis, hThis, nZSlice, afBufferPtr, ref fBackground);
             }
             finally
             {
@@ -1022,7 +1049,7 @@ namespace PicoGK
             try
             {
                 IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
-                _GetInterpolatedVoxelSlice(m_hThis, fZSlice, afBufferPtr, ref fBackground);
+                _GetInterpolatedVoxelSlice(lib.hThis, hThis, fZSlice, afBufferPtr, ref fBackground);
             }
             finally
             {

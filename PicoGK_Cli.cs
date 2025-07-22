@@ -704,9 +704,9 @@ namespace PicoGK
             // usually your CLI slices should have a smaller height. The slices
             // are interpolated between voxel layers
             if (fLayerHeight == 0f)
-                fLayerHeight = Library.fVoxelSizeMM;
+                fLayerHeight = lib.fVoxelSize;
                 
-            float fZStep = fLayerHeight / Library.fVoxelSizeMM;
+            float fZStep = fLayerHeight / lib.fVoxelSize;
 
             GetVoxelDimensions( out int nXOrigin,
                                 out int nYOrigin,
@@ -723,8 +723,8 @@ namespace PicoGK
 
             if (bUseAbsXYOrigin)
             {
-                vecOrigin = new(    nXOrigin*Library.fVoxelSizeMM,
-                                    nYOrigin*Library.fVoxelSizeMM);
+                vecOrigin = new(    nXOrigin*lib.fVoxelSize,
+                                    nYOrigin*lib.fVoxelSize);
             }
 
             float fLastLayer    = nZSize-1;
@@ -742,7 +742,7 @@ namespace PicoGK
                 PolySlice oSlice = PolySlice.oFromSdf(  img,
                                                         fLayerZ,
                                                         vecOrigin,
-                                                        Library.fVoxelSizeMM);
+                                                        lib.fVoxelSize);
 
                 if (fLayerZ == fLayerHeight) // first slice
                 {

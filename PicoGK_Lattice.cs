@@ -40,16 +40,18 @@ namespace PicoGK
 {
     public partial class Lattice
     {
-        public Lattice()
+        public Lattice(Library libSet)
         {
-            m_hThis = _hCreate();
-            Debug.Assert(m_hThis != IntPtr.Zero);
+            lib  = libSet;
+            hThis = _hCreate(lib.hThis);
+            if (!_bIsValid(lib.hThis, hThis))
+                throw new PicoGKAllocException();
         }
 
         public void AddSphere(  in Vector3 vecCenter,
                                 float fRadius)
         {
-            _AddSphere(m_hThis, vecCenter, fRadius);
+            _AddSphere(lib.hThis, hThis, vecCenter, fRadius);
         }
 
         public void AddBeam(    in Vector3 vecA,
@@ -58,7 +60,8 @@ namespace PicoGK
                                 float fRadB,
                                 bool bRoundCap = true)
         {
-            _AddBeam(   m_hThis,
+            _AddBeam(   lib.hThis,
+                        hThis,
                         in vecA,
                         in vecB,
                         fRadA,
@@ -72,7 +75,8 @@ namespace PicoGK
                                 float fRadB,
                                 bool bRoundCap = true)
         {
-            _AddBeam(   m_hThis,
+            _AddBeam(   lib.hThis,
+                        hThis,
                         in vecA,
                         in vecB,
                         fRadA,
