@@ -455,8 +455,7 @@ namespace PicoGK
 
             if (bDisposing)
             {
-                // dispose managed state (managed objects).
-                // Nothing to do in this class
+                m_oMetadata.Dispose();
             }
 
             _Destroy(lib.hThis, hThis);
@@ -502,6 +501,11 @@ namespace PicoGK
         private static extern void _GetColor(   LibHandle  hLib,
                                                 PolyHandle hThis,
                                                 ref ColorFloat clr);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "PolyLine_GetBoundingBox")]
+        private static extern void _GetBoundingBox( LibHandle  hLib,
+                                                    PolyHandle hThis,
+                                                    ref BBox3 oBBox);
 
         // Dispose Pattern
 
@@ -634,6 +638,17 @@ namespace PicoGK
                                                 IntPtr      hThis,
                                                 MshHandle   hMesh);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_AddVoxels")]
+        private static extern void _AddVoxels(  LibHandle   hLib,
+                                                IntPtr      hThis,
+                                                int         nGroup,
+                                                VoxHandle   hMox);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_RemoveVoxels")]
+        private static extern void _RemoveVoxels(   LibHandle   hLib,
+                                                    IntPtr      hThis,
+                                                    VoxHandle   hVox);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_AddPolyLine")]
         private static extern void _AddPolyLine(    LibHandle   hLib,
                                                     IntPtr      hThis,
@@ -666,6 +681,10 @@ namespace PicoGK
         private static extern void _SetGroupMatrix( IntPtr          hThis,
                                                     int             nGroupID,
                                                     in Matrix4x4    mat);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_GetBoundingBox")]
+        private static extern void _GetBoundingBox( IntPtr       hThis,
+                                                    ref BBox3    oBBox);
 
         // Dispose Pattern
 
@@ -1010,7 +1029,7 @@ namespace PicoGK
         public readonly Library lib;
     }
 
-    public partial class FieldMetadata
+    public partial class FieldMetadata : IDisposable
     {
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Metadata_hFromVoxels")]
         internal static extern VdbMetaHandle _hFromVoxels( LibHandle  hLib,

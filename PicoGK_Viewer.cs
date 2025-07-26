@@ -155,7 +155,8 @@ namespace PicoGK
 
         public void LoadLightSetup(string strFilePath)
         {
-            LoadLightSetup(File.OpenRead(strFilePath));
+            using Stream oStream = File.OpenRead(strFilePath);
+            LoadLightSetup(oStream);
         }
 
         public void LoadLightSetup(Stream oStream)
@@ -176,31 +177,39 @@ namespace PicoGK
                     throw new FileNotFoundException("SpecTexture entry not found in the ZIP archive.");
                 }
 
-                byte[] abyDiffuseData;
-                using (Stream oDiffuseStream = oDiffuseEntry.Open())
+                try
                 {
-                    using (MemoryStream oDiffuseMemStream = new MemoryStream())
+                    byte[] abyDiffuseData;
+                    using (Stream oDiffuseStream = oDiffuseEntry.Open())
                     {
-                        oDiffuseStream.CopyTo(oDiffuseMemStream);
-                        abyDiffuseData = oDiffuseMemStream.ToArray();
+                        using (MemoryStream oDiffuseMemStream = new MemoryStream())
+                        {
+                            oDiffuseStream.CopyTo(oDiffuseMemStream);
+                            abyDiffuseData = oDiffuseMemStream.ToArray();
+                        }
+                    }
+
+                    byte[] abySpecularData;
+                    using (Stream oSpecularStream = oSpecularEntry.Open())
+                    {
+                        using (MemoryStream oSpecularMemStream = new MemoryStream())
+                        {
+                            oSpecularStream.CopyTo(oSpecularMemStream);
+                            abySpecularData = oSpecularMemStream.ToArray();
+                        }
+                    }
+
+                    lock (m_oActions)
+                    {
+                        m_oActions.Enqueue(new LoadLightSetupAction(    m_oLog,
+                                                                        abyDiffuseData,
+                                                                        abySpecularData));
                     }
                 }
 
-                byte[] abySpecularData;
-                using (Stream oSpecularStream = oSpecularEntry.Open())
+                catch
                 {
-                    using (MemoryStream oSpecularMemStream = new MemoryStream())
-                    {
-                        oSpecularStream.CopyTo(oSpecularMemStream);
-                        abySpecularData = oSpecularMemStream.ToArray();
-                    }
-                }
-
-                lock (m_oActions)
-                {
-                    m_oActions.Enqueue(new LoadLightSetupAction(    m_oLog,
-                                                                    abyDiffuseData,
-                                                                    abySpecularData));
+                    Console.WriteLine("Unable to load lights");
                 }
             }
         }
@@ -314,6 +323,13 @@ namespace PicoGK
             }
         }
 
+        public BBox3 oBBox()
+        {
+            BBox3 oBBox = new();
+            _GetBoundingBox(hThis, ref oBBox);
+            return oBBox;
+        }
+
         public void SetBackgroundColor(ColorFloat clr)
         {
             m_clrBackground = clr;
@@ -353,14 +369,6 @@ namespace PicoGK
             RequestUpdate();
         }
 
-        public void LogStatistics()
-        {
-            lock (m_oActions)
-            {
-                m_oActions.Enqueue(new LogStatisticsAction(m_oLog));
-            }
-        }
-
         /// <summary>
         /// Allows you to query if all viewer actions are complete
         /// </summary>
@@ -390,92 +398,12 @@ namespace PicoGK
 
         ColorFloat m_clrBackground = new(0.3f);
 
-        /// TODO Remove
-        List<Mesh> m_oMeshes = new();
-        List<PolyLine> m_oPolyLines = new();
-        Dictionary<Voxels, Mesh> m_oVoxels = new();
-        BBox3 m_oBBox = new();
-
-        void RecalculateBoundingBox()
+    
+               void DoRemove(Mesh msh)
         {
-            Debug.Assert(m_iMainThreadID == Environment.CurrentManagedThreadId);
-            // Call this function only from the main() thread of the application
-
-            // start from fresh
-            m_oBBox = new();
-
-            lock (m_oMeshes)
-            {
-                foreach (Mesh msh in m_oMeshes)
-                {
-                    m_oBBox.Include(msh.oBoundingBox());
-                }
-            }
-
-            lock (m_oPolyLines)
-            {
-                foreach (PolyLine poly in m_oPolyLines)
-                {
-                    m_oBBox.Include(poly.oBoundingBox());
-                }
-            }
-        }
-
-        void DoAdd(Mesh msh, int nGroupID)
-        {
-            m_oBBox.Include(msh.oBoundingBox());
-
-            lock (m_oMeshes)
-            {
-                m_oMeshes.Add(msh);
-            }
-
-            _AddMesh(   msh.lib.hThis,
-                        hThis,
-                        nGroupID,
-                        msh.hThis);
-        }
-
-        void DoRemove(Mesh msh)
-        {
-            Debug.Assert(m_iMainThreadID == Environment.CurrentManagedThreadId);
-            // Call this function only from the main() thread of the application
-
-            lock (m_oMeshes)
-            {
-                if (!m_oMeshes.Contains(msh))
-                    throw new Exception("Tried to remove mesh that was never added");
-
-                m_oMeshes.Remove(msh);
-
-                _RemoveMesh(    msh.lib.hThis,
-                                hThis,
-                                msh.hThis);
-            }
-
-            RecalculateBoundingBox();
-            RequestUpdate();
-        }
-
-        void DoRemove(PolyLine poly)
-        {
-            Debug.Assert(m_iMainThreadID == Environment.CurrentManagedThreadId);
-            // Call this function only from the main() thread of the application
-
-            lock (m_oPolyLines)
-            {
-                if (!m_oPolyLines.Contains(poly))
-                    throw new Exception("Tried to remove mesh that was never added");
-
-                m_oPolyLines.Remove(poly);
-
-                _RemovePolyLine(    poly.lib.hThis,
-                                    hThis,
-                                    poly.hThis);
-            }
-
-            RecalculateBoundingBox();
-            RequestUpdate();
+            _RemoveMesh(    msh.lib.hThis,
+                            hThis,
+                            msh.hThis);
         }
 
         Matrix4x4 m_matModelTrans           = Matrix4x4.Identity;
@@ -511,11 +439,13 @@ namespace PicoGK
             {
                 Debug.Assert(hViewer == hThis);
 
-                if (!m_oBBox.bIsEmpty())
-                {
-                    Vector3 vecSceneCenter = m_oBBox.vecCenter();
+                BBox3 oBox = oBBox();
 
-                    double fR = ((m_oBBox.vecMax - vecSceneCenter).Length() * 3.0f) * m_fZoom;
+                if (!oBox.bIsEmpty())
+                {
+                    Vector3 vecSceneCenter = oBox.vecCenter();
+
+                    double fR = ((oBox.vecMax - vecSceneCenter).Length() * 3.0f) * m_fZoom;
                     double fRElev = Math.Cos((double)m_fElevation * Math.PI / 180.0f) * fR;
 
                     m_vecEye.X = (float)(Math.Cos((double)m_fOrbit * Math.PI / 180.0) * fRElev);
@@ -538,8 +468,8 @@ namespace PicoGK
                     }
                     else
                     {
-                        matProjection = Matrix4x4.CreateOrthographic(   m_oBBox.vecSize().X * 2,
-                                                                        m_oBBox.vecSize().Y * 2,
+                        matProjection = Matrix4x4.CreateOrthographic(   oBox.vecSize().X * 2,
+                                                                        oBox.vecSize().Y * 2,
                                                                         0.1f,
                                                                         fFar);
                     }

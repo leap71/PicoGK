@@ -63,7 +63,6 @@ namespace PicoGK
         /// <returns>The vertex index</returns>
         public int nAddVertex(in Vector3 vec)
         {
-            m_oBoundingBox.Include(vec);
             return _nAddVertex( lib.hThis,
                                 hThis,
                                 in vec);
@@ -113,7 +112,12 @@ namespace PicoGK
         /// Return BoundingBox of PolyLine
         /// </summary>
         /// <returns>Bounding Box</returns>
-        public BBox3 oBoundingBox() => m_oBoundingBox;
+        public BBox3 oBoundingBox()
+        {
+            BBox3 oBBox = new();
+            _GetBoundingBox(lib.hThis, hThis, ref oBBox);
+            return oBBox;
+        }
 
         /// <summary>
         /// Adds an arrow to the tip of the current polyline
@@ -210,8 +214,6 @@ namespace PicoGK
             nAddVertex(vecCenter - Vector3.UnitZ * fSizeMM);
             nAddVertex(vecCenter);
         }
-
-        BBox3 m_oBoundingBox = new BBox3();
     }
 }
 

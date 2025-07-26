@@ -33,17 +33,178 @@
 // limitations under the License.   
 //
 
-using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Reflection;
 
 namespace PicoGK
 {
     public partial class Library
     {
+        public class GlobalInstance : IDisposable
+        {
+            public Viewer   oViewer     => m_oViewer;
+            public Library  oLibrary    => m_oLib;
+            public LogFile  oLog        => m_oLog;
+
+
+            public GlobalInstance(  float fVoxelSizeMM,
+                                    string strLogPath = "",
+                                    string strViewerTitle = "PicoGK",
+                                    string strViewerEnvironment = "")
+            {
+                m_oLog      = new(   strLogPath != "" ? strLogPath : Path.Combine(Utils.strDocumentsFolder(), "PicoGK.log"));
+
+                try
+                {
+                    m_oLib = new(fVoxelSizeMM);
+                } 
+
+                catch (Exception e)
+                { 
+                    m_oLog.Log($"-----------------------------------------");
+                    m_oLog.Log($"-- Could not initialize PicoGK Library --");
+                    m_oLog.Log($"-----------------------------------------");
+                    m_oLog.Log($"Most likely cause is that the PicoGK runtime library wasn't found");
+                    m_oLog.Log($"Make sure {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.");
+                    m_oLog.Log($"See PicoGK documentation on GitHub for troubleshooting info");
+                    m_oLog.Log($"Terribly long error string follows (usually devoid of real information):");
+                    m_oLog.Log($"--------------------------------");
+                    m_oLog.Log($"-");
+                    m_oLog.Log($"{e}\n");
+                    m_oLog.Log($"-");
+                    m_oLog.Log($"--------------------------------");
+                    
+                    throw new Exception("Failed to load PicoGK library");
+                }
+
+                try
+                {    
+                    m_oLog.Log($"PicoGK:    {Library.strName}");
+                    m_oLog.Log($"           {Library.strVersion}");
+                    m_oLog.Log($"           {Library.strBuildInfo}\n");
+                    m_oLog.Log($"VoxelSize: {fVoxelSizeMM} (mm)");
+
+                    m_oLog.Log("Happy Computational Engineering!\n\n");
+                }
+
+                catch (Exception e)
+                {
+                    m_oLog.Log($"Failed to get PicoGK library info: {e.Message}");
+                    throw;
+                }
+
+                // Test if we can create the most basic of objects in PicoGK
+                // if this fails, something is wrong in the interplay with the
+                // runtime (should never happen in practice)
+
+                try
+                {
+                    //Lattice     lat     = new(m_oLib);
+                    Voxels      vox     = new(m_oLib);
+                    Mesh        msh     = new(m_oLib);
+                    Voxels      voxM    = new(msh);
+                    //Voxels      voxL    = new(lat);
+                    PolyLine    oPoly   = new(m_oLib, "FF0000");
+                }
+
+                catch (Exception e)
+                {
+                    m_oLog.Log($"Failed to instantiate basic PicoGK types:\n\n{e.Message}");
+                    throw;
+                }
+
+                // Let's create the viewer environment
+
+                m_oViewer   = new(strViewerTitle, new(2000,2000), m_oLog);
+
+                if (strViewerEnvironment == "")
+                {
+                    try
+                    {
+                        m_oLog.Log($"Loading lights embedded environment");
+
+                        Assembly oAssembly = typeof(Library).Assembly;
+                        using Stream oStream = oAssembly.GetManifestResourceStream("PicoGK.Resources.Environment.zip")
+                                                                    ?? throw new FileNotFoundException("Embedded environmet not found.");
+                        m_oViewer.LoadLightSetup(oStream);
+                    }
+
+                    catch (Exception)
+                    {
+                        m_oLog.Log($"Could not load lights embedded environment, trying to load from disk instead.");
+
+                        string strLightsFile = strFindLightSetupFile(out string strSearched);
+
+                        if (!File.Exists(strLightsFile))
+                        {
+                            strSearched += strLightsFile + "\n";
+
+                            m_oLog.Log($"Could not find a lights file - your viewer will look quite dark.");
+                            m_oLog.Log($"Searched in:");
+                            m_oLog.Log($"{strSearched}");
+                            m_oLog.Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
+                            m_oLog.Log("or providing the file as a parameter at Library.Go()");
+                        }
+
+                        m_oLog.Log($"Using light setup {strLightsFile} from disk");
+                        m_oViewer.LoadLightSetup(strLightsFile);
+                    }
+                }
+                else
+                {
+                    if (!File.Exists(strViewerEnvironment))
+                        throw new FileNotFoundException(strViewerEnvironment);
+
+                    m_oViewer.LoadLightSetup(strViewerEnvironment);
+                }
+
+                m_oViewer.SetBackgroundColor("FF");
+
+                // Make everything known globally
+
+                RegisterGlobalLibrary(m_oLib);
+                RegisterGlobalLogFile(m_oLog);
+                RegisterGlobalViewer(m_oViewer);
+            }
+
+            Library m_oLib;
+            Viewer  m_oViewer;
+            LogFile m_oLog;
+
+            ~GlobalInstance()
+            {
+                Dispose(false);
+            }
         
+            public void Dispose()
+            {
+                // Dispose of unmanaged resources.
+                Dispose(true);
+                // Suppress finalization.
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool bDisposing)
+            {
+                if (m_bDisposed)
+                    return;
+
+                if (bDisposing)
+                {
+                    UnregisterGlobalLogFile();
+                    UnregisterGlobalViewer();
+                    UnregisterGlobalLibrary();
+
+                    m_oLib      .Dispose();
+                    m_oViewer   .Dispose();
+                    m_oLog      .Dispose();
+                }
+
+                m_bDisposed = true;
+            }
+
+             bool m_bDisposed = false;
+        }
+
         public static Library oLibrary()
         {
             lock (m_mtxGlobalLibrary)
@@ -143,6 +304,7 @@ namespace PicoGK
         static Viewer?  m_oGlobalViewer = null;
         static object   m_mtxGlobalViewer = new();
 
+
         /// <summary>
         /// This is the one library function that you call to run your code
         /// it sets up the PicoGK library, with the specified voxel size and
@@ -151,26 +313,12 @@ namespace PicoGK
         /// inside of fnTask, you do your processing, displaying it in
         /// Library::oTheViewer and logging info with Library::Log()
         /// </summary>
-        /// <param name="_fVoxelSizeMM">
-        /// The global voxel size in MM, for example 0.1
-        /// </param>
-        /// <param name="fnTask">
-        /// The task to be executed (it will run in a separate thread)
-        /// </param>
-        /// <param name="strLogFolder">
-        /// The folder where you want the log file (defaults to your
-        /// documents folder
-        /// </param>
-        /// <param name="strLogFileName">
-        /// The file name for your log. Defaults to PicoGK_ with date and time
-        /// appended. If your specify the same log file name here, it prevents
-        /// PicoGK from creating a new log file name everytime.
-        /// </param>
-        /// <param name="strSrcFolder">
-        /// This is purely a helper for you, it's not used internally. But you
-        /// can access this folder name throug Library::strSrcFolder, which is
-        /// convenient.
-        /// </param>
+        /// <param name="fVoxelSizeMM">Voxel size in millimeters</param>
+        /// <param name="fnTask">The task to execute</param>
+        /// <param name="strLogPath">Filename of the logfile</param>
+        /// <param name="bEndAppWithTask">If true, the viewer exits when your task is done</param>
+        /// <param name="strWindowTitle">The title of your viewer window</param>
+        /// <param name="strLightsFile">A specific lighting environment to load</param>
         /// <exception cref="Exception">
         /// Throws an exception, for a number of scenarios, for example, if the
         /// library cannot be found, folders, etc. cannot be created, etc.
@@ -178,11 +326,10 @@ namespace PicoGK
         /// </exception>
         public static void Go(  float fVoxelSizeMM,
                                 ThreadStart fnTask,
-                                string strLogFolder     = "",
-                                string strLogFileName   = "",
-                                string strSrcFolder     = "",
-                                string strLightsFile    = "",
-                                bool bEndAppWithTask    = false)
+                                string strLogPath       = "",
+                                bool bEndAppWithTask    = false,
+                                string strWindowTitle   = "PicoGK",
+                                string strLightsFile    = "")
         {
             lock (m_mtxGlobalLibrary)
             {
@@ -193,182 +340,38 @@ namespace PicoGK
             if (fVoxelSizeMM <= 0.0f)
                 throw new Exception("Voxel size needs to be larger than 0mm");
 
-            if (strLogFolder == "")
-                strLogFolder = Utils.strDocumentsFolder();
+            if (strLogPath == "")
+                strLogPath = Path.Combine(Utils.strDocumentsFolder(), "PicoGK.log");
 
-            if (strLogFileName == "")
-                strLogFileName = "PicoGK.log";
-
-            string strLog = Path.Combine(   strLogFolder,
-                                            strLogFileName);
-
-            LogFile oLog;
-
-            try
+            using (GlobalInstance oInstance = new(fVoxelSizeMM, strLogPath, strWindowTitle, strLightsFile))
             {
-                oLog = new(strLog);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Unable to create PicoGK log file: {strLog}");
-                Console.WriteLine($"{e.Message}");
-                throw;
-            }
+                Thread oThread = new Thread(fnTask);
+                Log("Starting tasks.\n");
+                oThread.Start();
 
-            using (oLog)
-            {
-                Library oLib;
-
-                try
+                while (oInstance.oViewer.bPoll())
                 {
-                    oLib = new (fVoxelSizeMM);
-                }
-                catch (Exception e)
-                {
-                    oLog.Log($"-----------------------------------------");
-                    oLog.Log($"-- Could not initialize PicoGK Library --");
-                    oLog.Log($"-----------------------------------------");
-                    oLog.Log($"Most likely cause is that the PicoGK runtime library wasn't found");
-                    oLog.Log($"Make sure {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.");
-                    oLog.Log($"See PicoGK documentation on GitHub for troubleshooting info");
-                    oLog.Log($"Terribly long error string follows (usually devoid of real information):");
-                    oLog.Log($"--------------------------------");
-                    oLog.Log($"-");
-                    oLog.Log($"{e}\n");
-                    oLog.Log($"-");
-                    oLog.Log($"--------------------------------");
-                    
-                    throw new Exception("Failed to load PicoGK library");
+                    Thread.Sleep(5); // 200 Hz is plenty
+
+                    if (bEndAppWithTask)
+                    {
+                        // Close app when task ends
+
+                        if (!oThread.IsAlive)
+                        {
+                            // Task is done
+                            // Check if viewer has pending actions
+                            // if not, we are done
+                            if (oInstance.oViewer.bIsIdle())
+                                break;
+
+                            // Otherwise we do another cycle
+                        }
+                    }
                 }
 
-                using (oLib)
-                {
-                    try
-                    {
-                        TestAssumptions();
-                        // Check memory layout and other things
-                    }
-                    catch
-                    {
-                        oLog.Log("Internal compatibility error between runtime and C# code");
-                        throw new Exception("Failed to load PicoGK library");
-                    }
-
-                    if (!oLib.bSetup(oLog))
-                    {
-                        oLog.Log("Unable to use PicoGK library");
-                        throw new Exception("Unable to use PicoGK library");
-                    }
-
-                    oLog.Log("Welcome to PicoGK");
-                    oLog.Log("Loading Viewer");
-
-                    Viewer oViewer;
-
-                    try
-                    {
-                        oViewer = new Viewer(   "PicoGK", 
-                                                new Vector2(2048f, 1024f),
-                                                oLog);
-                    }
-
-                    catch (Exception e)
-                    {
-                        oLog.Log("Failed to create viewer");
-                        oLog.Log(e.Message);
-
-                        throw new Exception("Failed to create all necessary objects");
-                    }
-
-                    using (oViewer)
-                    {
-                        try
-                        {
-                            // Load lights
-                            string strSearched = "";
-
-                            if (strLightsFile == "")
-                            {
-                                // No lights file specified, let's try to load the embedded environment first
-
-                                try
-                                {
-                                    oLog.Log($"Loading lights embedded environment");
-
-                                    Assembly oAssembly = typeof(Library).Assembly;
-                                    using Stream oStream = oAssembly.GetManifestResourceStream("PicoGK.Resources.Environment.zip")
-                                                                    ?? throw new FileNotFoundException("Embedded environmet not found.");
-                                    oViewer.LoadLightSetup(oStream);
-                                }
-
-                                catch (Exception)
-                                {
-                                    oLog.Log($"Could not load lights embedded environment, trying to load from disk instead.");
-
-                                    strLightsFile = strFindLightSetupFile(  strSrcFolder, 
-                                                                            out strSearched);
-
-                                    if (!File.Exists(strLightsFile))
-                                    {
-                                        strSearched += strLightsFile + "\n";
-
-                                        oLog.Log($"Could not find a lights file - your viewer will look quite dark.");
-                                        oLog.Log($"Searched in:");
-                                        oLog.Log($"{strSearched}");
-                                        oLog.Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
-                                        oLog.Log("or providing the file as a parameter at Library.Go()");
-                                    }
-
-                                    oLog.Log($"Using light setup {strLightsFile} from disk");
-                                    oViewer.LoadLightSetup(strLightsFile);
-                                }
-                            }
-                            
-                            oViewer.SetBackgroundColor("FF");
-                        }
-
-                        catch (Exception e)
-                        {
-                            oLog.Log($"Failed to load Light Setup - your viewer will look dark\n{e.Message}");
-                        }
-                        
-                    }
-
-                    {
-                        RegisterGlobalLogFile(oLog);
-                        RegisterGlobalLibrary(oLib);
-                        RegisterGlobalViewer(oViewer);
-
-                        Thread oThread = new Thread(fnTask);
-
-                        Log("Starting tasks.\n");
-                        oThread.Start();
-
-                        while (oViewer.bPoll())
-                        {
-                            Thread.Sleep(5); // 200 Hz is plenty
-
-                            if (bEndAppWithTask)
-                            {
-                                // Close app when task ends
-
-                                if (!oThread.IsAlive)
-                                {
-                                    // Task is done
-                                    // Check if viewer has pending actions
-                                    // if not, we are done
-                                    if (oViewer.bIsIdle())
-                                        break;
-
-                                    // Otherwise we do another cycle
-                                }
-                            }
-                        }
-
-                        m_bAppExit = true;
-                        Log("Viewer Window Closed");
-                    }
-                }
+                m_bAppExit = true;
+                Log("Viewer Window Closed");
             }
         }
 
@@ -409,52 +412,7 @@ namespace PicoGK
         static bool m_bAppExit = false;
         static bool m_bContinueTask = true;   
 
-        /// <summary>
-        /// Logs the information from the library, usually the first line of
-        /// defence, if something is misconfigured, for example the library path
-        /// Also attempts to create all data types - if this blows up, then
-        /// something is wrong with the C++/C# interplay
-        /// </summary>
-        /// <returns></returns>
-        bool bSetup(LogFile log)
-        {
-            try
-            {
-                log.Log($"PicoGK:    {Library.strName}");
-                log.Log($"           {Library.strVersion}");
-                log.Log($"           {Library.strBuildInfo}\n");
-                log.Log($"VoxelSize: {fVoxelSize} (mm)");
-
-                log.Log("Happy Computational Engineering!\n\n");
-            }
-
-            catch (Exception e)
-            {
-                log.Log("Failed to get PicoGK library info:\n\n{0}", e.Message);
-                return false;
-            }
-
-            try
-            {
-                Lattice     lat     = new(this);
-                Voxels      vox     = new(this);
-                Mesh        msh     = new(this);
-                Voxels      voxM    = new(msh);
-                Voxels      voxL    = new(lat);
-                PolyLine    oPoly   = new(this, "FF0000");
-            }
-
-            catch (Exception e)
-            {
-                log.Log("Failed to instantiate basic PicoGK types:\n\n{0}", e.Message);
-                return false;
-            }
-
-            return true;
-        }
-
-        public static string strFindLightSetupFile( string strInputFolder,
-                                                    out string strSearched)
+        public static string strFindLightSetupFile(out string strSearched)
         {
             strSearched = "";
 
@@ -466,20 +424,8 @@ namespace PicoGK
 
             strSearched += strLightsFile + "\n";
 
-            if (strInputFolder == "")
-            {
-                strLightsFile = Path.Combine(   Utils.strDocumentsFolder(), 
-                                                "ViewerEnvironment.zip");
-
-                strSearched += strLightsFile + "\n";
-            }
-            else
-            {
-                strLightsFile = Path.Combine(   strInputFolder, 
-                                                "ViewerEnvironment.zip");
-
-                strSearched += strLightsFile + "\n";
-            }
+            strLightsFile = Path.Combine(   Utils.strDocumentsFolder(), 
+                                            "ViewerEnvironment.zip");
 
             if (!File.Exists(strLightsFile))
             {

@@ -175,14 +175,10 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                Mesh msh = new Mesh(m_vox);
-
-                lock (oViewer.m_oVoxels)
-                {
-                    oViewer.m_oVoxels.Add(m_vox, msh);
-                }
-
-                oViewer.DoAdd(msh, m_nGroupID);
+                _AddVoxels( m_vox.lib.hThis,
+                            oViewer.hThis,
+                            m_nGroupID,
+                            m_vox.hThis);
             }
          
             Voxels m_vox;
@@ -198,19 +194,9 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                Mesh? msh;
-
-                lock (oViewer.m_oVoxels)
-                {
-                    if (!oViewer.m_oVoxels.TryGetValue(m_vox, out msh))
-                    {
-                        throw new Exception("Tried to remove voxels that were never added");
-                    }
-
-                    oViewer.m_oVoxels.Remove(m_vox);
-                }
-
-                oViewer.DoRemove(msh);
+                _RemoveVoxels(  m_vox.lib.hThis,
+                                oViewer.hThis,
+                                m_vox.hThis);
             }
 
             Voxels m_vox;
@@ -228,7 +214,10 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                oViewer.DoAdd(m_msh, m_nGroupID);
+                _AddMesh(   m_msh.lib.hThis,
+                            oViewer.hThis,
+                            m_nGroupID,
+                            m_msh.hThis);
             }
 
             Mesh m_msh;
@@ -244,7 +233,9 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                oViewer.DoRemove(m_msh);
+                _RemoveMesh(    m_msh.lib.hThis,
+                                oViewer.hThis,
+                                m_msh.hThis);
             }
 
             Mesh m_msh;
@@ -252,7 +243,7 @@ namespace PicoGK
 
         class AddPolyLineAction : IViewerAction
         {
-            public AddPolyLineAction(PolyLine poly,
+            public AddPolyLineAction(   PolyLine poly,
                                         int nGroupID)
             {
                 m_poly = poly;
@@ -261,17 +252,11 @@ namespace PicoGK
 
             public void Do(Viewer oViewer)
             {
-                oViewer.m_oBBox.Include(m_poly.oBoundingBox());
-
                 _AddPolyLine(   m_poly.lib.hThis,
                                 oViewer.hThis,
                                 m_nGroupID,
                                 m_poly.hThis);
 
-                lock (oViewer.m_oPolyLines)
-                {
-                    oViewer.m_oPolyLines.Add(m_poly);
-                }
             }
 
             PolyLine m_poly;
@@ -299,91 +284,8 @@ namespace PicoGK
         {
             public void Do(Viewer oViewer)
             {
-                lock (oViewer.m_oPolyLines)
-                {
-                    foreach (PolyLine oPoly in oViewer.m_oPolyLines)
-                    {
-                        _RemovePolyLine(    oPoly.lib.hThis,
-                                            oViewer.hThis, 
-                                            oPoly.hThis);
-                    }
-
-                    oViewer.m_oPolyLines.Clear();
-                }
-
-                lock (oViewer.m_oVoxels)
-                {
-                    oViewer.m_oVoxels.Clear();
-                }
-
-                lock (oViewer.m_oMeshes)
-                {
-                    foreach (Mesh oMesh in oViewer.m_oMeshes)
-                    {
-                        _RemoveMesh(    oMesh.lib.hThis,
-                                        oViewer.hThis, 
-                                        oMesh.hThis);
-                    }
-
-                    oViewer.m_oMeshes.Clear();
-                }
-
-                // Clear bounds
-                oViewer.RecalculateBoundingBox();
+                /// TODO
             }
-        }
-
-        class LogStatisticsAction : IViewerAction
-        {
-            public LogStatisticsAction(LogFile oLog)
-            {
-                m_oLog = oLog;
-            }
-
-            public void Do(Viewer oViewer)
-            {
-                float fTriangles = 0;
-                float fVertices = 0;
-                ulong nMeshes = 0;
-
-                lock (oViewer.m_oMeshes)
-                {
-                    foreach (Mesh msh in oViewer.m_oMeshes)
-                    {
-                        fTriangles += (float)msh.nTriangleCount();
-                        fVertices += (float)msh.nVertexCount();
-                        nMeshes++;
-                    }
-                }
-
-                string strUnit = "";
-
-                if (fTriangles > 1000f)
-                {
-                    strUnit = "K";
-                    fTriangles  /= 1000.0f;
-                    fVertices   /= 1000.0f;
-
-                    if (fTriangles > 1000f)
-                    {
-                        strUnit = "mio";
-                        fTriangles /= 1000.0f;
-                        fVertices /= 1000.0f;
-                    }
-                }
-
-                m_oLog.Log($"Viewer Stats:");
-                m_oLog.Log($"   Number of Meshes: {nMeshes}");
-                lock (oViewer.m_oVoxels)
-                {
-                    m_oLog.Log($"   Voxel Objects:    {oViewer.m_oVoxels.Count()}");
-                }
-                m_oLog.Log($"   Total Triangles:  {fTriangles:F1}{strUnit}");
-                m_oLog.Log($"   Total Vertices:   {fVertices:F1}{strUnit}");
-                m_oLog.Log($"   Bounding Box:     {oViewer.m_oBBox}");
-            }
-
-            LogFile m_oLog;
         }
 
         class LoadLightSetupAction : IViewerAction

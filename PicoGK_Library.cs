@@ -47,6 +47,36 @@ namespace PicoGK
             hThis               = _hCreateInstance(fVoxelSizeMM);
             fVoxelSize          = fVoxelSizeMM;
             m_oTimerMemCheck    = new(_ => MonitorMemory(), null, m_oInterval, m_oInterval);
+
+
+            // Test a few assumptions
+            // Built in data type Vector3 is implicit,
+            // so should be compatible with our own
+            // structs, but let's be sure
+
+            Vector3     vec3    = new();
+            Vector2     vec2    = new();
+            Matrix4x4   mat4    = new();
+            Coord       xyz     = new(0, 0, 0);
+            Triangle    tri     = new(0, 0, 0);
+            ColorFloat  clr     = new(0f);
+            BBox2       oBB2    = new();
+            BBox3       oBB3    = new();
+
+            Debug.Assert(sizeof(bool)           == 1);                  // 8 bit for bool assumed
+            Debug.Assert(Marshal.SizeOf(vec3)   == ((32 * 3) / 8));     // 3 x 32 bit float
+            Debug.Assert(Marshal.SizeOf(vec2)   == ((32 * 2) / 8));     // 2 x 32 bit float
+            Debug.Assert(Marshal.SizeOf(mat4)   == ((32 * 16) / 8));    // 4 x 4 x 32 bit float 
+            Debug.Assert(Marshal.SizeOf(xyz)    == ((32 * 3) / 8));     // 3 x 32 bit integer
+            Debug.Assert(Marshal.SizeOf(tri)    == ((32 * 3) / 8));     // 3 x 32 bit integer
+            Debug.Assert(Marshal.SizeOf(clr)    == ((32 * 4) / 8));     // 4 x 32 bit float
+            Debug.Assert(Marshal.SizeOf(oBB2)   == ((32 * 2 * 2) / 8)); // 2 x vec2
+            Debug.Assert(Marshal.SizeOf(oBB3)   == ((32 * 3 * 2) / 8)); // 2 x vec3
+
+            // If any of these assert, then something is wrong with the
+            // memory layout, and the interface to compatible C libraries
+            // will fail - this should never happen, as all these types
+            // are well-defined
         }
 
         public long nTotalMemUsage()
@@ -165,38 +195,6 @@ namespace PicoGK
 
         public readonly float fVoxelSize;
 
-        public static void TestAssumptions()
-        {
-            // Test a few assumptions
-            // Built in data type Vector3 is implicit,
-            // so should be compatible with our own
-            // structs, but let's be sure
-
-            Vector3     vec3    = new();
-            Vector2     vec2    = new();
-            Matrix4x4   mat4    = new();
-            Coord       xyz     = new(0, 0, 0);
-            Triangle    tri     = new(0, 0, 0);
-            ColorFloat  clr     = new(0f);
-            BBox2       oBB2    = new();
-            BBox3       oBB3    = new();
-
-            Debug.Assert(sizeof(bool)           == 1);                  // 8 bit for bool assumed
-            Debug.Assert(Marshal.SizeOf(vec3)   == ((32 * 3) / 8));     // 3 x 32 bit float
-            Debug.Assert(Marshal.SizeOf(vec2)   == ((32 * 2) / 8));     // 2 x 32 bit float
-            Debug.Assert(Marshal.SizeOf(mat4)   == ((32 * 16) / 8));    // 4 x 4 x 32 bit float 
-            Debug.Assert(Marshal.SizeOf(xyz)    == ((32 * 3) / 8));     // 3 x 32 bit integer
-            Debug.Assert(Marshal.SizeOf(tri)    == ((32 * 3) / 8));     // 3 x 32 bit integer
-            Debug.Assert(Marshal.SizeOf(clr)    == ((32 * 4) / 8));     // 4 x 32 bit float
-            Debug.Assert(Marshal.SizeOf(oBB2)   == ((32 * 2 * 2) / 8)); // 2 x vec2
-            Debug.Assert(Marshal.SizeOf(oBB3)   == ((32 * 3 * 2) / 8)); // 2 x vec3
-
-            // If any of these assert, then something is wrong with the
-            // memory layout, and the interface to compatible C libraries
-            // will fail - this should never happen, as all these types
-            // are well-defined
-        }
-
         ~Library()
         {
             Dispose(false);
@@ -212,16 +210,22 @@ namespace PicoGK
 
         protected virtual void Dispose(bool bDisposing)
         {
+            
             if (m_bDisposed)
             {
                 return;
             }
 
+            Console.WriteLine("Disposing Library");
+
             if (bDisposing)
             {
+                
                 m_oTimerMemCheck?.Dispose();
                 _DestroyInstance(hThis);
             }
+
+            Console.WriteLine("Done Disposing Library");
 
             m_bDisposed = true;
         }
@@ -236,6 +240,7 @@ namespace PicoGK
 
         void MonitorMemory()
         {
+            Console.WriteLine("Monitor Memory");
             // Monitor Library's memory use over time
             // and communicate to Garbage Collector
             // Without this, the Garbage Collector hardly
@@ -257,6 +262,8 @@ namespace PicoGK
             }
 
             m_nUsedMemory = nNew;
+
+            Console.WriteLine("Monitor Memory - Done");
         }
     }
 }
