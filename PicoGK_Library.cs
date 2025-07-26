@@ -240,7 +240,6 @@ namespace PicoGK
 
         void MonitorMemory()
         {
-            Console.WriteLine("Monitor Memory");
             // Monitor Library's memory use over time
             // and communicate to Garbage Collector
             // Without this, the Garbage Collector hardly
@@ -262,8 +261,6 @@ namespace PicoGK
             }
 
             m_nUsedMemory = nNew;
-
-            Console.WriteLine("Monitor Memory - Done");
         }
     }
 }
