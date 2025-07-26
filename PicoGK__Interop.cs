@@ -660,6 +660,9 @@ namespace PicoGK
                                                     IntPtr      hThis,
                                                     PolyHandle  hPolyLine);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_RemoveAllObjects")]
+        private static extern void _RemoveAllObjects(IntPtr      hThis);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SetGroupVisible")]
         private static extern void _SetGroupVisible(    IntPtr  hThis,
                                                         int     nGroupID,

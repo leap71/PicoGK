@@ -284,7 +284,7 @@ namespace PicoGK
         {
             public void Do(Viewer oViewer)
             {
-                /// TODO
+                _RemoveAllObjects(oViewer.hThis);
             }
         }
 
