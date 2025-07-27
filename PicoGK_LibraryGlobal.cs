@@ -370,6 +370,27 @@ namespace PicoGK
                     }
                 }
 
+                // Request task to end
+                EndTask();
+
+                int n=0;
+                while (oThread.IsAlive)
+                {
+                    // Continue polling viewer to show GUI state
+
+                    oInstance.oViewer.bPoll();
+                    Thread.Sleep(5);
+                    
+                    if (n==0)
+                    {
+                        Log("Viewer window closing requested - Waiting for task to end.");
+                    }
+
+                    n++;
+                    if (n>200)
+                        n=0;
+                }
+
                 m_bAppExit = true;
                 Log("Viewer Window Closed");
             }
