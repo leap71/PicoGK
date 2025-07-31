@@ -558,7 +558,7 @@ namespace PicoGK
             return m_aclrValues[x + (y * nWidth)];
         }
 
-        ColorRgba32[] m_aclrValues;
+        internal ColorRgba32[] m_aclrValues;
     }
 
     public partial class ImageRgb24 : ImageColorAbstract

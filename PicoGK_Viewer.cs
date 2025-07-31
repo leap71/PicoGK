@@ -36,6 +36,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
@@ -581,6 +582,26 @@ namespace PicoGK
 
             RequestUpdate();
         }
+
+        public partial class GpuTex
+        {
+            public GpuTex(  Viewer oSetViewer,
+                            ImageRgba32 img)
+            {
+                oViewer = oSetViewer;
+
+                GCHandle handle = GCHandle.Alloc(img.m_aclrValues, GCHandleType.Pinned);
+                try
+                {
+                    IntPtr ptr = handle.AddrOfPinnedObject();
+                    hThis = _hCreate(oViewer.hThis, img.nWidth, img.nHeight, ptr);
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+        } 
     }
 }
     

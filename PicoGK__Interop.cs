@@ -732,6 +732,107 @@ namespace PicoGK
 
         bool    m_bDisposed = false;
         internal readonly IntPtr hThis;
+
+        public partial class GpuTex : IDisposable
+        {
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_GpuTex_hCreate")]
+            private static extern GpuTexHandle _hCreate(   IntPtr hViewer,
+                                                int nWidth,
+                                                int nHeight,
+                                                IntPtr pRgba8);
+
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_GpuTex_MarkForCleanup")]
+            private static extern void _MarkForCleanup( IntPtr hViewer,
+                                                        GpuTexHandle hThis);
+            
+            ~GpuTex()
+            {
+                Dispose(false);
+            }
+
+            public void Dispose()
+            {
+                // Dispose of unmanaged resources.
+                Dispose(true);
+                // Suppress finalization.
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool bDisposing)
+            {
+                
+                if (m_bDisposed)
+                {
+                    return;
+                }
+
+                if (bDisposing)
+                {
+                    // dispose managed state (managed objects).
+                    // Nothing to do in this class
+                }
+
+                _MarkForCleanup(oViewer.hThis, hThis);
+                m_bDisposed = true;
+            }
+
+            bool m_bDisposed = false;
+
+            internal Viewer  oViewer;
+            internal GpuTexHandle hThis;
+        }
+
+        public partial class SideBar : IDisposable
+        {
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SideBar_hCreate")]
+            extern internal static GuiSideBarHandle _hCreate(   IntPtr hViewer,
+                                                                bool bLeft,
+                                                                int nMin,
+                                                                int nMax,
+                                                                int nDef,
+                                                                ColorFloat clrBackground,
+                                                                ColorFloat clrBackgroundHv);
+
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SideBar_Destroy")]
+            extern internal static void  _Destroy(  IntPtr hThis,
+                                                    GuiSideBarHandle hSideBar);
+
+            ~SideBar()
+            {
+                Dispose(false);
+            }
+
+            public void Dispose()
+            {
+                // Dispose of unmanaged resources.
+                Dispose(true);
+                // Suppress finalization.
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool bDisposing)
+            {
+                
+                if (m_bDisposed)
+                {
+                    return;
+                }
+
+                if (bDisposing)
+                {
+                    // dispose managed state (managed objects).
+                    // Nothing to do in this class
+                }
+
+                _Destroy(oViewer.hThis, hThis);
+                m_bDisposed = true;
+            }
+
+            bool m_bDisposed = false;
+
+            internal Viewer oViewer;
+            internal GuiSideBarHandle hThis;
+        }
     }
 
     public partial class OpenVdbFile : IDisposable
