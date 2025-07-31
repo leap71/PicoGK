@@ -304,7 +304,6 @@ namespace PicoGK
         static Viewer?  m_oGlobalViewer = null;
         static object   m_mtxGlobalViewer = new();
 
-
         /// <summary>
         /// This is the one library function that you call to run your code
         /// it sets up the PicoGK library, with the specified voxel size and
