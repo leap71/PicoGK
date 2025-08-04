@@ -668,11 +668,6 @@ namespace PicoGK
                                                         int     nGroupID,
                                                         bool    bVisible);
 
-        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SetGroupStatic")]
-        private static extern void _SetGroupStatic( IntPtr hThis,
-                                                    int nGroupID,
-                                                    bool bStatic);
-
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SetGroupMaterial")]
         private static extern void _SetGroupMaterial(   IntPtr          hThis,
                                                         int             nGroupID,
@@ -684,6 +679,16 @@ namespace PicoGK
         private static extern void _SetGroupMatrix( IntPtr          hThis,
                                                     int             nGroupID,
                                                     in Matrix4x4    mat);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_EnableGroupWarnOverhang")]
+        private static extern void _EnableGroupWarnOverhang(    IntPtr  hThis,
+                                                                int     nGroupID,
+                                                                int     nWarningAngleDeg,
+                                                                int     nErrorAngleDeg);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_DisableGroupWarnOverhang")]
+        private static extern void _DisableGroupWarnOverhang(   IntPtr  hThis,
+                                                                int     nGroupID);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_GetBoundingBox")]
         private static extern void _GetBoundingBox( IntPtr       hThis,

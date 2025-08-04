@@ -291,15 +291,6 @@ namespace PicoGK
             }
         }
 
-        public void SetGroupStatic( int nGroupID,
-                                    bool bStatic)
-        {
-            lock (m_oActions)
-            {
-                m_oActions.Enqueue(new SetGroupStaticAction(nGroupID, bStatic));
-            }
-        }
-
         public void SetGroupMaterial    (int        nGroupID,
                                         ColorFloat  clr,
                                         float       fMetallic,
@@ -322,6 +313,26 @@ namespace PicoGK
                 m_oActions.Enqueue(new SetGroupMatrixAction(    nGroupID,
                                                                 mat));
             }
+        }
+
+        public void EnableOverhangWarning(  int nGroupID,
+                                            int nWarningAngleDeg,
+                                            int nErrorAngleDeg)
+        {
+            lock (m_oActions)
+            {
+                m_oActions.Enqueue(new EnableGroupOverhangWarningAction(    nGroupID, 
+                                                                            nWarningAngleDeg, 
+                                                                            nErrorAngleDeg));
+            }   
+        }
+
+        public void DisableOverhangWarning(int nGroupID)
+        {
+            lock (m_oActions)
+            {
+                m_oActions.Enqueue(new DisableGroupOverhangWarningAction(nGroupID));
+            }   
         }
 
         public BBox3 oBBox()

@@ -66,26 +66,6 @@ namespace PicoGK
             bool m_bVisible;
         }
 
-        class SetGroupStaticAction : IViewerAction
-        {
-            public SetGroupStaticAction(    int nGroupID,
-                                            bool bStatic)
-            {
-                m_nGroupID  = nGroupID;
-                m_bStatic   = bStatic;
-            }
-
-            public void Do(Viewer oViewer)
-            {
-                _SetGroupStatic(    oViewer.hThis,
-                                    m_nGroupID,
-                                    m_bStatic);
-            }
-
-            int m_nGroupID;
-            bool m_bStatic;
-        }
-
         class SetGroupMaterialAction : IViewerAction
         {
             public SetGroupMaterialAction(  int         nGroupID,
@@ -132,6 +112,46 @@ namespace PicoGK
 
             int         m_nGroupID;
             Matrix4x4   m_mat;
+        }
+
+        class EnableGroupOverhangWarningAction : IViewerAction
+        {
+            public EnableGroupOverhangWarningAction(    int nGroupID,
+                                                        int nWarningAngleDeg,
+                                                        int nErrorAngleDeg)
+            {
+                m_nGroupID      = nGroupID;
+                m_nWarningAngle = nWarningAngleDeg;
+                m_nErrorAngle   = nErrorAngleDeg;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                _EnableGroupWarnOverhang(   oViewer.hThis,
+                                            m_nGroupID,
+                                            m_nWarningAngle,
+                                            m_nErrorAngle);
+            }
+
+            int m_nGroupID;
+            int m_nWarningAngle;
+            int m_nErrorAngle;
+        }
+
+        class DisableGroupOverhangWarningAction : IViewerAction
+        {
+            public DisableGroupOverhangWarningAction(int nGroupID)
+            {
+                m_nGroupID      = nGroupID;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                _DisableGroupWarnOverhang(  oViewer.hThis,
+                                            m_nGroupID);
+            }
+
+            int m_nGroupID;
         }
 
         class RequestUpdateAction : IViewerAction
