@@ -33,6 +33,9 @@
 // limitations under the License.   
 //
 
+using System.Numerics;
+
+
 /// The extended constructors provided in this file allow PicoGK objects to be
 /// instatiated without providing a Library reference. This enables work inside
 /// a typical Library::Go task without passing library references around
@@ -63,6 +66,20 @@ namespace PicoGK
         : this(Library.oLibrary(), xImplicit)
         {
 
+        }
+
+        /// <summary>
+        /// Create a voxel field with a sphere inside
+        /// </summary>
+        /// <param name="vecCenter">Center of the sphere</param>
+        /// <param name="fRadius">Radius of the Sphere</param>
+        /// <returns></returns>
+        public static Voxels voxSphere( Vector3 vecCenter, 
+                                        float fRadius)
+        {
+            Lattice lat = new(Library.oLibrary());
+            lat.AddSphere(vecCenter, fRadius);
+            return new(lat);
         }
     }   
 
