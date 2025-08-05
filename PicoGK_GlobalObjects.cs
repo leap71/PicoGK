@@ -43,6 +43,7 @@ using System.Numerics;
 /// Library.RegisterGlobalLibrary function. If you run your task using PicoGK.Go
 /// all of this is done for you automatically
 /// 
+
 namespace PicoGK
 {
     public partial class Voxels
@@ -81,6 +82,9 @@ namespace PicoGK
             lat.AddSphere(vecCenter, fRadius);
             return new(lat);
         }
+
+        public static Voxels voxFromVdbFile(string strFileName)
+            => voxFromVdbFile(Library.oLibrary(), strFileName);
     }   
 
     public partial class Mesh

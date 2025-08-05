@@ -205,6 +205,34 @@ namespace PicoGK
              bool m_bDisposed = false;
         }
 
+        public static float fVoxelSizeMM
+        {
+            get
+            {
+                lock (m_mtxGlobalLibrary)
+                {
+                    if (m_oGlobalLibrary is null)
+                        throw new Exception("Your code relies on being called using Library::Go");
+
+                    return m_oGlobalLibrary.fVoxelSize;
+                }
+            }
+        }
+
+        public static string strLogFolder
+        {
+            get
+            {
+                lock (m_mtxGlobalLibrary)
+                {
+                    if (m_oGlobalLibrary is null)
+                        throw new Exception("Your code relies on being called using Library::Go");
+
+                    return m_strLogPath;
+                }
+            }
+        }
+
         public static Library oLibrary()
         {
             lock (m_mtxGlobalLibrary)
@@ -298,6 +326,8 @@ namespace PicoGK
         static Library? m_oGlobalLibrary = null;
         static object   m_mtxGlobalLibrary = new();
 
+        static string   m_strLogPath    = "";
+
         static LogFile? m_oGlobalLogFile = null;
         static object   m_mtxGlobalLogFile = new();
 
@@ -325,7 +355,7 @@ namespace PicoGK
         /// </exception>
         public static void Go(  float fVoxelSizeMM,
                                 ThreadStart fnTask,
-                                string strLogPath       = "",
+                                string strLogFilePath   = "",
                                 bool bEndAppWithTask    = false,
                                 string strWindowTitle   = "PicoGK",
                                 string strLightsFile    = "")
@@ -339,10 +369,12 @@ namespace PicoGK
             if (fVoxelSizeMM <= 0.0f)
                 throw new Exception("Voxel size needs to be larger than 0mm");
 
-            if (strLogPath == "")
-                strLogPath = Path.Combine(Utils.strDocumentsFolder(), "PicoGK.log");
+            if (strLogFilePath == "")
+                strLogFilePath = Path.Combine(Utils.strDocumentsFolder(), "PicoGK.log");
 
-            using (GlobalInstance oInstance = new(fVoxelSizeMM, strLogPath, strWindowTitle, strLightsFile))
+            m_strLogPath = Path.GetDirectoryName(strLogFilePath) ?? Utils.strDocumentsFolder();
+
+            using (GlobalInstance oInstance = new(fVoxelSizeMM, strLogFilePath, strWindowTitle, strLightsFile))
             {
                 Thread oThread = new Thread(fnTask);
                 Log("Starting tasks.\n");
