@@ -749,6 +749,17 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Returns whether the location specified lies inside the solid
+        /// domain of the voxel field (are you at or below the surface)
+        /// </summary>
+        /// <param name="vecTestPoint">Point to evaluate</param>
+        /// <returns>True if inside or on the surface, False if outside</returns>
+        public bool bIsInside(Vector3 vecTestPoint)
+        {
+            return _bIsInside(lib.hThis, hThis, vecTestPoint);
+        }
+
+        /// <summary>
         /// Returns the normal of the surface found at the specified point.
         /// Use after functions like bClosestPointOnSurface or bRayCastToSurface
         /// </summary>

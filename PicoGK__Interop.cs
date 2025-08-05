@@ -371,12 +371,6 @@ namespace PicoGK
                                                     float fStartX,
                                                     float fEndX);
 
-        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsInside")]
-        private static extern bool _bIsInside(      LibHandle   hLib,
-                                                    VoxHandle   hThis,
-                                                    in Vector3 vecTestPoint);
-
-
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsEqual")]
         private static extern bool _bIsEqual(   LibHandle   hLib,
                                                 VoxHandle   hThis,
@@ -387,6 +381,11 @@ namespace PicoGK
                                                             VoxHandle   hThis,
                                                             ref float   pfVolume,
                                                             ref BBox3   oBBox);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsInside")]
+        private static extern bool _bIsInside(      LibHandle   hLib,
+                                                    VoxHandle   hThis,
+                                                    in Vector3 vecTestPoint);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetSurfaceNormal")]
         private extern static void _GetSurfaceNormal(   LibHandle   hLib,
