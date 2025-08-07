@@ -355,7 +355,9 @@ namespace PicoGK
             {
                 oViewer.RemoveAllAnimations();
 
-                Vector2 vecTo = new Vector2(    oViewer.m_fOrbit,
+                /// TODO
+
+                /*Vector2 vecTo = new Vector2(    oViewer.m_fOrbit,
                                                 oViewer.m_fElevation);
 
                 switch (m_eDir)
@@ -391,7 +393,7 @@ namespace PicoGK
                                         Animation.EType.Once,
                                         Easing.EEasing.CUBIC_OUT);
 
-                oViewer.AddAnimation(oAnim);
+                oViewer.AddAnimation(oAnim);*/
             }
 
             EDir m_eDir;

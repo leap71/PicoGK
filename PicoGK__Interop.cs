@@ -555,11 +555,8 @@ namespace PicoGK
         public delegate void UpdateCallback(    IntPtr          hViewer,
                                                 in Vector2      vecViewport,
                                                 ref ColorFloat  clrBackground,
-                                                ref Matrix4x4   matModelViewProjection,
-                                                ref Matrix4x4   matModelTransform,
-                                                ref Matrix4x4   matStatic,
-                                                ref Vector3     vecEyePosition,
-                                                ref Vector3     vecEyeStatic);
+                                                ref Matrix4x4   matVP,
+                                                ref Vector3     vecEye);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void KeyPressedCallback(    IntPtr  hViewer,
@@ -570,7 +567,11 @@ namespace PicoGK
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void MouseMovedCallback(    IntPtr      poViewer,
-                                                    in Vector2  vecMousePos);
+                                                    in Vector2  vecMousePos,
+                                                    bool        bShift,
+                                                    bool        bCtrl,
+                                                    bool        bAlt,
+                                                    bool        bCmd);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void MouseButtonCallback(   IntPtr      hViewer,
@@ -582,7 +583,11 @@ namespace PicoGK
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void ScrollWheelCallback(   IntPtr      hViewer,
                                                     in Vector2  vecScrollWheel,
-                                                    in Vector2  vecMousePos);
+                                                    in Vector2  vecMousePos,
+                                                    bool        bShift,
+                                                    bool        bCtrl,
+                                                    bool        bAlt,
+                                                    bool        bCmd);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WindowSizelCallback(   IntPtr hViewer,

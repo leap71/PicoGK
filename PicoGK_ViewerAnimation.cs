@@ -87,7 +87,8 @@ namespace PicoGK
                 Vector2 vec = (m_vecTo - m_vecFrom) * fFactor;
                 vec += m_vecFrom;
 
-                m_oViewer.SetViewAngles(vec.X, vec.Y);
+                /// TODO
+                ///m_oViewer.SetViewAngles(vec.X, vec.Y);
             }
 
             Viewer m_oViewer;

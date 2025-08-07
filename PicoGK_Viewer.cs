@@ -348,36 +348,9 @@ namespace PicoGK
             RequestUpdate();
         }
 
-        public void AdjustViewAngles(   float fOrbitRelative,
-                                        float fElevationRelative)
-        {
-            SetViewAngles(  m_fOrbit + fOrbitRelative,
-                            m_fElevation + fElevationRelative);
-        }
-
-        public void SetViewAngles(  float fOrbit,
-                                    float fElevation)
-        {
-            m_fElevation = fElevation;
-
-            if (m_fElevation > 180.0f)
-                fElevation = 90.0f;
-            else if (m_fElevation < 180.0f)
-                fElevation = -90.0f;
-
-            m_fOrbit = fOrbit;
-
-            while (m_fOrbit > 360.0f)
-                m_fOrbit -= 360.0f;
-            while (m_fOrbit < 0.0f)
-                m_fOrbit += 360.0f;
-
-            RequestUpdate();
-        }
-
         public void SetFov(float fAngle)
         {
-            m_fFov = fAngle;
+            m_oCamera.SetFov(fAngle);
             RequestUpdate();
         }
 
@@ -400,12 +373,6 @@ namespace PicoGK
 
         bool m_bIdle = false;
 
-        public float m_fElevation   = 30.0f;
-        public float m_fOrbit       = 45.0f;
-        float m_fFov                = 45.0f;
-        float m_fZoom               = 1.0f;
-        bool m_bPerspective         = true;
-
         int m_iMainThreadID = -1;
 
         ColorFloat m_clrBackground = new(0.3f);
@@ -418,17 +385,14 @@ namespace PicoGK
                             msh.hThis);
         }
 
-        Matrix4x4 m_matModelTrans           = Matrix4x4.Identity;
-        Matrix4x4 m_matModelViewProjection  = Matrix4x4.Identity;
-        Matrix4x4 m_matModelViewStatic      = Matrix4x4.Identity;
-        Matrix4x4 m_matProjectionStatic     = Matrix4x4.Identity;
-        Matrix4x4 m_matStatic               = Matrix4x4.Identity;
-        Vector3 m_vecEye                    = new Vector3(1.0f);
-        Vector3 m_vecEyeStatic              = new Vector3(0f, 10f, 0f);
-        Vector2 m_vecPrevPos                = new();
-        bool m_bOrbit                       = false;
-
         LogFile m_oLog;
+
+        CamPerspectiveArc  m_oCamera               = new(45);
+        bool            m_bEmptyViewer          = true;
+        bool            m_bHadCamInteractions   = false;
+
+        bool            m_bMouseDrag            = false;
+        Vector2         m_vecMousePos           = Vector2.Zero;
 
         ///////// Internals
 
@@ -438,15 +402,14 @@ namespace PicoGK
             m_oLog.Log(strMessage);
         }
 
-        void UpdateCB(  IntPtr hViewer,
-                        in Vector2 vecViewport,
-                        ref ColorFloat clrBackground,
-                        ref Matrix4x4 matModelViewProjection,
-                        ref Matrix4x4 matModelTransform,
-                        ref Matrix4x4 matStatic,
-                        ref Vector3 vecEyePosition,
-                        ref Vector3 vecEyeStatic)
+        void UpdateCB(  IntPtr          hViewer,
+                        in Vector2      vecViewport,
+                        ref ColorFloat  clrBackground,
+                        ref Matrix4x4   matVP,
+                        ref Vector3     vecEye)
         {
+            m_oCamera.SetAspect(vecViewport);
+            
             try
             {
                 Debug.Assert(hViewer == hThis);
@@ -455,50 +418,18 @@ namespace PicoGK
 
                 if (!oBox.bIsEmpty())
                 {
-                    Vector3 vecSceneCenter = oBox.vecCenter();
-
-                    double fR = ((oBox.vecMax - vecSceneCenter).Length() * 3.0f) * m_fZoom;
-                    double fRElev = Math.Cos((double)m_fElevation * Math.PI / 180.0f) * fR;
-
-                    m_vecEye.X = (float)(Math.Cos((double)m_fOrbit * Math.PI / 180.0) * fRElev);
-                    m_vecEye.Y = (float)(Math.Sin((double)m_fOrbit * Math.PI / 180.0) * fRElev);
-                    m_vecEye.Z = (float)(Math.Sin((double)m_fElevation * Math.PI / 180.0) * fR);
-
-                    float fFar = (vecSceneCenter - m_vecEye).Length() * 2.0f;
-
-                    Matrix4x4 matModelView = Utils.matLookAt(m_vecEye, vecSceneCenter);
-
-                    Matrix4x4 matProjection;
-
-                    if (m_bPerspective)
+                    if (    m_bEmptyViewer ||         // Viewer had no content before
+                            (!m_bHadCamInteractions))   // Viewer was never interacted with
                     {
-                        matProjection = Matrix4x4.CreatePerspectiveFieldOfView(
-                            (float)(m_fFov * Math.PI / 180.0),
-                            vecViewport.X / vecViewport.Y,
-                            0.1f,
-                            fFar);
-                    }
-                    else
-                    {
-                        matProjection = Matrix4x4.CreateOrthographic(   oBox.vecSize().X * 2,
-                                                                        oBox.vecSize().Y * 2,
-                                                                        0.1f,
-                                                                        fFar);
+                        m_oCamera.ZoomToFit(oBox);
                     }
 
-                    m_matModelViewStatic    = Utils.matLookAt(m_vecEyeStatic, new Vector3(0, 0, 0));
-                    m_matProjectionStatic   = Matrix4x4.CreateOrthographic(100f * vecViewport.X / vecViewport.Y, 100f, 0.1f, 100f);
-
-                    m_matModelViewProjection = matModelView * matProjection;
-                    m_matStatic = m_matModelViewStatic * m_matProjectionStatic;
+                    m_bEmptyViewer = false;
                 }
 
-                vecEyeStatic                = m_vecEyeStatic;
-                vecEyePosition              = m_vecEye;
-                matStatic                   = m_matStatic;
-                matModelViewProjection      = m_matModelViewProjection;
-                matModelTransform           = m_matModelTrans;
-                clrBackground               = m_clrBackground;
+                matVP           =   m_oCamera.matVP;
+                vecEye          =   m_oCamera.vecEye;
+                clrBackground   =   m_clrBackground;
             }
 
             catch (Exception e)
@@ -507,7 +438,7 @@ namespace PicoGK
             }
         }
 
-        void KeyPressedCB(IntPtr hViewer,
+        void KeyPressedCB(  IntPtr hViewer,
                             int iKey,
                             int iScancode,
                             int iAction,
@@ -521,7 +452,7 @@ namespace PicoGK
             {
                 foreach (IKeyHandler xHandler in m_oKeyHandlers)
                 {
-                    if (xHandler.bHandleEvent(this,
+                    if (xHandler.bHandleEvent(  this,
                                                 eKey, iAction == 1, // Pressed
                                                 (iModifiers & 0x0001) != 0,
                                                 (iModifiers & 0x0002) != 0,
@@ -532,57 +463,78 @@ namespace PicoGK
             }
         }
 
-        void MouseMovedCB(IntPtr hViewer,
-                            in Vector2 vecMousePos)
+        void MouseMovedCB(  IntPtr hViewer,
+                            in Vector2 vecMousePos,
+                            bool        bShift,
+                            bool        bCtrl,
+                            bool        bAlt,
+                            bool        bCmd)
         {
             Debug.Assert(hViewer == hThis);
-            if (m_bOrbit)
+
+            if (m_bMouseDrag)
             {
-                Vector2 vecDist = vecMousePos - m_vecPrevPos;
-                AdjustViewAngles(-vecDist.X / 2.0f, vecDist.Y / 2);
-                m_vecPrevPos = vecMousePos;
+                Vector2 vecDist = vecMousePos - m_vecMousePos;
+                m_oCamera.MouseDrag(vecDist, bShift ? Camera.EDragType.PAN : Camera.EDragType.ROTATE);
+                m_bHadCamInteractions = true;
 
                 lock (m_oAnims)
                 {
                     m_oAnims.Clear();
                 }
+
+                RequestUpdate();
             }
+
+            m_vecMousePos = vecMousePos;
         }
 
-        void MouseButtonCB(IntPtr hViewer,
+        void MouseButtonCB( IntPtr hViewer,
                             int iButton,
                             int iAction,
                             int iModifiers,
                             in Vector2 vecMousePos)
         {
             Debug.Assert(hViewer == hThis);
+            m_vecMousePos = vecMousePos;
+
             if (iAction == 1)
             {
-                m_bOrbit = true;
-                m_vecPrevPos = vecMousePos;
-
+                m_bMouseDrag = true;
+                
                 lock (m_oAnims)
                 {
                     m_oAnims.Clear();
                 }
+
+                RequestUpdate();
             }
             else if (iAction == 0)
             {
-                m_bOrbit = false;
+                m_bMouseDrag = false;
             }
         }
 
-        void ScrollWheelCB( IntPtr hViewer,
-                            in Vector2 vecScrollWheel,
-                            in Vector2 vecMousePos)
+        void ScrollWheelCB( IntPtr      hViewer,
+                            in Vector2  vecScrollWheel,
+                            in Vector2  vecMousePos,
+                            bool        bShift,
+                            bool        bCtrl,
+                            bool        bAlt,
+                            bool        bCmd)
         {
             Debug.Assert(hViewer == hThis);
 
-            m_fZoom -= vecScrollWheel.Y / 50f;
+            if (bCtrl || bCmd)
+            {
+                m_oCamera.Scroll(vecScrollWheel);
+            }
+            else
+            {
+                m_oCamera.MouseDrag(vecScrollWheel * 3, bShift ? Camera.EDragType.PAN : Camera.EDragType.ROTATE);
+            }
 
-            if (m_fZoom < 0.1f)
-                m_fZoom = 0.1f;
-
+            m_bHadCamInteractions = true;
             RequestUpdate();
         }
 
@@ -590,6 +542,8 @@ namespace PicoGK
                             in Vector2 vecWindowSize)
         {
             Debug.Assert(hViewer == hThis);
+
+            m_oCamera.SetAspect(vecWindowSize);
 
             RequestUpdate();
         }
