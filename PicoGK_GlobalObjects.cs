@@ -83,6 +83,18 @@ namespace PicoGK
             return new(lat);
         }
 
+        /// <summary>
+        /// Combines all voxel fields in the container and returns the result
+        /// </summary>
+        /// <param name="avoxList">Container with the voxel fields</param>
+        /// <returns>All voxel fields combined</returns>
+        public static Voxels voxCombineAll(in IEnumerable<Voxels> avoxList)
+        {
+            Voxels vox = new(Library.oLibrary());
+            vox.BoolAddAll(avoxList);
+            return vox;
+        }
+
         public static Voxels voxFromVdbFile(string strFileName)
             => voxFromVdbFile(Library.oLibrary(), strFileName);
     }   
