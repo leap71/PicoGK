@@ -78,9 +78,9 @@ namespace PicoGK
 
                 try
                 {    
-                    m_oLog.Log($"PicoGK:    {Library.strName}");
-                    m_oLog.Log($"           {Library.strVersion}");
-                    m_oLog.Log($"           {Library.strBuildInfo}\n");
+                    m_oLog.Log($"PicoGK:    {Library.strName()}");
+                    m_oLog.Log($"           {Library.strVersion()}");
+                    m_oLog.Log($"           {Library.strBuildInfo()}\n");
                     m_oLog.Log($"VoxelSize: {fVoxelSizeMM} (mm)");
 
                     m_oLog.Log("Happy Computational Engineering!\n\n");
