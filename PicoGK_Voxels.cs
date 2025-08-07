@@ -952,8 +952,45 @@ namespace PicoGK
             Antialiased
         }
 
+        public enum ESliceAxis
+        {
+            X,
+            Y,
+            Z
+        }
+
         /// <summary>
-        /// Returns a signed distance-field-encoded slice of the voxel field
+        /// Allocate a grayscale image that can hold a voxel slice
+        /// </summary>
+        /// <param name="nSliceCount">Number of slices in the specified axis</param>
+        /// <param name="eAxis">Axis to use for the slice direction</param>
+        /// <returns>Allocated grayscale image to be used in GetVoxelSlice</returns>
+        public ImageGrayScale imgAllocateSlice( out int nSliceCount,
+                                                ESliceAxis eAxis = ESliceAxis.Z)
+        {
+            GetVoxelDimensions( out int nXSize, 
+                                out int nYSize, 
+                                out int nZSize);
+
+            switch (eAxis)
+            {
+            case ESliceAxis.Z:
+                nSliceCount = nZSize;
+                return new ImageGrayScale(nXSize, nYSize);
+
+            case ESliceAxis.Y:
+                nSliceCount = nYSize;
+                return new ImageGrayScale(nXSize, nZSize);
+                
+            case ESliceAxis.X:
+            default:
+                nSliceCount = nXSize;
+                return new ImageGrayScale(nYSize, nZSize);
+            }
+        }
+
+        /// <summary>
+        /// Returns a slice of the voxel field along the specified axis.
         /// To use it, use GetVoxelDimensions to find out the size of the voxel
         /// field in voxel units. Then allocate a new grayscale image to copy
         /// the data into, and pass it as a reference. Since GetVoxelDimensions
@@ -961,18 +998,40 @@ namespace PicoGK
         /// on you to allocate an image and don't create it for you. You can
         /// also re-use the image if you want to save an entire image stack
         /// </summary>
-        /// <param name="nZSlice">Slice to retrieve. 0 is at the bottom.</param>
+        /// <param name="nSlice">Slice to retrieve. 0 is at the origin.</param>
         /// <param name="img">Pre-allocated grayscale image to receive the values</param>
-        public void GetVoxelSlice(  in int nZSlice,
+        /// <param name="eMode">Encoding mode of the image, defaults to signed distance, 
+        /// which is the native narrow band distance encoded in the float image. You
+        /// can also speciy black/white, which encodes the inside of the field as black
+        /// pixels, or antialiased, which encodes the outside narrow band in grayscale</param>
+        /// <param name="eAxis">Axis to slice along, defaults to Z, but you can also slice
+        /// along X and Y</param>
+        public void GetVoxelSlice(  in int nSlice,
                                     ref ImageGrayScale img,
-                                    ESliceMode eMode = ESliceMode.SignedDistance)
+                                    ESliceMode eMode = ESliceMode.SignedDistance,
+                                    ESliceAxis eAxis = ESliceAxis.Z)
         {
             float fBackground = 0f;
             GCHandle oPinnedArray = GCHandle.Alloc(img.m_afValues, GCHandleType.Pinned);
             try
             {
                 IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
-                _GetVoxelSlice(lib.hThis, hThis, nZSlice, afBufferPtr, ref fBackground);
+
+                switch (eAxis)
+                {
+                case ESliceAxis.Z:
+                    _GetZSlice(lib.hThis, hThis, nSlice, afBufferPtr, ref fBackground);
+                    break;
+
+                case ESliceAxis.Y:
+                    _GetYSlice(lib.hThis, hThis, nSlice, afBufferPtr, ref fBackground);
+                    break;
+
+                case ESliceAxis.X:
+                default:
+                    _GetXSlice(lib.hThis, hThis, nSlice, afBufferPtr, ref fBackground);
+                    break;
+                }
             }
             finally
             {
@@ -1051,6 +1110,10 @@ namespace PicoGK
         /// </summary>
         /// <param name="nZSlice">Slice to retrieve. 0 is at the bottom.</param>
         /// <param name="img">Pre-allocated grayscale image to receive the values</param>
+        /// <param name="eMode">Encoding mode of the image, defaults to signed distance, 
+        /// which is the native narrow band distance encoded in the float image. You
+        /// can also speciy black/white, which encodes the inside of the field as black
+        /// pixels, or antialiased, which encodes the outside narrow band in grayscale</param>
         public void GetInterpolatedVoxelSlice(  in float fZSlice,
                                                 ref ImageGrayScale img,
                                                 ESliceMode eMode = ESliceMode.SignedDistance)
@@ -1060,7 +1123,7 @@ namespace PicoGK
             try
             {
                 IntPtr afBufferPtr = oPinnedArray.AddrOfPinnedObject();
-                _GetInterpolatedVoxelSlice(lib.hThis, hThis, fZSlice, afBufferPtr, ref fBackground);
+                _GetInterpolatedZSlice(lib.hThis, hThis, fZSlice, afBufferPtr, ref fBackground);
             }
             finally
             {

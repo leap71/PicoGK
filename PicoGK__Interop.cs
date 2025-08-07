@@ -416,19 +416,33 @@ namespace PicoGK
                                                         ref int nYSize,
                                                         ref int nZSize);
 
-        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetSlice")]
-        private extern static void _GetVoxelSlice(  LibHandle   hLib,
-                                                    VoxHandle   hThis,
-                                                    int nZSlice,
-                                                    IntPtr afBuffer,
-                                                    ref float fBackgroundValue);
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetXSlice")]
+        private extern static void _GetXSlice(  LibHandle   hLib,
+                                                VoxHandle   hThis,
+                                                int nXSlice,
+                                                IntPtr afBuffer,
+                                                ref float fBackgroundValue);
 
-        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetInterpolatedSlice")]
-        private extern static void _GetInterpolatedVoxelSlice(  LibHandle   hLib,
-                                                                VoxHandle   hThis,
-                                                                float fZSlice,
-                                                                IntPtr afBuffer,
-                                                                ref float fBackgroundValue);
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetYSlice")]
+        private extern static void _GetYSlice(  LibHandle   hLib,
+                                                VoxHandle   hThis,
+                                                int nYSlice,
+                                                IntPtr afBuffer,
+                                                ref float fBackgroundValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetZSlice")]
+        private extern static void _GetZSlice(  LibHandle   hLib,
+                                                VoxHandle   hThis,
+                                                int nZSlice,
+                                                IntPtr afBuffer,
+                                                ref float fBackgroundValue);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_GetInterpolatedZSlice")]
+        private extern static void _GetInterpolatedZSlice(  LibHandle   hLib,
+                                                            VoxHandle   hThis,
+                                                            float fZSlice,
+                                                            IntPtr afBuffer,
+                                                            ref float fBackgroundValue);
 
         // Dispose Pattern
 
