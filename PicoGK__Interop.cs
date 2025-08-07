@@ -764,6 +764,11 @@ namespace PicoGK
                                                 int nHeight,
                                                 IntPtr pRgba8);
 
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_GpuTex_Refresh")]
+            private static extern void _Refresh( IntPtr hViewer,
+                                                 GpuTexHandle hThis,
+                                                 IntPtr pRgba8);
+
             [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_GpuTex_MarkForCleanup")]
             private static extern void _MarkForCleanup( IntPtr hViewer,
                                                         GpuTexHandle hThis);
