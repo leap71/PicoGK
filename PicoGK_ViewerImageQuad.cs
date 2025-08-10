@@ -76,8 +76,6 @@ namespace PicoGK
             {
                 _SetMatrix(oViewer.hThis, hThis, mat);
             }
-
-            GpuTex  m_oTex;
         } 
     }
 }

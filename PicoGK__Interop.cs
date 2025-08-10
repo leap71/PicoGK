@@ -854,8 +854,7 @@ namespace PicoGK
 
                 if (bDisposing)
                 {
-                    // dispose managed state (managed objects).
-                    // Nothing to do in this class
+                    m_oTex.Dispose();
                 }
 
                 _Destroy(oViewer.hThis, hThis);
@@ -866,6 +865,8 @@ namespace PicoGK
 
             internal Viewer     oViewer;
             internal QuadHandle hThis;
+
+            GpuTex  m_oTex;
         }
 
         public partial class SideBar : IDisposable
