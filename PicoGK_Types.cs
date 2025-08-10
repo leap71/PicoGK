@@ -51,6 +51,7 @@ namespace PicoGK
     public readonly record struct ScalarFieldHandle(IntPtr Value);
     public readonly record struct VectorFieldHandle(IntPtr Value);
     public readonly record struct GpuTexHandle(IntPtr Value);
+    public readonly record struct QuadHandle(IntPtr Value);
     public readonly record struct GuiSideBarHandle(IntPtr Value);
 
     public class PicoGKAllocException : Exception

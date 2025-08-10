@@ -114,12 +114,12 @@ namespace PicoGK
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_VoxelsToMm")]
         private static extern void _VoxelsToMm( LibHandle  hLib,
-                                                Vector3 vecVoxelCoordinate,
+                                                in  Vector3 vecVoxelCoordinate,
                                                 ref Vector3 vecMmCoordinate);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Library_MmToVoxels")]
         private static extern void _MmToVoxels( LibHandle  hLib,
-                                                Vector3 vecMmCoordinate,
+                                                in  Vector3 vecMmCoordinate,
                                                 ref Vector3 vecVoxelCoordinate);
     }
 
@@ -808,6 +808,64 @@ namespace PicoGK
 
             internal Viewer  oViewer;
             internal GpuTexHandle hThis;
+        }
+
+        public partial class ImageQuad : IDisposable
+        {
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_Quad_hCreate")]
+            private static extern QuadHandle _hCreate(  IntPtr          hThis,
+                                                        GpuTexHandle    hTexDefault,
+                                                        ColorFloat      clrDefault,
+                                                        float           fAlpha,
+                                                        in Matrix4x4    mat,
+                                                        bool            bFlipX,
+                                                        bool            bFlipY,
+                                                        bool            bDoubleSided);
+
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_Quad_Destroy")]
+            private static extern void _Destroy(    IntPtr       hThis,
+                                                    QuadHandle  hQuad);
+
+            [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_Quad_SetMatrix")]
+            private static extern void _SetMatrix(  IntPtr          hThis,
+                                                    QuadHandle      hQuad,
+                                                    in Matrix4x4    mat);
+
+            ~ImageQuad()
+            {
+                Dispose(false);
+            }
+
+            public void Dispose()
+            {
+                // Dispose of unmanaged resources.
+                Dispose(true);
+                // Suppress finalization.
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool bDisposing)
+            {
+                
+                if (m_bDisposed)
+                {
+                    return;
+                }
+
+                if (bDisposing)
+                {
+                    // dispose managed state (managed objects).
+                    // Nothing to do in this class
+                }
+
+                _Destroy(oViewer.hThis, hThis);
+                m_bDisposed = true;
+            }
+
+            bool m_bDisposed = false;
+
+            internal Viewer     oViewer;
+            internal QuadHandle hThis;
         }
 
         public partial class SideBar : IDisposable
