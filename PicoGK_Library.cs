@@ -171,7 +171,7 @@ namespace PicoGK
             Vector3 vecMm = new();
             Vector3 vecVoxels   = new Vector3(x, y, z);
             _VoxelsToMm(    hThis,
-                            vecVoxels,
+                            in vecVoxels,
                             ref vecMm);
 
             return vecMm;
