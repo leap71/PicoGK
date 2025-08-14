@@ -309,6 +309,14 @@ namespace PicoGK
         private static extern void _Destroy(    LibHandle   hLib,
                                                 VoxHandle   hThis);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_nMemUsage")]
+        private static extern long _nMemUsage(      LibHandle   hLib,
+                                                    VoxHandle   hThis);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_fVoxelSize")]
+        private static extern float _fVoxelSize(    LibHandle   hLib,
+                                                    VoxHandle   hThis);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_BoolAdd")]
         private static extern void _BoolAdd(    LibHandle   hLib,
                                                 VoxHandle   hThis,

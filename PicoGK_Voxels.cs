@@ -197,6 +197,21 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Returns the amount of memory in bytes used by this object
+        /// </summary>
+        /// <returns>Number of bytes allocated to this object</returns>
+        public long nMemUsage()
+        {
+            return _nMemUsage(lib.hThis, hThis);
+        }
+
+        /// <summary>
+        /// Returns the voxel size in millimeters used in the voxel field
+        /// </summary>
+        /// <returns>Voxel size in mm</returns>
+        public float fVoxelSize => _fVoxelSize(lib.hThis, hThis);
+
+        /// <summary>
         /// Performs a boolean union between two voxel fields
         /// Our voxelfield will have all the voxels set that the operands also has set
         /// </summary>
