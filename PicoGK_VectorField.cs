@@ -94,7 +94,7 @@ namespace PicoGK
         /// <summary>
         /// Creates a gradient field from an existing voxel field
         /// </summary>
-        /// <param name="oVoxels">Voxels to create gradients from</param>
+        /// <param name="vox">Voxels to create gradients from</param>
         public VectorField(Voxels vox)
             : this( vox.lib, 
                     _hCreateFromVoxels( vox.lib.hThis, 
@@ -108,7 +108,7 @@ namespace PicoGK
         /// Creates a vector field from an existing voxel field
         /// setting the value of each voxel to the specified value
         /// </summary>
-        /// <param name="oVoxels">Voxel field that defines which values to set</param>
+        /// <param name="vox">Voxel field that defines which values to set</param>
         /// <param name="vecValue">Value to set in the vector field</param>
         /// <param name="fSdThreshold">The threshold of the signed distance field
         /// to be used for the definition of "inside" - usually 0.5 is a good

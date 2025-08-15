@@ -117,10 +117,9 @@ namespace PicoGK
             return mshTrans;
         }
 
-        //// <summary>
+        /// <summary>
         /// Mirrors a mesh at the specified plane.
         /// </summary>
-        /// <param name="msh">The mesh to mirror.</param>
         /// <param name="vecPlanePoint">A point through which the mirror plane passes.</param>
         /// <param name="vecPlaneNormal">The normal vector of the mirror plane.</param>
         /// <returns>The mirrored mesh.</returns>
@@ -203,13 +202,13 @@ namespace PicoGK
                                     t);
         }
 
-        //// <summary>
-        ///  Add a triangle to the mesh with the specified vertex indices
+        /// <summary>
+        /// Add a triangle to the mesh with the specified vertex indices
         /// </summary>
         /// <param name="A">First vertex in the triangle</param>
         /// <param name="B">Second vertex in the triangle</param>
         /// <param name="C">Third vertex in the triangle</param>
-        /// <returns>The triangle index of the added triangle in the mesh</returns>
+        /// <returns></returns>
         public int nAddTriangle(int A, int B, int C)
         {
             return nAddTriangle(new Triangle(A, B, C));

@@ -784,6 +784,7 @@ namespace PicoGK
         /// <param name="strFileName">File name of the .CLI file</param>
         /// <param name="fLayerHeight">Layer height in mm
         /// Typical values are 30 micron (0.03f) or 60 micron (0.06f)</param>
+        /// <param name="eFormat">Format options</param>
         /// <param name="bUseAbsXYOrigin">If specified, the CLI file uses the 
         /// position in space in X/Y that the voxel field was in. By default
         /// the position of the CLI slices are relative to the voxel field

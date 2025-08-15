@@ -105,6 +105,7 @@ namespace PicoGK
         /// Creates a new .VDB file object by attempting to load it from disk
         /// Note, the order of the fields in the file is arbitrary
         /// </summary>
+        /// <param name="libSet">Library instance to use</param>
         /// <param name="strFileName">Path and filename of the .VDB</param>
         /// <exception cref="FileLoadException">
         /// If file cannot be read, exception is thrown.

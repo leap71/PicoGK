@@ -45,7 +45,8 @@ namespace PicoGK
         /// <summary>
         /// Create a new polyline with the specified color
         /// </summary>
-        /// <param name="clr"></param>
+        /// <param name="libSet">Library instance to use</param>
+        /// <param name="clr">Color of the polyline</param>
         public PolyLine(    Library libSet,
                             ColorFloat clr)
         {
@@ -69,9 +70,9 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Adds all vertices from a container (such as a List<>)
+        /// Adds all vertices from a container
         /// </summary>
-        /// <param name="avec">list/array etc. of vertices</param>
+        /// <param name="avec">Container containing vertices</param>
         public void Add(IEnumerable<Vector3> avec)
         {
             foreach (Vector3 vec in avec)
@@ -187,16 +188,10 @@ namespace PicoGK
             nAddVertex(vecTip);
         }
 
-        /// <summary>
-        /// Adds a cross at the end of the current polyline, oriented in X,Y,Z
-        /// The cross ends in the current position, so no change in the last
-        /// polyline position is made
-        /// </summary>
-        /// <param name="fSizeMM">
-        /// Optional size of the cross,
-        /// and the distance from the tip. Defaults to 1mm
-        /// </param>
-        /// <param name="_vecDir">Optional direction of the arrow</param>
+       /// <summary>
+       /// Add a cross at the end of a polyline
+       /// </summary>
+       /// <param name="fSizeMM">Size of the cross</param>
         public void AddCross(float fSizeMM = 1.0f)
         {
             if (nVertexCount() < 1)

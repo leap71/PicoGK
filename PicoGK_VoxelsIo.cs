@@ -37,26 +37,27 @@ namespace PicoGK
 {
 	public partial class Voxels
 	{
-		/// <summary>
-		/// Create Voxels from a OpenVDB file (.vdb)
-		/// This function searches for the first compatible field in the .vdb
-		/// file (OpenVDB supports storing many fields of various types in one
-		/// file). PicoGK Voxels need an openvdb::GRID_LEVEL_SET field.
-		/// Incompatible fields and other compatible fields after the first one
-		/// are ignored. For more sophisticated .vdb file handling, use
-		/// PicoGK.OpenVdbFile
-		/// Note: When you save your own VdbFiles with multiple fields in it
-		/// you cannot rely on the fields being in the same order as you saved
-		/// them. In other words, if you use PicoGK.OpenVdbFile to save multiple
-		/// Voxel fields to a file, loading Voxels with voxFromVdbFile will
-		/// load any one, not necessarily the one you saved first.
-		/// </summary>
-		/// <param name="strFileName">Path and file name of the VDB file</param>
-		/// <returns>A voxel field, based on the .vdb data</returns>
-		/// <exception cref="FileLoadException">If file is empty or no
-		/// compatible field found, an exception is thrown.
-		/// </exception>
-		public static Voxels voxFromVdbFile(	Library libSet,
+        /// <summary>
+        /// Create Voxels from a OpenVDB file (.vdb)
+        /// This function searches for the first compatible field in the .vdb
+        /// file (OpenVDB supports storing many fields of various types in one
+        /// file). PicoGK Voxels need an openvdb::GRID_LEVEL_SET field.
+        /// Incompatible fields and other compatible fields after the first one
+        /// are ignored. For more sophisticated .vdb file handling, use
+        /// PicoGK.OpenVdbFile
+        /// Note: When you save your own VdbFiles with multiple fields in it
+        /// you cannot rely on the fields being in the same order as you saved
+        /// them. In other words, if you use PicoGK.OpenVdbFile to save multiple
+        /// Voxel fields to a file, loading Voxels with voxFromVdbFile will
+        /// load any one, not necessarily the one you saved first.
+        /// </summary>
+        /// <param name="libSet">Library instance to use</param>
+        /// <param name="strFileName">Path and file name of the VDB file</param>
+        /// <returns>A voxel field, based on the .vdb data</returns>
+        /// <exception cref="FileLoadException">If file is empty or no
+        /// compatible field found, an exception is thrown.
+        /// </exception>
+        public static Voxels voxFromVdbFile(	Library libSet,
 												string strFileName)
 		{
 			OpenVdbFile oFile = new(libSet, strFileName);
@@ -85,7 +86,7 @@ namespace PicoGK
         /// Creates a new .vdb file and saves the voxel field to it
         /// </summary>
         /// <param name="strFileName">Path and filename of the file</param>
-        /// <exception Throws an exception if unable to save
+        /// <exception> Throws an exception if unable to save
         /// </exception>
         public void SaveToVdbFile(string strFileName)
 		{

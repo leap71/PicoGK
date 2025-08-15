@@ -105,7 +105,7 @@ namespace PicoGK
         /// Copy constructor, create a duplicate
         /// of the supplied voxel field
         /// </summary>
-        /// <param name="oSource">Source to copy from</param>
+        /// <param name="voxSource">Source to copy from</param>
         public Voxels(in Voxels voxSource)
             : this( voxSource.lib,
                     _hCreateCopy(   voxSource.lib.hThis,
@@ -134,7 +134,9 @@ namespace PicoGK
         /// Creates a new voxel field and renders it using the
         /// implicit function specified
         /// </summary>
-        /// <param name="oImplicit">Object producing a signed distance field</param>
+        /// <param name="libSet">Library instance to use</param>
+        /// <param name="xImplicit">Implicit function to render</param>
+        /// <param name="oBounds">Boundary box to evaluate for implicit function</param>
         public Voxels(  Library libSet,
                         in IImplicit xImplicit,
                         in BBox3 oBounds) : this(libSet)
@@ -146,7 +148,8 @@ namespace PicoGK
         /// Creates a new voxel field and renders it using the
         /// bounded implicit function specified
         /// </summary>
-        /// <param name="oImplicit">Object producing a signed distance field</param>
+        /// <param name="libSet">Library instance to use</param>
+        /// <param name="xImplicit">Implicit function to render</param>
         public Voxels(  Library libSet,
                         in IBoundedImplicit xImplicit) : this(libSet)
         {
@@ -184,6 +187,7 @@ namespace PicoGK
         /// <summary>
         /// Create a voxel field with a sphere inside
         /// </summary>
+        /// <param name="libSet">Library instance to use</param>
         /// <param name="vecCenter">Center of the sphere</param>
         /// <param name="fRadius">Radius of the Sphere</param>
         /// <returns></returns>
@@ -251,7 +255,7 @@ namespace PicoGK
                 BoolAdd(vox);
         }
 
-        // <summary>
+        /// <summary>
         /// Performs a boolean union of all voxels supplied in the
         /// container (List, Array, etc.) on a copy of the current voxel field
         /// and returns that copy
@@ -279,6 +283,7 @@ namespace PicoGK
         /// <summary>
         /// Combines all voxel fields in the container and returns the result
         /// </summary>
+        /// <param name="libSet">Library instance to use</param>
         /// <param name="avoxList">Container with the voxel fields</param>
         /// <returns>All voxel fields combined</returns>
         public static Voxels voxCombineAll( Library libSet,
@@ -388,7 +393,7 @@ namespace PicoGK
 
         /// <summary>
         /// Overloaded operator for intersect  (boolean AND)
-        /// vox = vox1 & vox2
+        /// vox = vox1 &amp; vox2
         /// </summary>
         public static Voxels operator &(Voxels voxA, Voxels voxB)
         {
@@ -444,8 +449,9 @@ namespace PicoGK
         /// Offsets a copy of the voxel field twice, by the specified distances
         /// Outwards is positive, inwards is negative 
         /// </summary>
-        /// <param name="fDistMM"></param>
-        /// <returns>Returns the resulting field</returns>
+        /// <param name="fDist1MM">First distance to offset</param>
+        /// <param name="fDist2MM">Second distance to offset</param>
+       /// <returns>Returns the resulting field</returns>
         public Voxels voxDoubleOffset(  float fDist1MM,
                                         float fDist2MM)
         {
@@ -856,7 +862,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="vecSearch">Search point</param>
         /// <param name="vecDirection">Direction to search in</param>
-        /// <returns>Point on surface/returns>
+        /// <returns>Point on surface</returns>
         /// <exception cref="Exception">Throws an exception of no intersection 
         /// with surface found.</exception>
         public Vector3 vecRayCastToSurface( in  Vector3 vecSearch,
@@ -1101,9 +1107,6 @@ namespace PicoGK
 
         /// <summary>
         /// Returns a signed distance-field-encoded slice of the voxel field
-        /// at the interpolated fZSlice value. This is the same as GetVoxelSlice
-        /// except you can use intermediate positions for the Z position, which
-        /// are interpolated between the actual two Z slice positions
         /// To use it, use GetVoxelDimensions to find out the size of the voxel
         /// field in voxel units. Then allocate a new grayscale image to copy
         /// the data into, and pass it as a reference. Since GetVoxelDimensions
@@ -1111,19 +1114,7 @@ namespace PicoGK
         /// on you to allocate an image and don't create it for you. You can
         /// also re-use the image if you want to save an entire image stack
         /// </summary>
-        /// <param name="fZSlice">Slice to retrieve. 
-        /// 0.5f is halfway between bottom and second layer.</param>
-        /// <param name="img">Pre-allocated grayscale image to receive the values</param>
-        /// <summary>
-        /// Returns a signed distance-field-encoded slice of the voxel field
-        /// To use it, use GetVoxelDimensions to find out the size of the voxel
-        /// field in voxel units. Then allocate a new grayscale image to copy
-        /// the data into, and pass it as a reference. Since GetVoxelDimensions
-        /// is potentially an "expensive" function, we are putting the burden
-        /// on you to allocate an image and don't create it for you. You can
-        /// also re-use the image if you want to save an entire image stack
-        /// </summary>
-        /// <param name="nZSlice">Slice to retrieve. 0 is at the bottom.</param>
+        /// <param name="fZSlice">Slice to retrieve. 0 is at the bottom.</param>
         /// <param name="img">Pre-allocated grayscale image to receive the values</param>
         /// <param name="eMode">Encoding mode of the image, defaults to signed distance, 
         /// which is the native narrow band distance encoded in the float image. You

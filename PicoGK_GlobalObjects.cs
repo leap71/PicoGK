@@ -36,13 +36,13 @@
 using System.Numerics;
 
 
-/// The extended constructors provided in this file allow PicoGK objects to be
-/// instatiated without providing a Library reference. This enables work inside
-/// a typical Library::Go task without passing library references around
-/// the global Library object needs to be registered using the
-/// Library.RegisterGlobalLibrary function. If you run your task using PicoGK.Go
-/// all of this is done for you automatically
-/// 
+// The extended constructors provided in this file allow PicoGK objects to be
+// instatiated without providing a Library reference. This enables work inside
+// a typical Library::Go task without passing library references around
+// the global Library object needs to be registered using the
+// Library.RegisterGlobalLibrary function. If you run your task using PicoGK.Go
+// all of this is done for you automatically
+// 
 
 namespace PicoGK
 {

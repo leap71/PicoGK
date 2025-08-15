@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Optional: suppress missing-doc warnings in CI until you’re ready -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
 
     <!-- NuGet Metadata -->
     <PackageId>PicoGK</PackageId>

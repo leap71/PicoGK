@@ -83,21 +83,29 @@ namespace PicoGK
             : this(oSource.lib, _hCreateCopy(oSource.lib.hThis, oSource.hThis))
         {}
 
+
         /// <summary>
         /// Creates a scalar field from an existing voxel field
-        /// setting the voxels inside the object to the specified value
+        /// setting the voxels inside the object to signed distance value
         /// of the voxels
         /// </summary>
-        /// <param name="oVoxels">Voxels to create SDF from</param>
-        /// <param name="fValue">Value to set the scalar field to</param>"
-        /// <param name="fSdThreshold">The threshold of the signed distance field
-        /// to be used for the definition of "inside" - usually 0.5 is a good
-        /// value - the surface is at exactly 0 and a value of
-        /// 1.0 means you are 1 voxel outside from the surface.</param>
+        /// <param name="vox"></param>
         public ScalarField(Voxels vox)
             : this(vox.lib, _hCreateFromVoxels(vox.lib.hThis, vox.hThis))
         { }
 
+        /// <summary>
+        /// Creates a new scalar field using the topology of an existing
+        /// voxel field. If the threshold is smaller than the specified
+        /// value, the scalar field value is set to the specified value
+        /// </summary>
+        /// <param name="vox">Voxel field to use as topology source</param>
+        /// <param name="fValue">Value to set the Scalar Field to if condition is met</param>
+        /// <param name="fSdThreshold">The threshold of the signed distance field
+        /// to be used for the definition of "inside" - usually 0.5 is a good
+        /// value - the surface is at exactly 0 and a value of
+        /// 1.0 means you are 1 voxel outside from the surface.
+        /// </param>
         public ScalarField( Voxels vox,
                             float fValue,
                             float fSdThreshold = 0.5f)

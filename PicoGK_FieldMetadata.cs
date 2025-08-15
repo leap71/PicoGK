@@ -285,12 +285,13 @@ namespace PicoGK
 
             return str;
         }
-    
+
         /// <summary>
         /// Internal constructor used by the Voxels, ScalarField and VectorField
         /// accessor function. Do not construct FieldMetadata objects by
         /// yourself
         /// </summary>
+        /// <param name="oLibrary">Library instance to use</param>
         /// <param name="hSource">This pointer</param>
         public FieldMetadata(   Library         oLibrary, 
                                 VdbMetaHandle   hSource)

@@ -344,7 +344,7 @@ namespace PicoGK
         /// </summary>
         /// <param name="fVoxelSizeMM">Voxel size in millimeters</param>
         /// <param name="fnTask">The task to execute</param>
-        /// <param name="strLogPath">Filename of the logfile</param>
+        /// <param name="strLogFilePath">Filename of the logfile</param>
         /// <param name="bEndAppWithTask">If true, the viewer exits when your task is done</param>
         /// <param name="strWindowTitle">The title of your viewer window</param>
         /// <param name="strLightsFile">A specific lighting environment to load</param>

@@ -58,6 +58,7 @@ namespace PicoGK
         /// <param name="eLoadUnit">Units to load</param>
         /// <param name="fPostScale">Scale parameter to be applied before offset</param>
         /// <param name="vecPostOffsetMM">Offset parameter to be applied last</param>
+        /// <param name="libSet">Library instance to use</param>
         /// <returns>Returns a valid mesh in any case. If file was invalid, the mesh may be empty.</returns>
         public static Mesh mshFromStlFile(  string strFilePath,
                                             EStlUnit eLoadUnit = EStlUnit.AUTO, // use units from file, or mm when not spec'd
