@@ -57,6 +57,13 @@ namespace PicoGK
             vecMax.Y = float.MinValue;
         }
 
+        /// <summary>
+        /// Create a 2D bounding box from float values for min/max
+        /// </summary>
+        /// <param name="fMinX">Min coordinate X</param>
+        /// <param name="fMinY">Min coordinate Y</param>
+        /// <param name="fMaxX">Max coordinate X</param>
+        /// <param name="fMaxY">Max coordinate Y</param>
         public BBox2(   float fMinX,
                         float fMinY,
                         float fMaxX,
@@ -200,10 +207,20 @@ namespace PicoGK
             return $"<Min: {vecMin} | Max: {vecMax}>";
         }
 
+        /// <summary>
+        /// Minimum coordinate of the bounding box
+        /// </summary>
         public Vector2 vecMin   = new();
+
+        /// <summary>
+        /// Maximum coordinate of the bounding box
+        /// </summary>
         public Vector2 vecMax   = new();
     }
 
+    /// <summary>
+    /// 3D bounding box
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BBox3
     {
@@ -221,6 +238,15 @@ namespace PicoGK
             vecMax.Z = float.MinValue;
         }
 
+        /// <summary>
+        /// Create a bounding box from six float values
+        /// </summary>
+        /// <param name="fMinX">Minimum X coordinate</param>
+        /// <param name="fMinY">Minimum Y coordinate</param>
+        /// <param name="fMinZ">Minimum Z coordinate</param>
+        /// <param name="fMaxX">Maximum X coordinate</param>
+        /// <param name="fMaxY">Maximum Y coordinate</param>
+        /// <param name="fMaxZ">Maximum Z coordinate</param>
         public BBox3(   float fMinX,
                         float fMinY,
                         float fMinZ,
@@ -453,7 +479,14 @@ namespace PicoGK
             return $"<Min: {vecMin} | Max: {vecMax}>";
         }
 
+        /// <summary>
+        /// Minimum coordinate of the bounding box
+        /// </summary>
         public Vector3 vecMin   = new();
+
+        /// <summary>
+        /// Maximum coordinate of the bounding box
+        /// </summary>
         public Vector3 vecMax   = new();
     }
 }

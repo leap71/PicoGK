@@ -48,14 +48,23 @@ namespace PicoGK
 {
     public partial class Voxels
     {
+        /// <summary>
+        /// Create a new empty voxels object, using the global library instance
+        /// </summary>
         public Voxels()
         : this(Library.oLibrary())
         {
 
         }
 
+        /// <summary>
+        /// Create a new Voxels object using the global library instance, 
+        /// rendering the implicit within the specified bounds
+        /// </summary>
+        /// <param name="xImplicit">Implicit to render</param>
+        /// <param name="oBounds">Bounding box to evaluate the implicit in</param>
         public Voxels(  in IImplicit xImplicit,
-                    in BBox3 oBounds)
+                        in BBox3 oBounds)
         : this( Library.oLibrary(), 
                 xImplicit, 
                 oBounds)
@@ -63,6 +72,11 @@ namespace PicoGK
 
         }
 
+        /// <summary>
+        /// Create a new Voxels object using the global library instance, 
+        /// rendering the specified bounded implicit 
+        /// </summary>
+        /// <param name="xImplicit">Bounded implicit to render</param>
         public Voxels(in IBoundedImplicit xImplicit) 
         : this(Library.oLibrary(), xImplicit)
         {
@@ -70,7 +84,8 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Create a voxel field with a sphere inside
+        /// Create a new Voxels object using the global library instance, 
+        /// rendering a sphere with the specified center and radius
         /// </summary>
         /// <param name="vecCenter">Center of the sphere</param>
         /// <param name="fRadius">Radius of the Sphere</param>
@@ -84,7 +99,8 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Combines all voxel fields in the container and returns the result
+        /// Create a new Voxels object using the global library instance, 
+        /// and adds all voxel fields in the container, returning the result
         /// </summary>
         /// <param name="avoxList">Container with the voxel fields</param>
         /// <returns>All voxel fields combined</returns>
@@ -95,12 +111,34 @@ namespace PicoGK
             return vox;
         }
 
+        /// <summary>
+        /// Create Voxels from a OpenVDB file (.vdb) using the global library instance.
+        /// This function searches for the first compatible field in the .vdb
+        /// file (OpenVDB supports storing many fields of various types in one
+        /// file). PicoGK Voxels need an openvdb::GRID_LEVEL_SET field.
+        /// Incompatible fields and other compatible fields after the first one
+        /// are ignored. For more sophisticated .vdb file handling, use
+        /// PicoGK.OpenVdbFile
+        /// Note: When you save your own VdbFiles with multiple fields in it
+        /// you cannot rely on the fields being in the same order as you saved
+        /// them. In other words, if you use PicoGK.OpenVdbFile to save multiple
+        /// Voxel fields to a file, loading Voxels with voxFromVdbFile will
+        /// load any one, not necessarily the one you saved first.
+        /// </summary>
+        /// <param name="strFileName">Path and file name of the VDB file</param>
+        /// <returns>A voxel field, based on the .vdb data</returns>
+        /// <exception cref="FileLoadException">If file is empty or no
+        /// compatible field found, an exception is thrown.
+        /// </exception>
         public static Voxels voxFromVdbFile(string strFileName)
             => voxFromVdbFile(Library.oLibrary(), strFileName);
     }   
 
     public partial class Mesh
     {
+        /// <summary>
+        /// Creates a new empty Mesh, using the global library instance
+        /// </summary>
         public Mesh()
             : this(Library.oLibrary())
         {
@@ -110,6 +148,9 @@ namespace PicoGK
 
     public partial class Lattice
     {
+        /// <summary>
+        /// Creates a new empty Lattice, using the global library instance
+        /// </summary>
         public Lattice()
             : this(Library.oLibrary())
         {
@@ -117,9 +158,13 @@ namespace PicoGK
         }
     }
 
+    
     public partial class PolyLine
     {
-       public PolyLine(ColorFloat clr)
+        /// <summary>
+        /// Creates a new empty PolyLine, using the global library instance
+        /// </summary>
+        public PolyLine(ColorFloat clr)
             : this(Library.oLibrary(), clr)
         {
 

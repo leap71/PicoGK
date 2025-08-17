@@ -44,9 +44,24 @@ namespace PicoGK
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public partial struct ColorFloat
     {
+        /// <summary>
+        /// Red value (1 is full color)
+        /// </summary>
         public float R;
+
+        /// <summary>
+        /// Green value (1 is full color)
+        /// </summary>
         public float G;
+
+        /// <summary>
+        /// Blue value (1 is full color)
+        /// </summary>
         public float B;
+
+        /// <summary>
+        /// Alpha value (1 is opaque, 0 is transparent)
+        /// </summary>
         public float A;
 
         /// <summary>
@@ -129,6 +144,10 @@ namespace PicoGK
             A = fAlpha;
         }
 
+        /// <summary>
+        /// Creates a floating point color from a RGB 24 bit color
+        /// </summary>
+        /// <param name="clr">RGB 24 bit color value</param>
         public ColorFloat(ColorRgb24 clr)
         {
             R = clr.R / 255.0f;
@@ -137,6 +156,10 @@ namespace PicoGK
             A = 1.0f;
         }
 
+        /// <summary>
+        /// Creates a floating point color from a RGBA 32 bit color
+        /// </summary>
+        /// <param name="clr">RGBA 32 bit color value</param>
         public ColorFloat(ColorRgba32 clr)
         {
             R = clr.R / 255.0f;
@@ -145,6 +168,10 @@ namespace PicoGK
             A = clr.A / 255.0f;
         }
 
+        /// <summary>
+        /// Creates a floating point color from a BGR 24 bit color
+        /// </summary>
+        /// <param name="clr">BGR 24 bit color value</param>
         public ColorFloat(ColorBgr24 clr)
         {
             R = clr.R / 255.0f;
@@ -153,6 +180,10 @@ namespace PicoGK
             A = 1.0f;
         }
 
+        /// <summary>
+        /// Creates a floating point color from a BGRA 32 bit color
+        /// </summary>
+        /// <param name="clr">BGRA 32 bit color value</param>
         public ColorFloat(ColorBgra32 clr)
         {
             R = clr.R / 255.0f;
@@ -161,6 +192,11 @@ namespace PicoGK
             A = clr.A / 255.0f;
         }
 
+        /// <summary>
+        /// Creates a new color from an existing color, overriding the alpha
+        /// </summary>
+        /// <param name="clr">Source color</param>
+        /// <param name="fAlphaOverride">Alpha override</param>
         public ColorFloat(ColorFloat clr, float fAlphaOverride)
         {
             R = clr.R;
@@ -169,6 +205,10 @@ namespace PicoGK
             A = fAlphaOverride;
         }
 
+        /// <summary>
+        /// Creates a new color value from a Hue Saturation value (HSV)
+        /// </summary>
+        /// <param name="clrHSV">HSV color</param>
         public ColorFloat(ColorHSV clrHSV)
         {
             ColorFloat clr = clrHSV;
@@ -178,6 +218,10 @@ namespace PicoGK
             A = 1f;
         }
 
+        /// <summary>
+        /// Create a new color value from a Hue Lightness Saturation value (HLS)
+        /// </summary>
+        /// <param name="clrHLS">HLS color</param>
         public ColorFloat(ColorHLS clrHLS)
         {
             ColorFloat clr = clrHLS;
@@ -187,6 +231,11 @@ namespace PicoGK
             A = 1f;
         }
 
+        /// <summary>
+        /// Returns the color as a hex code such as "FF" for white, "AAAA" for transparent gray
+        /// "AABBCC" for an RGB color value or "DDEEFF99" for a RGBA value 
+        /// </summary>
+        /// <returns>Hex-encoded color value with 2 .. 8 characters</returns>
         public string strAsHexCode()
         {
             ColorRgba32 clr = this;
@@ -209,17 +258,32 @@ namespace PicoGK
             return strResult;
         }
 
+        /// <summary>
+        /// Returns the color value as an ABGR hex code (always 8 chars)
+        /// </summary>
+        /// <returns>8 character ABGR hex string</returns>
         public string strAsABGRHexCode()
         {
             ColorRgba32 clr = this;
             return $"{clr.A:x2}{clr.B:x2}{clr.G:x2}{clr.R:x2}";
         }
 
+        /// <summary>
+        /// Returns the color as hex string
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return strAsHexCode();
         }
 
+        /// <summary>
+        /// Weighted linear interpolation between two colors
+        /// </summary>
+        /// <param name="clr1">First color</param>
+        /// <param name="clr2">Second color</param>
+        /// <param name="fWeight">Weight 0..1 to interpolate the color from First...Second</param>
+        /// <returns></returns>
         public static ColorFloat clrWeighted(   ColorFloat clr1,
                                                 ColorFloat clr2,
                                                 float fWeight)
@@ -257,9 +321,18 @@ namespace PicoGK
         }
     }
 
+    /// <summary>
+    /// 24 bit RGB color
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ColorRgb24
     {
+        /// <summary>
+        /// Construct a 24 bit RGB value from 3 byes
+        /// </summary>
+        /// <param name="byR">Red value</param>
+        /// <param name="byG">Green value</param>
+        /// <param name="byB">Blue value</param>
         public ColorRgb24(  byte byR,
                             byte byG,
                             byte byB)
@@ -269,6 +342,10 @@ namespace PicoGK
             B = byB;
         }
 
+        /// <summary>
+        /// Construct a 24 bit RGB value from a float color
+        /// </summary>
+        /// <param name="clr">Float color value</param>
         public ColorRgb24(ColorFloat clr)
         {
             R = (byte)(clr.R * 255.0f);
@@ -285,14 +362,35 @@ namespace PicoGK
             return new ColorRgb24(clr);
         }
 
+        /// <summary>
+        /// Red value (0..255)
+        /// </summary>
         public byte R;
+
+        /// <summary>
+        /// Green value (0..255)
+        /// </summary>
         public byte G;
+
+        /// <summary>
+        /// Blue value (0..255)
+        /// </summary>
         public byte B;
     }
 
+    /// <summary>
+    /// 32 bit RGBA color
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ColorRgba32
     {
+        /// <summary>
+        /// Create a color from 3 or 4 bytes
+        /// </summary>
+        /// <param name="byR">Red color 0..255</param>
+        /// <param name="byG">Green color 0..255</param>
+        /// <param name="byB">Blue color 0..255</param>
+        /// <param name="byA">Alpha channel 0..255 (255 is opaque)</param>
         public ColorRgba32( byte byR,
                             byte byG,
                             byte byB,
@@ -304,6 +402,11 @@ namespace PicoGK
             A = byA;
         }
 
+        /// <summary>
+        /// Create an 8 bit RGBA color from a float color
+        /// Values below 0 and above 1 are truncated (0 .. 255)
+        /// </summary>
+        /// <param name="clr">Float color</param>
         public ColorRgba32(ColorFloat clr)
         {
             R = (byte)(clr.R * 255.0f);
@@ -321,15 +424,39 @@ namespace PicoGK
             return new ColorRgba32(clr);
         }
 
+        /// <summary>
+        /// Red value (0..255)
+        /// </summary>
         public byte R;
+
+        /// <summary>
+        /// Green value (0..255)
+        /// </summary>
         public byte G;
+
+        /// <summary>
+        /// Blue value (0..255)
+        /// </summary>
         public byte B;
+
+        /// <summary>
+        /// Alpha value 0..255 (255 is opaque)
+        /// </summary>
         public byte A;
     }
 
+    /// <summary>
+    /// BGR 24 bit color value
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ColorBgr24
     {
+        /// <summary>
+        /// Construct a BGR value from 3 bytes
+        /// </summary>
+        /// <param name="byB">Blue value</param>
+        /// <param name="byG">Green value</param>
+        /// <param name="byR">Red value</param>
         public ColorBgr24(  byte byB,
                             byte byG,
                             byte byR)
@@ -339,6 +466,10 @@ namespace PicoGK
             R = byR;
         }
 
+        /// <summary>
+        /// Create a BGR 24 bit color from a float color
+        /// </summary>
+        /// <param name="clr">Source color</param>
         public ColorBgr24(  ColorFloat clr)
         {
             R = (byte)(clr.R * 255.0f);
@@ -355,14 +486,35 @@ namespace PicoGK
             return new ColorBgr24(clr);
         }
 
+        /// <summary>
+        /// Blue value (0..255)
+        /// </summary>
         public byte B;
+
+        /// <summary>
+        /// Green value (0..255)
+        /// </summary>
         public byte G;
+
+        /// <summary>
+        /// Red value (0..255)
+        /// </summary>
         public byte R;
     }
 
+    /// <summary>
+    /// BGRA 32 bit color value
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ColorBgra32
     {
+        /// <summary>
+        /// Construct a 32 bit BGRA color value from 4 bytes
+        /// </summary>
+        /// <param name="byB">Blue value (0..255)</param>
+        /// <param name="byG">Green value (0..255)</param>
+        /// <param name="byR">Red value (0..255)</param>
+        /// <param name="byA">Alpha value (0..255)</param>
         public ColorBgra32( byte byB,
                             byte byG,
                             byte byR,
@@ -374,6 +526,10 @@ namespace PicoGK
             A = byA;
         }
 
+        /// <summary>
+        /// Construct a BGRA 32 bit value from a float color
+        /// </summary>
+        /// <param name="clr">Floating point color</param>
         public ColorBgra32( ColorFloat clr)
         {
             R = (byte)(clr.R * 255.0f);
@@ -391,19 +547,49 @@ namespace PicoGK
             return new ColorBgra32(clr);
         }
 
+        /// <summary>
+        /// Blue value (0..255)
+        /// </summary>
         public byte B;
+        /// <summary>
+        /// Green value (0..255)
+        /// </summary>
         public byte G;
+        /// <summary>
+        /// Red value (0..255)
+        /// </summary>
         public byte R;
+        /// <summary>
+        /// Alpha value (0..255)
+        /// </summary>
         public byte A;
     }
 
+    /// <summary>
+    /// Hue Saturation Value (HSV) color
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ColorHSV
     {
+        /// <summary>
+        /// Hue (0..360º)
+        /// </summary>
         public float H;
+        /// <summary>
+        /// Saturation (0..1)
+        /// </summary>
         public float S;
+        /// <summary>
+        /// Value component
+        /// </summary>
         public float V;
 
+        /// <summary>
+        /// Create an HSV value from its three components
+        /// </summary>
+        /// <param name="fH"></param>
+        /// <param name="fS"></param>
+        /// <param name="fV"></param>
         public ColorHSV( float fH,
                          float fS,
                          float fV)
@@ -413,6 +599,10 @@ namespace PicoGK
             V = fV;
         }
 
+        /// <summary>
+        /// Create an HSV color from three linear RGB components
+        /// </summary>
+        /// <param name="clr">RGB color</param>
         public ColorHSV(ColorFloat clr)
         {
             // make sure we are in valid range for HSV conversion
@@ -466,14 +656,20 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Allows you to pass a ColorFloat to any function that needs a ColorBgra32
+        /// Implicit conversion that allows you to pass a ColorFloat
+        /// to any function requiring and HSV color
         /// </summary>
-        /// <param name="clr">The ColorFloat to use</param>
+        /// <param name="clr">ColorFloat to be converted to HSV</param>
         public static implicit operator ColorHSV(ColorFloat clr)
         {
             return new ColorHSV(clr);
         }
 
+        /// <summary>
+        /// Implicit conversion that allows to use an HSV color value
+        /// for any function that requires a ColorFloat
+        /// </summary>
+        /// <param name="clrHSV">HSV color which is implicitly converted</param>
         public static implicit operator ColorFloat(ColorHSV clrHSV)
         {   
             float h = clrHSV.H;
@@ -511,19 +707,43 @@ namespace PicoGK
         }
     }
 
+    /// <summary>
+    /// A color value in HSV space
+    /// </summary>
     public struct ColorHLS
     {
-        public float H; // Hue (0-360)
-        public float L; // Lightness (0-1)
+        /// <summary>
+        /// Hue value (0..360º)
+        /// </summary>
+        public float H;
+
+        /// <summary>
+        /// Lightness value (0..1)
+        /// </summary>
+        public float L;
+
+        /// <summary>
+        /// Saturation value (0..1)
+        /// </summary>
         public float S; // Saturation (0-1)
 
-        public ColorHLS(float h, float l, float s)
+        /// <summary>
+        /// Create an HLS color from its three components
+        /// </summary>
+        /// <param name="fH">Hue (0..360º)</param>
+        /// <param name="fL">Lightness (0..1)</param>
+        /// <param name="fS">Saturation (0..1)</param>
+        public ColorHLS(float fH, float fL, float fS)
         {
-            H = h;
-            L = l;
-            S = s;
+            H = fH;
+            L = fL;
+            S = fS;
         }
 
+        /// <summary>
+        /// Convert an RGB color into an HLS color
+        /// </summary>
+        /// <param name="clr">ColorFloat to be converted to HLS</param>
         public ColorHLS(ColorFloat clr)
         {
             // make sure we are in valid range for HSV conversion
@@ -572,11 +792,19 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Implicit conversion from ColorFloat to ColorHLS
+        /// </summary>
+        /// <param name="clr">ColorFloat to be converted to ColorHLS</param>
         public static implicit operator ColorHLS(ColorFloat clr)
         {
             return new ColorHLS(clr);
         }
 
+        /// <summary>
+        /// Implicit conversion from ColorHLS to ColorFloat
+        /// </summary>
+        /// <param name="clrHLS">HLS color to be converted</param>
         public static implicit operator ColorFloat(ColorHLS clrHLS)
         {
             float r, g, b;
@@ -602,6 +830,9 @@ namespace PicoGK
             return new ColorFloat(r, g, b);
         }
 
+        /// <summary>
+        /// Helper function to return the color component
+        /// </summary>
         private static float GetColorComponent(float temp1, float temp2, float temp3)
         {
             temp3 = NormalizeHue(temp3);
@@ -614,6 +845,11 @@ namespace PicoGK
             return temp1;
         }
 
+        /// <summary>
+        /// Normalizes the hue to be within 0..360 bounds
+        /// </summary>
+        /// <param name="hue"></param>
+        /// <returns></returns>
         private static float NormalizeHue(float hue)
         {
             hue = hue % 360; // Normalize hue to be within 0-360
