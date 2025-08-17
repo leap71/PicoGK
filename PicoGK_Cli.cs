@@ -46,22 +46,85 @@ namespace PicoGK
     /// The parser could probably be written in a more concise way if it generalized the structure $$ .. / for commands.
     /// But this is generally not a well-though-out format.
     /// </summary>
-	public partial class CliIo
+	public static class CliIo
     {
-        public enum EFormat {UseEmptyFirstLayer, FirstLayerWithContent};
+        /// <summary>
+        /// Format options for CLI writer
+        /// </summary>
+        public enum EFormat 
+        {
+            /// <summary>
+            /// Uses an intentionally-empty first layer
+            /// to allow the CLI reader to infer the layer height
+            /// </summary>
+            /// 
+            UseEmptyFirstLayer, 
+            /// <summary>
+            /// The first layer contains outlines (default)
+            /// </summary>
+            FirstLayerWithContent
+        };
+
+        /// <summary>
+        /// Result of a CLI import
+        /// </summary>
         public class Result
         {
+            /// <summary>
+            /// The stack of slices that were imported
+            /// </summary>
             public PolySliceStack oSlices = new();
+
+            /// <summary>
+            /// The bounding box of the slices contained in the file
+            /// </summary>
             public BBox3 oBBoxFile = new();
+
+            /// <summary>
+            /// Was the file binary?
+            /// </summary>
             public bool bBinary = false;
+
+            /// <summary>
+            /// Units used in the header
+            /// </summary>
             public float fUnitsHeader = 0.0f;
+
+            /// <summary>
+            /// Was the file aligned at 32 bit boundaries?
+            /// </summary>
             public bool b32BitAlign = false;
+
+            /// <summary>
+            ///  Version number of the CLI export
+            /// </summary>
             public UInt32 nVersion = 0;
+
+            /// <summary>
+            /// Date string read from the header
+            /// </summary>
             public string strHeaderDate = "";
+
+            /// <summary>
+            /// Number of layers in the file
+            /// </summary>
             public UInt32 nLayers = 0;
+
+            /// <summary>
+            /// Warnings that were encountered during the file reading
+            /// </summary>
             public string strWarnings = "";
         }
 
+        /// <summary>
+        /// Write a stack of PolySlices to a CLI file
+        /// </summary>
+        /// <param name="oSlices">Stack of PolySlice objects</param>
+        /// <param name="strFilePath">Path and filename of the CLI file</param>
+        /// <param name="eFormat">Format options</param>
+        /// <param name="strDate">Optional date (if empty, current date is used)</param>
+        /// <param name="fUnitsInMM">Units to be used (in MM), 1000f results in coordinates to be written in meters</param>
+        /// <exception cref="Exception">Throws and exception if no valid slices or file IO issues were encountered</exception>
         public static void WriteSlicesToCliFile(    PolySliceStack oSlices,
                                                     string strFilePath,
                                                     EFormat eFormat,
@@ -177,6 +240,13 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Read PolySlice objects from a CLI file. Currently only ASCII format is supported
+        /// </summary>
+        /// <param name="strFilePath">Path and filename of the file to read</param>
+        /// <returns>Result object contains the slices and further information</returns>
+        /// <exception cref="ArgumentException">Thrown if file contains invalid parameters</exception>
+        /// <exception cref="NotSupportedException">Thrown if unsupported features encountered, notably binary is not supported</exception>
         public static Result oSlicesFromCliFile(string strFilePath)
         {
             Result oResult = new();
@@ -666,10 +736,6 @@ namespace PicoGK
             return oResult;
         }
 
-        public CliIo()
-        {
-        }
-
         private static bool bExtractParameter(  ref string strLine,
                                                 ref string strParam)
         {
@@ -696,6 +762,19 @@ namespace PicoGK
 
     public partial class Voxels
     {
+        /// <summary>
+        /// Vectorize a Voxels object using Marching Squares.
+        /// The result is the outline of each voxel slice with outer contours
+        /// in counter-clockwise direction and inner contours (islands) in
+        /// clockwise direction. Supports arbitrary layer height (interpolates
+        /// the slices between discrete Z values)
+        /// </summary>
+        /// <param name="fLayerHeight">Layer height in MM</param>
+        /// <param name="bUseAbsXYOrigin">By default the origin lies at 0/0 of the bounding box.
+        /// If you set this parameter to true, the X/Y coordinates start at the actual position in space
+        /// where the voxel field lies. This can be useful for display purposes.</param>
+        /// <returns>The returned PolySliceStack object contains the vectorized layers.</returns>
+        /// <exception cref="Exception">An exception is thrown if no slices are detected.</exception>
         public PolySliceStack oVectorize(   float fLayerHeight = 0f,
                                             bool bUseAbsXYOrigin = false)
 
