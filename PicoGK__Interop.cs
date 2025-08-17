@@ -33,6 +33,9 @@
 // limitations under the License.   
 //
 
+// Disable documentation warnings for this file
+#pragma warning disable 1591
+
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
