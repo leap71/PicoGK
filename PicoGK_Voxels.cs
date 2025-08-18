@@ -183,7 +183,6 @@ namespace PicoGK
             return new Mesh(this);
         }
 
-
         /// <summary>
         /// Create a voxel field with a sphere inside
         /// </summary>
@@ -198,6 +197,17 @@ namespace PicoGK
             Lattice lat = new(libSet);
             lat.AddSphere(vecCenter, fRadius);
             return new(lat);
+        }
+
+        /// <summary>
+        /// Checks whether this Voxels object is empty, i.e. has no
+        /// volume. This function is faster than, for example,
+        /// CalculateProperties
+        /// </summary>
+        /// <returns></returns>
+        public bool bIsEmpty()
+        {
+            return _bIsEmpty(lib.hThis, hThis);
         }
 
         /// <summary>

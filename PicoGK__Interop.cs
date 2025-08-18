@@ -308,6 +308,10 @@ namespace PicoGK
         internal static extern bool _bIsValid(   LibHandle   hLib,
                                                 VoxHandle   hThis);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsEmpty")]
+        internal static extern bool _bIsEmpty(  LibHandle   hLib,
+                                                VoxHandle   hThis);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_Destroy")]
         private static extern void _Destroy(    LibHandle   hLib,
                                                 VoxHandle   hThis);
