@@ -194,9 +194,31 @@ namespace PicoGK
                                         Vector3 vecCenter, 
                                         float fRadius)
         {
-            Lattice lat = new(libSet);
-            lat.AddSphere(vecCenter, fRadius);
-            return new(lat);
+            return new(libSet, _hCreateSphere(libSet.hThis, vecCenter, fRadius));
+        }
+
+        /// <summary>
+        /// Returns a lattice beam with hemispherical ends
+        /// internally uses a very fast function, so is faster
+        /// than the general lattice functions
+        /// </summary>
+        /// <param name="libSet">Library instanxe to use</param>
+        /// <param name="vec1">Start point</param>
+        /// <param name="fRadius1">Radius at start</param>
+        /// <param name="vec2">End point</param>
+        /// <param name="fRadius2">Radius at end</param>
+        /// <returns></returns>
+        public static Voxels voxLatticeBeam(    Library libSet,
+                                                Vector3 vec1,
+                                                float fRadius1,
+                                                Vector3 vec2,
+                                                float fRadius2)
+        {
+            return new(libSet, _hCreateCapsule( libSet.hThis,
+                                                vec1,
+                                                vec2,
+                                                fRadius1,
+                                                fRadius2));
         }
 
         /// <summary>

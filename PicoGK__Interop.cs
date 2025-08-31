@@ -304,6 +304,18 @@ namespace PicoGK
         private static extern VoxHandle _hCreateCopy(  LibHandle   hLib,
                                                         VoxHandle   hSource);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateSphere")]
+        private static extern VoxHandle _hCreateSphere( LibHandle   hLib,
+                                                        in Vector3 vecCenter,
+                                                        float fRadius);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateCapsule")]
+        private static extern VoxHandle _hCreateCapsule(    LibHandle   hLib,
+                                                            in Vector3 vec1,
+                                                            in Vector3 vec2,
+                                                            float fRadius1,
+                                                            float fRadius2);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsValid")]
         internal static extern bool _bIsValid(   LibHandle   hLib,
                                                 VoxHandle   hThis);
