@@ -39,12 +39,23 @@ using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// An interface used to traverse the active values of a ScalarField
+    /// </summary>
     public interface ITraverseScalarField
     {
+        /// <summary>
+        /// Called for every active value in the ScalarField object
+        /// </summary>
+        /// <param name="vecPosition">Position in the field</param>
+        /// <param name="fValue">Value at the postion</param>
         public abstract void InformActiveValue( in Vector3  vecPosition,
                                                 float       fValue);
     }
 
+    /// <summary>
+    /// A field of scalar floating point values
+    /// </summary>
     public partial class ScalarField : IImplicit
     {
         /// <summary>
@@ -292,6 +303,9 @@ namespace PicoGK
                                             iZOrigin + nZSize));
         }
 
+        /// <summary>
+        /// Field metadata
+        /// </summary>
         public FieldMetadata m_oMetadata;
     }
 }

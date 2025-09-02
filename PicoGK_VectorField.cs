@@ -38,12 +38,23 @@ using System.Numerics;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// An interface to allow traversal of all active values in a VectorField
+    /// </summary>
     public interface ITraverseVectorField
     {
+        /// <summary>
+        /// Called for every active value in the VectorField object
+        /// </summary>
+        /// <param name="vecPosition">Position in the VectorField</param>
+        /// <param name="vecValue">Value at position</param>
         public abstract void InformActiveValue( in Vector3 vecPosition,
                                                 in Vector3 vecValue);
     }
 
+    /// <summary>
+    /// A Field of 3D floating point vectors
+    /// </summary>
     public partial class VectorField
     {
         /// <summary>
@@ -188,6 +199,9 @@ namespace PicoGK
                                 xTraverse.InformActiveValue);
         }
 
+        /// <summary>
+        /// VectorField metadata
+        /// </summary>
         public FieldMetadata m_oMetadata;
     }
 }
