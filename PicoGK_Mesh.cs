@@ -38,6 +38,9 @@ using System.Numerics;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// A triangle mesh
+    /// </summary>
     public partial class Mesh
     {
         /// <summary>

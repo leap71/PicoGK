@@ -38,8 +38,16 @@ using System.Numerics;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// A lattice of beams (and spheres)
+    /// </summary>
     public partial class Lattice
     {
+        /// <summary>
+        /// Create an empty lattice object
+        /// </summary>
+        /// <param name="libSet">Library instance</param>
+        /// <exception cref="PicoGKAllocException">Failure to allocate the object</exception>
         public Lattice(Library libSet)
         {
             lib  = libSet;
@@ -48,12 +56,25 @@ namespace PicoGK
                 throw new PicoGKAllocException();
         }
 
+        /// <summary>
+        /// Add a sphere to the lattice
+        /// </summary>
+        /// <param name="vecCenter">Center point</param>
+        /// <param name="fRadius">Radius of the sphere</param>
         public void AddSphere(  in Vector3 vecCenter,
                                 float fRadius)
         {
             _AddSphere(lib.hThis, hThis, vecCenter, fRadius);
         }
 
+        /// <summary>
+        /// Add a beam to the lattice
+        /// </summary>
+        /// <param name="vecA">Starting point of the beam</param>
+        /// <param name="fRadA">Radius at starting point</param>
+        /// <param name="vecB">End point of the beam</param>
+        /// <param name="fRadB">Radius at end point</param>
+        /// <param name="bRoundCap">If true, beam has a hemispherical cap</param>
         public void AddBeam(    in Vector3 vecA,
                                 float fRadA,
                                 in Vector3 vecB,
@@ -69,6 +90,14 @@ namespace PicoGK
                         bRoundCap);
         }
 
+        /// <summary>
+        /// Add a beam to the lattice
+        /// </summary>
+        /// <param name="vecA">Start point of the beam</param>
+        /// <param name="vecB">End point of the beam</param>
+        /// <param name="fRadA">Radius at start point</param>
+        /// <param name="fRadB">Radius at end point</param>
+        /// <param name="bRoundCap">If true, beam has hemispherical caps</param>
         public void AddBeam(    in Vector3 vecA,
                                 in Vector3 vecB,
                                 float fRadA,
