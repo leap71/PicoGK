@@ -316,6 +316,11 @@ namespace PicoGK
                                                             float fRadius1,
                                                             float fRadius2);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_hCreateMeshShell")]
+        private static extern VoxHandle _hCreateMeshShell(  LibHandle   hLib,
+                                                            MshHandle   hMsh,
+                                                            float fRadius);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsValid")]
         internal static extern bool _bIsValid(   LibHandle   hLib,
                                                 VoxHandle   hThis);

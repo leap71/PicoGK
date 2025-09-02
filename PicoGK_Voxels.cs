@@ -199,7 +199,7 @@ namespace PicoGK
 
         /// <summary>
         /// Returns a lattice beam with hemispherical ends
-        /// internally uses a very fast function, so is faster
+        /// internally uses an optimized internal function, so is faster
         /// than the general lattice functions
         /// </summary>
         /// <param name="libSet">Library instanxe to use</param>
@@ -207,7 +207,7 @@ namespace PicoGK
         /// <param name="fRadius1">Radius at start</param>
         /// <param name="vec2">End point</param>
         /// <param name="fRadius2">Radius at end</param>
-        /// <returns></returns>
+        /// <returns>Voxels object</returns>
         public static Voxels voxLatticeBeam(    Library libSet,
                                                 Vector3 vec1,
                                                 float fRadius1,
@@ -219,6 +219,25 @@ namespace PicoGK
                                                 vec2,
                                                 fRadius1,
                                                 fRadius2));
+        }
+
+        /// <summary>
+        /// Creates a shelled (hollow) Voxels object
+        /// from a mesh. The mesh object is offset in all
+        /// directions by the radius. The mesh doesn't have
+        /// to be closed (it could consist of just one triangle)
+        /// </summary>
+        /// <param name="libSet">Library instance</param>
+        /// <param name="msh">Mesh object</param>
+        /// <param name="fRadius">Offset radius (in all directions)</param>
+        /// <returns>Voxels object</returns>
+        public static Voxels voxMeshShell(  Library libSet,
+                                            Mesh msh,
+                                            float fRadius)
+        {
+            return new(libSet, _hCreateMeshShell(   libSet.hThis,
+                                                    msh.hThis,
+                                                    fRadius));
         }
 
         /// <summary>
