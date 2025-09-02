@@ -93,9 +93,46 @@ namespace PicoGK
         public static Voxels voxSphere( Vector3 vecCenter, 
                                         float fRadius)
         {
-            Lattice lat = new(Library.oLibrary());
-            lat.AddSphere(vecCenter, fRadius);
-            return new(lat);
+            return voxSphere(Library.oLibrary(), vecCenter, fRadius);
+        }
+
+        /// <summary>
+        /// Returns a lattice beam with hemispherical ends
+        /// internally uses an optimized internal function, so is faster
+        /// than the general lattice functions
+        /// </summary>
+        /// <param name="vec1">Start point</param>
+        /// <param name="fRadius1">Radius at start</param>
+        /// <param name="vec2">End point</param>
+        /// <param name="fRadius2">Radius at end</param>
+        /// <returns>Voxels object</returns>
+        public static Voxels voxLatticeBeam(    Vector3 vec1,
+                                                float fRadius1,
+                                                Vector3 vec2,
+                                                float fRadius2)
+        {
+            return voxLatticeBeam(  Library.oLibrary(),
+                                    vec1,
+                                    fRadius1,
+                                    vec2,
+                                    fRadius2);
+        }
+
+        /// <summary>
+        /// Creates a shelled (hollow) Voxels object
+        /// from a mesh. The mesh object is offset in all
+        /// directions by the radius. The mesh doesn't have
+        /// to be closed (it could consist of just one triangle)
+        /// </summary>
+        /// <param name="msh">Mesh object</param>
+        /// <param name="fRadius">Offset radius (in all directions)</param>
+        /// <returns>Voxels object</returns>
+        public static Voxels voxMeshShell(  Mesh msh,
+                                            float fRadius)
+        {
+            return voxMeshShell(    Library.oLibrary(),
+                                    msh,
+                                    fRadius);
         }
 
         /// <summary>
@@ -173,12 +210,20 @@ namespace PicoGK
 
     public partial class OpenVdbFile
     {
+        /// <summary>
+        /// Create an empty openvdb file object
+        /// </summary>
        public OpenVdbFile()
             : this(Library.oLibrary())
         {
 
         } 
 
+        /// <summary>
+        /// Create an OpenVDB file object by loading
+        /// an existing file
+        /// </summary>
+        /// <param name="strFileName"></param>
         public OpenVdbFile(string strFileName)
             : this( Library.oLibrary(), 
                     strFileName)
@@ -189,6 +234,9 @@ namespace PicoGK
 
     public partial class ScalarField
     {
+        /// <summary>
+        /// Create an empty scalar field object
+        /// </summary>
        public ScalarField()
             : this(Library.oLibrary())
         {
@@ -198,6 +246,9 @@ namespace PicoGK
 
     public partial class VectorField
     {
+        /// <summary>
+        /// Create an empty VectorField object
+        /// </summary>
        public VectorField()
             : this(Library.oLibrary())
         {
