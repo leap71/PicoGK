@@ -69,12 +69,21 @@ namespace PicoGK
         public Vector3 vecPos => new(mat.M41, mat.M42, mat.M43);
 
         /// <summary>
-        /// Local basis directions in world space.
+        /// Access to Local X basis direction in world space.
+        /// Row-vector semantics: the rows of the 3×3 linear part are the world-space images of local X/Y/Z.
+        /// </summary>       
+        public Vector3 vecLocalX => new(mat.M11, mat.M12, mat.M13); // image of (1,0,0) local in world
+
+        /// <summary>
+        /// Access to Local Y basis direction in world space.
         /// Row-vector semantics: the rows of the 3×3 linear part are the world-space images of local X/Y/Z.
         /// </summary>      
-        
-        public Vector3 vecLocalX => new(mat.M11, mat.M12, mat.M13); // image of (1,0,0) local in world
         public Vector3 vecLocalY => new(mat.M21, mat.M22, mat.M23); // image of (0,1,0) local in world
+
+        /// <summary>
+        /// Access to Local Z basis direction in world space.
+        /// Row-vector semantics: the rows of the 3×3 linear part are the world-space images of local X/Y/Z.
+        /// </summary>      
         public Vector3 vecLocalZ => new(mat.M31, mat.M32, mat.M33); // image of (0,0,1) local in world
 
         /// <summary>
@@ -171,12 +180,31 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Convert point locations and directions from world to local and back
+        /// Convert a coordinate in the local coordinate system to world coordinates
         /// </summary>
-
+        /// <param name="vecLocal">Local coordinate</param>
+        /// <returns>World coordinate</returns>
         public Vector3 vecPtToWorld(Vector3 vecLocal)   => Vector3.Transform(vecLocal, mat);
+
+        /// <summary>
+        /// Return a direction in the local coordinate system to a world direction
+        /// </summary>
+        /// <param name="vecLocal">Local direction</param>
+        /// <returns>World direction</returns>
         public Vector3 vecDirToWorld(Vector3 vecLocal)  => Vector3.TransformNormal(vecLocal, mat);
+
+        /// <summary>
+        /// Convert a world coordinate to a coordinate in the local coordinate system
+        /// </summary>
+        /// <param name="vecWorld">World coordinate</param>
+        /// <returns>Local coordinate</returns>
         public Vector3 vecPtToLocal(Vector3 vecWorld)   => Vector3.Transform(vecWorld, matInv);
+
+        /// <summary>
+        /// Convert a world direction into a local direction
+        /// </summary>
+        /// <param name="vecWorld">Direction in the world coordinate system</param>
+        /// <returns>local direction</returns>
         public Vector3 vecDirToLocal(Vector3 vecWorld)  => Vector3.TransformNormal(vecWorld, matInv);
 
 

@@ -40,8 +40,15 @@ using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// The Library object encapsulates an instance of a PicoGK library configuration
+    /// </summary>
     public partial class Library : IDisposable
     {
+        /// <summary>
+        /// Create a new Library instance, using the specified voxel size in MM
+        /// </summary>
+        /// <param name="fVoxelSizeMM">Voxel size in MM</param>
         public Library(float fVoxelSizeMM)
         {
             hThis               = _hCreateInstance(fVoxelSizeMM);
@@ -79,91 +86,166 @@ namespace PicoGK
             // are well-defined
         }
 
+        /// <summary>
+        /// Return the total memory usage of all objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nTotalMemUsage()
         {
             return _nTotalMemUsage(hThis);
         }
 
+        /// <summary>
+        /// Returns the total memory usage of all Mesh objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nMeshesMemUsage()
         {
             return _nMeshesMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all Lattice objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nLatticesMemUsage()
         {
             return _nLatticesMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all PolyLine objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nPolyLinesMemUsage()
         {
             return _nPolyLinesMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all Voxels objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nVoxelsMemUsage()
         {
             return _nVoxelsMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all VdbFile objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nVdbFilesMemUsage()
         {
             return _nVdbFilesMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all ScalarField objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nScalarFieldsMemUsage()
         {
             return _nScalarFieldsMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all VectorField objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nVectorFieldsMemUsage()
         {
             return _nVectorFieldsMemUsage(hThis);
         }
 
+         /// <summary>
+        /// Returns the total memory usage of all VdbFile metadata objects created with this Library instance
+        /// </summary>
+        /// <returns>Memory usage in bytes</returns>
         public long nVdbMetasMemUsage()
         {
             return _nVdbMetasMemUsage(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of Mesh objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nMeshesAllocated()
         {
             return _nMeshesAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of Lattice objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nLatticesAllocated()
         {
             return _nLatticesAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of PolyLine objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nPolyLinesAllocated()
         {
             return _nPolyLinesAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of Voxels objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nVoxelsAllocated()
         {
             return _nVoxelsAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of VdbFile objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nVdbFilesAllocated()
         {
             return _nVdbFilesAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of ScalarField objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nScalarFieldsAllocated()
         {
             return _nScalarFieldsAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of VectorField objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nVectorFieldsAllocated()
         {
             return _nVectorFieldsAllocated(hThis);
         }
 
+        /// <summary>
+        /// Returns the number of VdbFile metadata objects created with this Library instance
+        /// </summary>
+        /// <returns>Count of allocated objects</returns>
         public long nVdbMetasAllocated()
         {
             return _nVdbMetasAllocated(hThis);
         }
 
+        /// <summary>
+        /// Convert voxel index coordinates to world coordinates in millimeters
+        /// </summary>
+        /// <param name="x">x coordinate in voxel units</param>
+        /// <param name="y">y coordinate in voxel units</param>
+        /// <param name="z">z coordinate in voxel units</param>
+        /// <returns>3D vector coordinate in millimeters (world units)</returns>
         public Vector3 vecVoxelsToMm(   int x,
                                         int y,
                                         int z)
@@ -177,6 +259,13 @@ namespace PicoGK
             return vecMm;
         }
 
+        /// <summary>
+        /// Convert world (millimeter) units to voxel units
+        /// </summary>
+        /// <param name="vecMm">3D coordinate in world (millimeter) space</param>
+        /// <param name="x">x coordinate in voxel units</param>
+        /// <param name="y">y coordinate in voxel units</param>
+        /// <param name="z">z coordinate in voxel units</param>
          public void MmToVoxels(    Vector3 vecMm,
                                     out int x,
                                     out int y,
@@ -193,13 +282,22 @@ namespace PicoGK
             z = (int) (vecResult.Z + 0.5f);
         }
 
+        /// <summary>
+        /// Voxel size in millimeters
+        /// </summary>
         public readonly float fVoxelSize;
 
+        /// <summary>
+        /// Cleanup of library
+        /// </summary>
         ~Library()
         {
             Dispose(false);
         }
 
+        /// <summary>
+        /// The Library implements the Dispose pattern, so you can use it with `using`
+        /// </summary>
         public void Dispose()
         {
             // Dispose of unmanaged resources.
@@ -208,9 +306,12 @@ namespace PicoGK
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Internal dispose function
+        /// </summary>
+        /// <param name="bDisposing">True if called from explict Dispose</param>
         protected virtual void Dispose(bool bDisposing)
-        {
-            
+        {   
             if (m_bDisposed)
             {
                 return;
@@ -220,13 +321,11 @@ namespace PicoGK
 
             if (bDisposing)
             {
-                
                 m_oTimerMemCheck?.Dispose();
                 _DestroyInstance(hThis);
             }
 
             Console.WriteLine("Done Disposing Library");
-
             m_bDisposed = true;
         }
 
