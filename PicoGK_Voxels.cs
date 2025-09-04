@@ -801,22 +801,29 @@ namespace PicoGK
         public void CalculateProperties(    out float fVolumeCubicMM,
                                             out BBox3 oBBox)
         {
-            oBBox           = new();
-            fVolumeCubicMM  = 0f;
+            // Unfortunately openvdb keeps surface voxels (distance 0) around after boolean 
+            // operations, which cause wrong numbers when calculating the volume
+            // the only way around is to construct a mesh (which skips these values), 
+            // create a new voxel field from that mesh, and calculate the values from that.
 
-           _CalculateProperties(    lib.hThis,
-                                    hThis,
-                                    ref fVolumeCubicMM,
-                                    ref oBBox);
+            using Mesh      msh = new(this);
+            using Voxels    vox = new(msh);
+
+            oBBox           = msh.oBoundingBox();
+            fVolumeCubicMM  = _fCalculateVolume(lib.hThis, vox.hThis);
         }
 
         /// <summary>
-        /// Calculates the bounding box from an intermediate mesh generated from the voxels
+        /// Calculates the bounding box of a voxel field
+        /// Note: Uses an intermediate mesh generated from the voxels
+        /// This is the only accurate way of getting a bounding box. OpenVDB keeps spurious
+        /// surface voxels (distance 0) around which show up in the bounding box, even though
+        /// the voxel field does not actually contain any volume.
         /// </summary>
         /// <returns>Bounding box of the voxels in real world coordinates</returns>
         public BBox3 oCalculateBoundingBox()
         {
-            Mesh msh = new(this);
+            using Mesh msh = new(this);
             return msh.oBoundingBox();  
         }
 

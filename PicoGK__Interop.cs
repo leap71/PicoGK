@@ -408,11 +408,9 @@ namespace PicoGK
                                                 VoxHandle   hThis,
                                                 VoxHandle   hOther);
 
-        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_CalculateProperties")]
-        private extern static void _CalculateProperties(    LibHandle   hLib,
-                                                            VoxHandle   hThis,
-                                                            ref float   pfVolume,
-                                                            ref BBox3   oBBox);
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_fCalculateVolume")]
+        private extern static float _fCalculateVolume(  LibHandle   hLib,
+                                                        VoxHandle   hThis);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Voxels_bIsInside")]
         private static extern bool _bIsInside(      LibHandle   hLib,
