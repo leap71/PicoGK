@@ -387,7 +387,7 @@ namespace PicoGK
 
         LogFile m_oLog;
 
-        CamPerspectiveArc  m_oCamera               = new(45);
+        CamPerspectiveArcball  m_oCamera               = new(45);
         bool            m_bEmptyViewer          = true;
         bool            m_bHadCamInteractions   = false;
 
@@ -408,7 +408,7 @@ namespace PicoGK
                         ref Matrix4x4   matVP,
                         ref Vector3     vecEye)
         {
-            m_oCamera.SetAspect(vecViewport);
+            m_oCamera.SetViewPort(vecViewport);
             
             try
             {
@@ -474,8 +474,15 @@ namespace PicoGK
 
             if (m_bMouseDrag)
             {
-                Vector2 vecDist = vecMousePos - m_vecMousePos;
-                m_oCamera.MouseDrag(vecDist, bShift ? Camera.EDragType.PAN : Camera.EDragType.ROTATE);
+                Vector2 vecDist         = vecMousePos - m_vecMousePos;
+                Camera.EDragType eType  = Camera.EDragType.ROTATE;
+
+                if (bShift)
+                    eType = Camera.EDragType.PAN;
+                else if (bAlt)
+                    eType = Camera.EDragType.SPIN;
+
+                m_oCamera.MouseDrag(vecDist, eType);
                 m_bHadCamInteractions = true;
 
                 lock (m_oAnims)
@@ -531,7 +538,14 @@ namespace PicoGK
             }
             else
             {
-                m_oCamera.MouseDrag(vecScrollWheel * 3, bShift ? Camera.EDragType.PAN : Camera.EDragType.ROTATE);
+                Camera.EDragType eType = Camera.EDragType.ROTATE;
+
+                if (bShift)
+                    eType = Camera.EDragType.PAN;
+                else if (bAlt)
+                    eType = Camera.EDragType.SPIN;
+
+                m_oCamera.MouseDrag(vecScrollWheel * 3, eType);
             }
 
             m_bHadCamInteractions = true;
@@ -543,7 +557,7 @@ namespace PicoGK
         {
             Debug.Assert(hViewer == hThis);
 
-            m_oCamera.SetAspect(vecWindowSize);
+            m_oCamera.SetViewPort(vecWindowSize);
 
             RequestUpdate();
         }

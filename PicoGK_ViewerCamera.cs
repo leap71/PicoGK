@@ -44,15 +44,11 @@ namespace PicoGK
             public enum EDragType
             {
                 ROTATE,
+                SPIN,
                 PAN
             };
 
-            public abstract void SetAspect(float fAspectRatio);
-
-            public void SetAspect(Vector2 vecSize)
-            {
-                SetAspect(vecSize.X / vecSize.Y);
-            }
+           public  abstract void SetViewPort(Vector2 vecSize);
 
             public abstract void LookAt(Vector3 vec);
 
@@ -73,206 +69,72 @@ namespace PicoGK
             }
         }
 
-        public class CamPerspective : Camera
+
+        public class CamPerspectiveArcball : Camera
         {
-            public CamPerspective(float fFoVDeg = 45)
+            public CamPerspectiveArcball(float fFovDeg = 45f)
             {
-                SetFov(fFoVDeg);
+                SetFov(fFovDeg);
+                UpdateMatrices();
             }
-            
+
             public void SetFov(float fFovDeg)
             {
-                float fFovRad = fFovDeg * float.Pi / 180f; 
-                if (fFovRad != m_fFoV)
+                float f = fFovDeg * float.Pi / 180f;
+                if (f != m_fFoV)
                 {
-                    m_fFoV = fFovRad;
+                    m_fFoV = f;
                     UpdateMatrices();
                 }
             }
 
-            public override void SetAspect(float fAspectRatio)
+            public override void SetViewPort(Vector2 vecSizePx)
             {
-                if (fAspectRatio != m_fAspect)
+                if (vecSizePx != m_vecViewport)
                 {
-                    m_fAspect = fAspectRatio;
+                    m_fAspect = vecSizePx.X / float.Max(1f, vecSizePx.Y);
+                    m_vecViewport = vecSizePx;
                     UpdateMatrices();
                 }
             }
 
             public override void LookAt(Vector3 vec)
             {
-                if (vec != m_vecPivot)
-                {
-                    m_vecPivot = vec;
-                    UpdateMatrices();
-                }
-            }
-
-            public override void ZoomToFit(BBox3 oBBox)
-            {
-                m_vecPivot  = oBBox.vecCenter();
-
-                // Compute bounding sphere radius
-                float fR = oBBox.vecSize().Length() * 0.5f;
-
-                // Compute the required distance to fit vertically:
-                float fDistVert = fR / float.Tan(m_fFoV / 2f);
-
-                // Compute horizontal FoV from aspect ratio
-                float fFovXRad  = 2f * float.Atan(MathF.Tan(m_fFoV / 2f) * m_fAspect);
-                float fDistHorz = fR / float.Tan(fFovXRad / 2f);
-
-                // Choose the tighter one (which dominates)
-                m_fDistance = float.Max(fDistHorz, fDistVert) * 1.1f;
-
+                m_vecPivot = vec;
                 UpdateMatrices();
-            }
-
-            public override void MouseDrag(Vector2 vecMouseRel, EDragType eType)
-            {
-                const float ROTATE_SPEED = 0.005f;
-                const float PAN_SPEED    = 0.0025f;
-
-                if (eType == EDragType.ROTATE)
-                {
-                    m_vecPitchYaw.X -= vecMouseRel.X * ROTATE_SPEED;
-                    m_vecPitchYaw.Y += vecMouseRel.Y * ROTATE_SPEED;
-
-                    // Clamp pitch to avoid flipping
-                    m_vecPitchYaw.Y = float.Clamp(m_vecPitchYaw.Y, -float.Pi / 2f + 0.01f, float.Pi / 2f - 0.01f);
-                }
-                else if (eType == EDragType.PAN)
-                {
-                    Vector3 vecForward = Vector3.Normalize(m_vecPivot - m_vecEye);
-                    Vector3 vecRight   = Vector3.Normalize(Vector3.Cross(vecForward, Vector3.UnitY));
-                    Vector3 vecUp      = Vector3.Normalize(Vector3.Cross(vecRight, vecForward));
-
-                    float fPanScale = m_fDistance * PAN_SPEED;
-
-                    m_vecPivot -= vecRight * vecMouseRel.X * fPanScale;
-                    m_vecPivot += vecUp    * vecMouseRel.Y * fPanScale;
-                }
-
-                UpdateMatrices();
-            }
-
-            public override void Scroll(Vector2 vecMouseRel)
-            {
-                const float ZOOM_SPEED = .1f;
-
-                // Exponential zoom scaling
-                m_fDistance *= float.Pow(1.0f - ZOOM_SPEED, vecMouseRel.Y);
-                m_fDistance = float.Clamp(m_fDistance, 0.01f, 1000f);
-                
-                UpdateMatrices();
-            }
-
-            public override Matrix4x4 matVP => m_matV * m_matP;
-
-            public override Vector3 vecEye =>  m_vecEye;
-
-            void UpdateMatrices()
-            {
-                float yaw   = m_vecPitchYaw.X;
-                float pitch = m_vecPitchYaw.Y;
-                float x     = m_fDistance * float.Cos(pitch) * float.Sin(yaw);
-                float y     = m_fDistance * float.Sin(pitch);
-                float z     = m_fDistance * float.Cos(pitch) * float.Cos(yaw);
-                m_vecEye    = m_vecPivot + new Vector3(x, y, z);
-
-                m_matV = Matrix4x4.CreateLookAt(    m_vecEye, 
-                                                    m_vecPivot, 
-                                                    Vector3.UnitY);
-
-                m_matP = Matrix4x4.CreatePerspectiveFieldOfView(    m_fFoV, 
-                                                                    m_fAspect, 
-                                                                    0.1f, 
-                                                                    1000f);
-
-                Console.WriteLine($"Eye: {m_vecEye}");
-            }
-
-            Vector3 m_vecEye        = Vector3.One;
-            float   m_fFoV          = float.Pi / 2f;
-            float   m_fAspect       = 1;
-            float   m_fDistance     = 1;
-            Vector3 m_vecPivot      = Vector3.Zero;
-            Vector2 m_vecPitchYaw   = Vector2.Zero;
-            Matrix4x4 m_matV;
-            Matrix4x4 m_matP;
-        }
-   
-        public class CamPerspectiveArc : Camera
-        {
-            public CamPerspectiveArc(float fFoVDeg = 45)
-            {
-                SetFov(fFoVDeg);
-            }
-
-            public void SetFov(float fFovDeg)
-            {
-                float fFovRad = fFovDeg * float.Pi / 180f; 
-                if (fFovRad != m_fFoV)
-                {
-                    m_fFoV = fFovRad;
-                    UpdateMatrices();
-                }
-            }
-
-            public override void SetAspect(float fAspectRatio)
-            {
-                if (fAspectRatio != m_fAspect)
-                {
-                    m_fAspect = fAspectRatio;
-                    UpdateMatrices();
-                }
-            }
-
-            public override void LookAt(Vector3 vec)
-            {
-                if (vec != m_vecPivot)
-                {
-                    m_vecPivot = vec;
-                    UpdateMatrices();
-                }
             }
 
             public override void ZoomToFit(BBox3 oBBox)
             {
                 m_vecPivot = oBBox.vecCenter();
+                float r = oBBox.vecSize().Length() * 0.5f;
 
-                float fR = oBBox.vecSize().Length() * 0.5f;
-                float fDistVert = fR / float.Tan(m_fFoV / 2f);
-                float fFovXRad = 2f * float.Atan(MathF.Tan(m_fFoV / 2f) * m_fAspect);
-                float fDistHorz = fR / float.Tan(fFovXRad / 2f);
+                float distVert = r / MathF.Tan(m_fFoV * 0.5f);
+                float fovX = 2f * MathF.Atan(MathF.Tan(m_fFoV * 0.5f) * m_fAspect);
+                float distH = r / MathF.Tan(fovX * 0.5f);
 
-                m_fDistance = float.Max(fDistHorz, fDistVert) * 1.1f;
-
+                m_fDistance = MathF.Max(distVert, distH) * 1.1f;
                 UpdateMatrices();
             }
 
             public override void MouseDrag(Vector2 vecMouseRel, EDragType eType)
             {
-                const float ROTATE_SPEED = 0.005f;
-                const float PAN_SPEED = 0.0025f;
-
-                if (eType == EDragType.ROTATE)
+                switch (eType)
                 {
-                    Quaternion qYaw = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -vecMouseRel.X * ROTATE_SPEED);
-                    Vector3 right = Vector3.Transform(Vector3.UnitX, m_qRotation);
-                    Quaternion qPitch = Quaternion.CreateFromAxisAngle(right, -vecMouseRel.Y * ROTATE_SPEED);
-                    m_qRotation = Quaternion.Normalize(qPitch * qYaw * m_qRotation);
-                }
-                else if (eType == EDragType.PAN)
-                {
-                    Vector3 vecForward = Vector3.Normalize(m_vecPivot - m_vecEye);
-                    Vector3 vecRight   = Vector3.Normalize(Vector3.Cross(vecForward, Vector3.UnitY));
-                    Vector3 vecUp      = Vector3.Normalize(Vector3.Cross(vecRight, vecForward));
+                case EDragType.ROTATE:
+                    Rotate(vecMouseRel);
+                    break;
 
-                    float fPanScale = m_fDistance * PAN_SPEED;
+                case EDragType.SPIN:
+                    Spin(vecMouseRel);
+                    break;
 
-                    m_vecPivot -= vecRight * vecMouseRel.X * fPanScale;
-                    m_vecPivot += vecUp    * vecMouseRel.Y * fPanScale;
+                case EDragType.PAN:
+                    Pan(vecMouseRel);
+                    break;
+
+                default:
+                    break;
                 }
 
                 UpdateMatrices();
@@ -280,38 +142,120 @@ namespace PicoGK
 
             public override void Scroll(Vector2 vecMouseRel)
             {
-                const float ZOOM_SPEED = 0.1f;
-
-                m_fDistance *= float.Pow(1.0f - ZOOM_SPEED, vecMouseRel.Y);
-                m_fDistance = float.Clamp(m_fDistance, 0.01f, 1000f);
+                float fSteps = vecMouseRel.Y;
+                float fFactor = MathF.Pow(1.0f - ZOOM_SPEED, fSteps);
+                m_fDistance = float.Clamp(m_fDistance * fFactor, 0.01f, 1e6f);
 
                 UpdateMatrices();
             }
 
-            public override Matrix4x4 matVP => m_matV * m_matP;
-            public override Vector3 vecEye => m_vecEye;
+            public override Matrix4x4   matVP => m_matV * m_matP;
+            public override Vector3     vecEye => m_vecEye;
 
             void UpdateMatrices()
             {
-                Vector3 offset = Vector3.Transform(new Vector3(0, 0, m_fDistance), m_qRotation);
-                m_vecEye = m_vecPivot + offset;
+                // Camera eye from pivot + rotated local -Z axis at distance
+                Vector3 vecLocal = new Vector3(0, 0, m_fDistance);
+                Vector3 vecOffset = Vector3.Transform(vecLocal, m_qRotation);
+                m_vecEye = m_vecPivot + vecOffset;
 
-                Vector3 up = Vector3.Transform(Vector3.UnitY, m_qRotation);
+                Vector3 vecUp = Vector3.Transform(Vector3.UnitY, m_qRotation);
+                if (vecUp.LengthSquared() < 1e-10f) 
+                    vecUp = Vector3.UnitY; // Safe fallback
 
-                m_matV = Matrix4x4.CreateLookAt(m_vecEye, m_vecPivot, up);
-                m_matP = Matrix4x4.CreatePerspectiveFieldOfView(m_fFoV, m_fAspect, 0.1f, 1000f);
+                m_matV = Matrix4x4.CreateLookAt(m_vecEye, m_vecPivot, Vector3.Normalize(vecUp));
+                m_matP = Matrix4x4.CreatePerspectiveFieldOfView(m_fFoV, float.Max(1e-5f, m_fAspect), 0.1f, 1e6f);
             }
 
-            Vector3 m_vecEye = Vector3.One;
-            float m_fFoV = float.Pi / 2f;
-            float m_fAspect = 1;
-            float m_fDistance = 1;
-            Vector3 m_vecPivot = Vector3.Zero;
-            Quaternion m_qRotation = Quaternion.Identity;
-            Matrix4x4 m_matV;
-            Matrix4x4 m_matP;
-        }
+            // Build camera basis from view matrix (stable near poles)
+            void CalculateBasis(out Vector3 vecRight, out Vector3 vecUp, out Vector3 vecBack)
+            {
+                // m_matV maps world -> view; its columns encode world axes in view space.
+                // For transforming a view-space axis to world, use the inverse (or directly from rotation part of inverse).
+                Matrix4x4.Invert(m_matV, out Matrix4x4 invV);
+                vecRight = Vector3.Normalize(new Vector3(invV.M11, invV.M12, invV.M13));
+                vecUp    = Vector3.Normalize(new Vector3(invV.M21, invV.M22, invV.M23));
+                vecBack  = Vector3.Normalize(new Vector3(invV.M31, invV.M32, invV.M33)); // camera forward is -vecBack
+            }
 
+            void Spin(Vector2 vecDeltaPx)
+            {
+                 if (vecDeltaPx.LengthSquared() < 1e-12f) 
+                    return;
+
+                CalculateBasis(out _, out _, out Vector3 vecBack);
+    
+                float dTheta = (vecDeltaPx.X - vecDeltaPx.Y) * (2f * float.Pi / PIXELS_PER_SPIN);
+               
+                Quaternion qDelta = Quaternion.CreateFromAxisAngle(-vecBack, -dTheta);
+                m_qRotation = Quaternion.Normalize(qDelta * m_qRotation);
+            }
+
+            void Rotate(Vector2 vecDeltaPx)
+            {
+                // Small-angle trackball fallback (works without absolute cursor)
+                // Scale pixel delta into view-space arcball vector
+                if (vecDeltaPx.LengthSquared() < 1e-12f) 
+                    return;
+
+                float s = 1.0f / float.Max( m_vecViewport.X,  m_vecViewport.Y); // normalized small angle
+                Vector2 vecNormalizedDelta = vecDeltaPx * s;
+
+                // Axis in view space: (dy, dx, 0) -> right-handed screen space
+                Vector3 vecAxisView = Vector3.Normalize(new Vector3(vecNormalizedDelta.Y, vecNormalizedDelta.X, 0f));
+                float fAngle = ROTATE_SPEED * vecNormalizedDelta.Length();
+
+                CalculateBasis( out Vector3 vecRight, 
+                                out Vector3 vecUp, 
+                                out Vector3 vecBack);
+
+                Vector3 vecAxisWorld =  vecAxisView.X * vecRight + 
+                                        vecAxisView.Y * vecUp + 
+                                        vecAxisView.Z * vecBack;
+
+                if (vecAxisWorld.LengthSquared() > 1e-12f)
+                {
+                    vecAxisWorld = Vector3.Normalize(vecAxisWorld);
+                    Quaternion qDelta = Quaternion.CreateFromAxisAngle(vecAxisWorld, -fAngle);
+                    m_qRotation = Quaternion.Normalize(qDelta * m_qRotation);
+                }
+            }
+
+            void Pan(Vector2 vecDeltaPx)
+            {
+                if (vecDeltaPx.LengthSquared() < 1e-12f) 
+                    return;
+
+                // Convert pixel motion to world units at the pivot depth:
+                float fWorldPerPixel = PAN_SPEED * float.Tan(m_fFoV * 0.5f) * m_fDistance / float.Max(1, m_vecViewport.X);
+
+                CalculateBasis(out var right, out var up, out var back); // forward = -back
+
+                Vector3 vecDeltaWorld   = (-vecDeltaPx.X * fWorldPerPixel) * right
+                                        + ( vecDeltaPx.Y * fWorldPerPixel) * up;
+
+                m_vecPivot += vecDeltaWorld;
+                m_vecEye   += vecDeltaWorld;
+            }
+
+            Vector3     m_vecEye      = new Vector3(0, 0, 1);
+            Vector3     m_vecPivot    = Vector3.Zero;
+            Quaternion  m_qRotation   = Quaternion.Identity;
+
+            float       m_fFoV        = 45f * float.Pi / 180f;
+            float       m_fAspect     = 1f;
+            float       m_fDistance   = 1f;
+
+            Vector2     m_vecViewport   = new (1920,1080);
+
+            Matrix4x4   m_matV;
+            Matrix4x4   m_matP;
+
+            const float ZOOM_SPEED      = 0.1f;
+            const float ROTATE_SPEED    = 15f;
+            const float PAN_SPEED       = 10f;
+            const float PIXELS_PER_SPIN = 900f; // 900 px ≈ 360°
+        }
     }
 }
     
