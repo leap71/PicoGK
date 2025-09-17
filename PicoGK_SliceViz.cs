@@ -37,6 +37,7 @@ using System.Numerics;
 
 namespace PicoGK
 {
+    using Shapes;
     public class SliceViz : IDisposable
     {
         public SliceViz(    Viewer oViewer,
@@ -47,7 +48,7 @@ namespace PicoGK
             m_vox       = vox;
             m_eAxis     = eAxis;
 
-            m_img = vox.imgAllocateSlice(out m_nSlices, m_eAxis);
+            m_img       = vox.imgAllocateSlice(out m_nSlices, m_eAxis);
             m_vecScale  = vox.lib.vecVoxelsToMm(m_img.nWidth, m_img.nHeight, 1);
 
             BBox3 oBox = vox.oCalculateBoundingBox();
@@ -56,7 +57,7 @@ namespace PicoGK
             switch (eAxis)
             {
                 case Voxels.ESliceAxis.X:
-                vecPos.X = oBox.vecMin.X; 
+                vecPos.X = oBox.vecMin.X;
                 m_frm = LocalFrame.frmFromZX(vecPos, Vector3.UnitX, Vector3.UnitY);
                 m_bFlipY = true;
                 break;
@@ -96,22 +97,19 @@ namespace PicoGK
                                 true);
 
             if (m_poly != null)
-            {
                 m_oViewer.Remove(m_poly);
-                m_poly.Dispose();
-            }
 
-            LocalFrame frm = m_frm.frmMovedLocal(new(0,0,nSlice * m_vox.lib.fVoxelSize));
+            LocalFrame frm = m_frm.frmMovedLocalZ(nSlice * m_vox.lib.fVoxelSize);
 
             m_poly = new(m_vox.lib, "FF0000");
-            m_poly.nAddVertex(  frm.vecPtToWorld(new( m_vecScale.X / 2,   m_vecScale.Y / 2, 0)));
-            m_poly.nAddVertex(  frm.vecPtToWorld(new( m_vecScale.X / 2,  -m_vecScale.Y / 2, 0)));
-            m_poly.nAddVertex(  frm.vecPtToWorld(new(-m_vecScale.X / 2,  -m_vecScale.Y / 2, 0)));
-            m_poly.nAddVertex(  frm.vecPtToWorld(new(-m_vecScale.X / 2,   m_vecScale.Y / 2, 0)));
-            m_poly.nAddVertex(  frm.vecPtToWorld(new( m_vecScale.X / 2,   m_vecScale.Y / 2, 0)));
+            m_poly.nAddVertex(  frm.vecPtToWorld(new Vector2( m_vecScale.X / 2,   m_vecScale.Y / 2)));
+            m_poly.nAddVertex(  frm.vecPtToWorld(new Vector2( m_vecScale.X / 2,  -m_vecScale.Y / 2)));
+            m_poly.nAddVertex(  frm.vecPtToWorld(new Vector2(-m_vecScale.X / 2,  -m_vecScale.Y / 2)));
+            m_poly.nAddVertex(  frm.vecPtToWorld(new Vector2(-m_vecScale.X / 2,   m_vecScale.Y / 2)));
+            m_poly.nAddVertex(  frm.vecPtToWorld(new Vector2( m_vecScale.X / 2,   m_vecScale.Y / 2)));
             m_oViewer.Add(m_poly, 3);
 
-            Console.WriteLine(m_oViewer.oBBox().ToString());
+            //Console.WriteLine(m_oViewer.oBBox().ToString());
 
             m_vox.GetVoxelSlice(nSlice, ref m_img, Voxels.ESliceMode.Antialiased, m_eAxis);
 
@@ -124,8 +122,6 @@ namespace PicoGK
             if (m_poly != null)
             {
                 m_oViewer.Remove(m_poly);
-                m_poly.Dispose();
-                m_poly = null;
             }
 
             if (m_oQuad != null)
