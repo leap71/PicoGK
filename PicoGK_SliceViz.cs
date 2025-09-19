@@ -38,6 +38,7 @@ using System.Numerics;
 namespace PicoGK
 {
     using Shapes;
+
     public class SliceViz : IDisposable
     {
         public SliceViz(    Viewer oViewer,
@@ -76,15 +77,25 @@ namespace PicoGK
                 break;
             }
         }
+        
+        /// <summary>
+        /// The number of slices in this voxel field
+        /// </summary>
+        public int nSliceCount      => m_nSlices;
 
-        public int nSliceCount => m_nSlices;
-
+        /// <summary>
+        /// Visualize the slice in the viewer using a normalized
+        /// parameter from 0..1
+        /// </summary>
         public void Visualize(float fNormalized)
         {
             int nSlice = (int) (nSliceCount * float.Clamp(fNormalized, 0,1) + 0.5f);
             Visualize(nSlice);
         }
 
+        /// <summary>
+        /// Visualize the slice in the viewer, using an absolute slice index
+        /// </summary>
         public void Visualize(int nSlice)
         {
             m_oQuad ??= new(    m_oViewer,
@@ -117,11 +128,15 @@ namespace PicoGK
             m_oQuad.UpdateImage(new(m_img));
         }
 
+        /// <summary>
+        /// Dispose the object (IDispose)
+        /// </summary>
         public void Dispose()
         {
             if (m_poly != null)
             {
                 m_oViewer.Remove(m_poly);
+                m_poly = null;
             }
 
             if (m_oQuad != null)
@@ -139,7 +154,7 @@ namespace PicoGK
         int                 m_nSlices;
         Vector3             m_vecScale;
         ImageGrayScale      m_img;
-        Viewer.ImageQuad?   m_oQuad = null;
-        PolyLine?           m_poly = null;
+        Viewer.ImageQuad?   m_oQuad         = null;
+        PolyLine?           m_poly          = null;
     }
 }
