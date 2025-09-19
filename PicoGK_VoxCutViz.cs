@@ -69,8 +69,18 @@ namespace PicoGK
             m_oViz2     = new(oViewer, vox, eAxis);
 
             m_oBounds   = vox.oCalculateBoundingBox();
-            m_voxCut    = new(vox);
-            m_oViewer.Add(m_voxCut, m_nGroup);
+
+            m_cts = new CancellationTokenSource();
+            m_evChanged = new AutoResetEvent(false);
+
+            m_oTask = Task.Factory.StartNew(
+                () => CutterTask(m_cts.Token),
+                m_cts.Token,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+
+            // Initialize with full range
+            Cut(0, nSliceCount - 1);
         }
 
         /// <summary>
@@ -98,45 +108,26 @@ namespace PicoGK
         /// <param name="nSlice2">Second slice position</param>
         public void Cut(int nSlice1, int nSlice2)
         {
+            // Clamp to valid index range
+            nSlice1 = Math.Clamp(nSlice1, 0, nSliceCount - 1);
+            nSlice2 = Math.Clamp(nSlice2, 0, nSliceCount - 1);
+
             m_oViz1.Visualize(nSlice1);
             m_oViz2.Visualize(nSlice2);
 
-            BBox3 oTrimBounds = m_oBounds;
+            int nSliceMin = Math.Min(nSlice1, nSlice2);
+            int nSliceMax = Math.Max(nSlice1, nSlice2);
 
-            int nSliceMin = nSlice1;
-            int nSliceMax = nSlice2;
-
-            if (nSlice1 > nSlice2)
-            {
-                nSliceMin = nSlice2;
-                nSliceMax = nSlice1;
-            }
-
+            // Publish latest cut positions (in meters) to the worker atomically
             float fMin = m_vox.fVoxelSize * nSliceMin;
             float fMax = m_vox.fVoxelSize * nSliceMax;
 
-            switch (m_eAxis)
-            {
-                case Voxels.ESliceAxis.X:
-                    oTrimBounds.vecMin.X = m_oBounds.vecMin.X + fMin;
-                    oTrimBounds.vecMax.X = m_oBounds.vecMin.X + fMax;
-                    break;
+            // Use Volatile.Write so the worker sees these in order
+            Volatile.Write(ref m_fMin, fMin);
+            Volatile.Write(ref m_fMax, fMax);
 
-                case Voxels.ESliceAxis.Y:
-                    oTrimBounds.vecMin.Y = m_oBounds.vecMin.Y + fMin;
-                    oTrimBounds.vecMax.Y = m_oBounds.vecMin.Y + fMax;
-                    break;
-
-                case Voxels.ESliceAxis.Z:
-                    oTrimBounds.vecMin.Z = m_oBounds.vecMin.Z + fMin;
-                    oTrimBounds.vecMax.Z = m_oBounds.vecMin.Z + fMax;
-                    break;
-            }
-
-            Voxels vox = m_vox.voxTrim(oTrimBounds);
-            m_oViewer.Add(vox,m_nGroup);
-            m_oViewer.Remove(m_voxCut);
-            m_voxCut = vox;
+            // Signal the worker there is new work
+            m_evChanged.Set();
         }
 
         /// <summary>
@@ -144,18 +135,96 @@ namespace PicoGK
         /// </summary>
         public void Dispose()
         {
-            m_oViewer.Remove(m_voxCut);
+            // Stop worker
+            m_cts.Cancel();
+            m_evChanged.Set(); // wake if waiting
+            try 
+            { 
+                m_oTask?.Wait(); 
+            } 
+            catch (AggregateException) 
+            { 
+                // swallow cancellations
+            }
+
+            // Cleanup viewer visuals
             m_oViz1.Dispose();
             m_oViz2.Dispose();
+
+            m_evChanged.Dispose();
+            m_cts.Dispose();
         }
 
-        Viewer              m_oViewer;
-        Voxels              m_vox;
-        int                 m_nGroup;
-        Voxels.ESliceAxis   m_eAxis;
-        SliceViz            m_oViz1;
-        SliceViz            m_oViz2;
-        BBox3               m_oBounds;
-        Voxels              m_voxCut;
+        void CutterTask(CancellationToken tok)
+        {
+            // Keep last applied range to avoid redundant recompute
+            float fLastMin = float.NaN;
+            float fLastMax = float.NaN;
+
+            Voxels voxCut = m_vox; // current cut vox in viewer, replaced on update
+
+            while (!tok.IsCancellationRequested)
+            {
+                // Wait for a signal or cancellation; also coalesce rapid updates
+                m_evChanged.WaitOne();
+                if (tok.IsCancellationRequested) 
+                    break;
+
+                // Drain extra signals quickly to coalesce multiple Cut() calls
+                while (m_evChanged.WaitOne(0)) 
+                { /* no-op */ }
+
+                // Read latest published values
+                float fCurMin = Volatile.Read(ref m_fMin);
+                float fCurMax = Volatile.Read(ref m_fMax);
+
+                if (fCurMin == fLastMin && fCurMax == fLastMax)
+                    continue;
+
+                fLastMin = fCurMin; 
+                fLastMax = fCurMax;
+
+                // Compute new trim bounds
+                var oTrimBounds = m_oBounds;
+                switch (m_eAxis)
+                {
+                    case Voxels.ESliceAxis.X:
+                        oTrimBounds.vecMin.X = m_oBounds.vecMin.X + fCurMin;
+                        oTrimBounds.vecMax.X = m_oBounds.vecMin.X + fCurMax;
+                        break;
+                    case Voxels.ESliceAxis.Y:
+                        oTrimBounds.vecMin.Y = m_oBounds.vecMin.Y + fCurMin;
+                        oTrimBounds.vecMax.Y = m_oBounds.vecMin.Y + fCurMax;
+                        break;
+                    case Voxels.ESliceAxis.Z:
+                        oTrimBounds.vecMin.Z = m_oBounds.vecMin.Z + fCurMin;
+                        oTrimBounds.vecMax.Z = m_oBounds.vecMin.Z + fCurMax;
+                        break;
+                }
+
+                Voxels vox = m_vox.voxTrim(oTrimBounds);
+                m_oViewer.Add(vox, m_nGroup);
+                m_oViewer.Remove(voxCut);
+                voxCut = vox;
+            }
+
+            m_oViewer.Remove(voxCut);
+        }
+
+        readonly Viewer                     m_oViewer;
+        readonly Voxels                     m_vox;
+        readonly int                        m_nGroup;
+        readonly Voxels.ESliceAxis          m_eAxis;
+        readonly SliceViz                   m_oViz1;
+        readonly SliceViz                   m_oViz2;
+        readonly BBox3                      m_oBounds;
+
+        // Signaled state from producer (Cut) to worker
+        float                               m_fMin;
+        float                               m_fMax;
+
+        readonly AutoResetEvent             m_evChanged;
+        readonly CancellationTokenSource    m_cts;
+        readonly Task                       m_oTask;
     }
 }
