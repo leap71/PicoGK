@@ -455,11 +455,22 @@ namespace PicoGK
         /// Intersects the voxel field with the specified bounding box
         /// so all voxels outside the box are trimmed away
         /// </summary>
-        /// <param name="oBox"></param>
         public void Trim(BBox3 oBox)
         {
             Voxels voxTrim = new(Utils.mshCreateCube(lib, oBox));
             BoolIntersect(voxTrim);
+        }
+
+        /// <summary>
+        /// Intersects a copy of the voxel field with the specified bounding box
+        /// so all voxels outside the box are trimmed away. Returns the result
+        /// as a new voxel field.
+        /// </summary>
+        public Voxels voxTrim(BBox3 oBox)
+        {
+            Voxels vox = new(this);
+            vox.Trim(oBox);
+            return vox;
         }
 
         /// <summary>
