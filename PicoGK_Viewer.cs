@@ -44,9 +44,9 @@ namespace PicoGK
     {
         public Viewer(  string strTitle,
                         Vector2 vecSize,
-                        LogFile oLog)
+                        ILog xLog)
         {
-            m_oLog = oLog;
+            m_xLog = xLog;
 
             m_iMainThreadID = Environment.CurrentManagedThreadId;
 
@@ -202,7 +202,7 @@ namespace PicoGK
 
                     lock (m_oActions)
                     {
-                        m_oActions.Enqueue(new LoadLightSetupAction(    m_oLog,
+                        m_oActions.Enqueue(new LoadLightSetupAction(    m_xLog,
                                                                         abyDiffuseData,
                                                                         abySpecularData));
                     }
@@ -385,7 +385,7 @@ namespace PicoGK
                             msh.hThis);
         }
 
-        LogFile m_oLog;
+        ILog m_xLog;
 
         CamPerspectiveArcball  m_oCamera               = new(45);
         bool            m_bEmptyViewer          = true;
@@ -399,7 +399,7 @@ namespace PicoGK
         void InfoCB(    string strMessage,
                         bool bFatalError)
         {
-            m_oLog.Log(strMessage);
+            m_xLog.Log(strMessage);
         }
 
         void UpdateCB(  IntPtr          hViewer,
@@ -434,7 +434,7 @@ namespace PicoGK
 
             catch (Exception e)
             {
-                m_oLog.Log($"Caught exception in Viewer update callback:\n{e.ToString()}\n");
+                m_xLog.Log($"Caught exception in Viewer update callback:\n{e.ToString()}\n");
             }
         }
 

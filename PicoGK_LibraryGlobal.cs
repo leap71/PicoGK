@@ -43,7 +43,7 @@ namespace PicoGK
         {
             public Viewer   oViewer     => m_oViewer;
             public Library  oLibrary    => m_oLib;
-            public LogFile  oLog        => m_oLog;
+            public LogFile  xLog        => m_xLog;
 
 
             public GlobalInstance(  float fVoxelSizeMM,
@@ -51,7 +51,7 @@ namespace PicoGK
                                     string strViewerTitle = "PicoGK",
                                     string strViewerEnvironment = "")
             {
-                m_oLog      = new(   strLogPath != "" ? strLogPath : Path.Combine(Utils.strDocumentsFolder(), "PicoGK.log"));
+                m_xLog      = new LogFile(strLogPath != "" ? strLogPath : Path.Combine(Utils.strDocumentsFolder(), "PicoGK.log"));
 
                 try
                 {
@@ -60,35 +60,35 @@ namespace PicoGK
 
                 catch (Exception e)
                 { 
-                    m_oLog.Log($"-----------------------------------------");
-                    m_oLog.Log($"-- Could not initialize PicoGK Library --");
-                    m_oLog.Log($"-----------------------------------------");
-                    m_oLog.Log($"Most likely cause is that the PicoGK runtime library wasn't found");
-                    m_oLog.Log($"Make sure {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.");
-                    m_oLog.Log($"See PicoGK documentation on GitHub for troubleshooting info");
-                    m_oLog.Log($"Terribly long error string follows (usually devoid of real information):");
-                    m_oLog.Log($"--------------------------------");
-                    m_oLog.Log($"-");
-                    m_oLog.Log($"{e}\n");
-                    m_oLog.Log($"-");
-                    m_oLog.Log($"--------------------------------");
+                    m_xLog.Log($"-----------------------------------------");
+                    m_xLog.Log($"-- Could not initialize PicoGK Library --");
+                    m_xLog.Log($"-----------------------------------------");
+                    m_xLog.Log($"Most likely cause is that the PicoGK runtime library wasn't found");
+                    m_xLog.Log($"Make sure {Config.strPicoGKLib}.dylib/.dll is accessible and has execution rights.");
+                    m_xLog.Log($"See PicoGK documentation on GitHub for troubleshooting info");
+                    m_xLog.Log($"Terribly long error string follows (usually devoid of real information):");
+                    m_xLog.Log($"--------------------------------");
+                    m_xLog.Log($"-");
+                    m_xLog.Log($"{e}\n");
+                    m_xLog.Log($"-");
+                    m_xLog.Log($"--------------------------------");
                     
                     throw new Exception("Failed to load PicoGK library");
                 }
 
                 try
                 {    
-                    m_oLog.Log($"PicoGK:    {Library.strName()}");
-                    m_oLog.Log($"           {Library.strVersion()}");
-                    m_oLog.Log($"           {Library.strBuildInfo()}\n");
-                    m_oLog.Log($"VoxelSize: {fVoxelSizeMM} (mm)");
+                    m_xLog.Log($"PicoGK:    {Library.strName()}");
+                    m_xLog.Log($"           {Library.strVersion()}");
+                    m_xLog.Log($"           {Library.strBuildInfo()}\n");
+                    m_xLog.Log($"VoxelSize: {fVoxelSizeMM} (mm)");
 
-                    m_oLog.Log("Happy Computational Engineering!\n\n");
+                    m_xLog.Log("Happy Computational Engineering!\n\n");
                 }
 
                 catch (Exception e)
                 {
-                    m_oLog.Log($"Failed to get PicoGK library info: {e.Message}");
+                    m_xLog.Log($"Failed to get PicoGK library info: {e.Message}");
                     throw;
                 }
 
@@ -108,19 +108,19 @@ namespace PicoGK
 
                 catch (Exception e)
                 {
-                    m_oLog.Log($"Failed to instantiate basic PicoGK types:\n\n{e.Message}");
+                    m_xLog.Log($"Failed to instantiate basic PicoGK types:\n\n{e.Message}");
                     throw;
                 }
 
                 // Let's create the viewer environment
 
-                m_oViewer   = new(strViewerTitle, new(2000,2000), m_oLog);
+                m_oViewer   = new(strViewerTitle, new(2000,2000), m_xLog);
 
                 if (strViewerEnvironment == "")
                 {
                     try
                     {
-                        m_oLog.Log($"Loading lights embedded environment");
+                        m_xLog.Log($"Loading lights embedded environment");
 
                         Assembly oAssembly = typeof(Library).Assembly;
                         using Stream oStream = oAssembly.GetManifestResourceStream("PicoGK.Resources.Environment.zip")
@@ -130,7 +130,7 @@ namespace PicoGK
 
                     catch (Exception)
                     {
-                        m_oLog.Log($"Could not load lights embedded environment, trying to load from disk instead.");
+                        m_xLog.Log($"Could not load lights embedded environment, trying to load from disk instead.");
 
                         string strLightsFile = strFindLightSetupFile(out string strSearched);
 
@@ -138,14 +138,14 @@ namespace PicoGK
                         {
                             strSearched += strLightsFile + "\n";
 
-                            m_oLog.Log($"Could not find a lights file - your viewer will look quite dark.");
-                            m_oLog.Log($"Searched in:");
-                            m_oLog.Log($"{strSearched}");
-                            m_oLog.Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
-                            m_oLog.Log("or providing the file as a parameter at Library.Go()");
+                            m_xLog.Log($"Could not find a lights file - your viewer will look quite dark.");
+                            m_xLog.Log($"Searched in:");
+                            m_xLog.Log($"{strSearched}");
+                            m_xLog.Log("You can fix this by placing the file PicoGKLights.zip into one of these folders");
+                            m_xLog.Log("or providing the file as a parameter at Library.Go()");
                         }
 
-                        m_oLog.Log($"Using light setup {strLightsFile} from disk");
+                        m_xLog.Log($"Using light setup {strLightsFile} from disk");
                         m_oViewer.LoadLightSetup(strLightsFile);
                     }
                 }
@@ -162,13 +162,13 @@ namespace PicoGK
                 // Make everything known globally
 
                 RegisterGlobalLibrary(m_oLib);
-                RegisterGlobalLogFile(m_oLog);
+                RegisterGlobalLog(m_xLog);
                 RegisterGlobalViewer(m_oViewer);
             }
 
             Library m_oLib;
             Viewer  m_oViewer;
-            LogFile m_oLog;
+            LogFile m_xLog;
 
             ~GlobalInstance()
             {
@@ -190,13 +190,13 @@ namespace PicoGK
 
                 if (bDisposing)
                 {
-                    UnregisterGlobalLogFile();
+                    UnregisterGlobalLog();
                     UnregisterGlobalViewer();
                     UnregisterGlobalLibrary();
 
                     m_oLib      .Dispose();
                     m_oViewer   .Dispose();
-                    m_oLog      .Dispose();
+                    m_xLog      .Dispose();
                 }
 
                 m_bDisposed = true;
@@ -293,33 +293,33 @@ namespace PicoGK
             }
         }
 
-        public static LogFile oLogFile()
+        public static ILog xLog()
         {
-            lock (m_mtxGlobalLogFile)
+            lock (m_mtxGlobalLog)
             {
-                if (m_oGlobalLogFile is null)
+                if (m_xGlobalLog is null)
                     throw new Exception("Your code relies on being called using Library::Go");
 
-                return m_oGlobalLogFile;
+                return m_xGlobalLog;
             }
         }
 
-        public static void RegisterGlobalLogFile(LogFile oLogFile)
+        public static void RegisterGlobalLog(ILog xLog)
         {
-            lock (m_mtxGlobalLogFile)
+            lock (m_mtxGlobalLog)
             {
-                if (m_oGlobalLogFile is not null)
+                if (m_xGlobalLog is not null)
                     throw new Exception("Cannot register more than one global PicoGK log file");
 
-                m_oGlobalLogFile = oLogFile;
+                m_xGlobalLog = xLog;
             }
         }
 
-        public static void UnregisterGlobalLogFile()
+        public static void UnregisterGlobalLog()
         {
-            lock (m_mtxGlobalLogFile)
+            lock (m_mtxGlobalLog)
             {
-                m_oGlobalLogFile = null;
+                m_xGlobalLog = null;
             }
         }
 
@@ -328,8 +328,8 @@ namespace PicoGK
 
         static string   m_strLogPath    = "";
 
-        static LogFile? m_oGlobalLogFile = null;
-        static object   m_mtxGlobalLogFile = new();
+        static ILog?    m_xGlobalLog = null;
+        static object   m_mtxGlobalLog = new();
 
         static Viewer?  m_oGlobalViewer = null;
         static object   m_mtxGlobalViewer = new();
@@ -429,7 +429,7 @@ namespace PicoGK
 
         public static void Log(string strFormat, params object[] args)
         {
-            oLogFile().Log(strFormat, args);
+            xLog().Log(strFormat, args);
         }
 
         /// <summary>

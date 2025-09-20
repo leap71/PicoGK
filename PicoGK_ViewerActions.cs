@@ -310,11 +310,11 @@ namespace PicoGK
 
         class LoadLightSetupAction : IViewerAction
         {
-            public LoadLightSetupAction(    LogFile oLog,
+            public LoadLightSetupAction(    ILog xLog,
                                             byte [] abyDiffuseDds,
                                             byte [] abySpecularDds)
             {
-                m_oLog              = oLog;
+                m_xLog              = xLog;
                 m_abyDiffuseDds     = abyDiffuseDds;
                 m_abySpecularDds    = abySpecularDds;
             }
@@ -327,11 +327,11 @@ namespace PicoGK
                                         m_abySpecularDds,
                                         m_abySpecularDds.Length))
                 {
-                    m_oLog.Log($"Failed to load light setup");
+                    m_xLog.Log($"Failed to load light setup");
                 }
             }
 
-            LogFile m_oLog;
+            ILog m_xLog;
             byte [] m_abyDiffuseDds;
             byte [] m_abySpecularDds;
         }
