@@ -60,10 +60,6 @@ namespace PicoGK
         /// <summary>
         /// Create a 2D bounding box from float values for min/max
         /// </summary>
-        /// <param name="fMinX">Min coordinate X</param>
-        /// <param name="fMinY">Min coordinate Y</param>
-        /// <param name="fMaxX">Max coordinate X</param>
-        /// <param name="fMaxY">Max coordinate Y</param>
         public BBox2(   float fMinX,
                         float fMinY,
                         float fMaxX,
@@ -81,10 +77,8 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Creates a Bounding Box with the specified min/max
+        /// Creates a Bounding Box with the specified min/max values
         /// </summary>
-        /// <param name="vecSetMin">Minimum Coord</param>
-        /// <param name="vecSetMax">Maximum Coord</param>
         public BBox2(   in Vector2 vecSetMin,
                         in Vector2 vecSetMax)
         {
@@ -99,7 +93,6 @@ namespace PicoGK
         /// <summary>
         /// Is the BoundingBox empty?
         /// </summary>
-        /// <returns>True: Empty</returns>
         public bool bIsEmpty()
         {
             if (vecMin.X == float.MaxValue)
@@ -135,7 +128,6 @@ namespace PicoGK
         /// <summary>
         /// Include the specified vector in the bounding box
         /// </summary>
-        /// <param name="vec">Vector to include</param>
         public void Include(Vector2 vec)
         {
             Debug.Assert(!float.IsNaN(vec.X));
@@ -150,7 +142,6 @@ namespace PicoGK
         /// <summary>
         /// Include the specified Bounding Box in this Box
         /// </summary>
-        /// <param name="oBox">Bounding Box to include</param>
         public void Include(BBox2 oBox)
         {
             Include(oBox.vecMin);
@@ -161,7 +152,6 @@ namespace PicoGK
         /// Grows the bounding box by the specified value on each side
         /// I.E. the width, for example is width + 2*fGrowBy afterwards
         /// </summary>
-        /// <param name="fGrowBy"></param>
         public void Grow(float fGrowBy)
         {
             if (bIsEmpty())
@@ -181,9 +171,8 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Size of the Bounding Box
+        /// Returns the size of the Bounding Box
         /// </summary>
-        /// <returns>A vector corresponding to width and height</returns>
         public Vector2 vecSize()
         {
             return vecMax - vecMin;
@@ -192,7 +181,6 @@ namespace PicoGK
         /// <summary>
         /// Center point of the bounding box
         /// </summary>
-        /// <returns>Vector representing the center point</returns>
         public Vector2 vecCenter()
         {
             return vecMin + vecSize() / 2;
@@ -201,7 +189,6 @@ namespace PicoGK
         /// <summary>
         /// A string representation of the Bounding Box
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return $"<Min: {vecMin} | Max: {vecMax}>";
@@ -241,12 +228,6 @@ namespace PicoGK
         /// <summary>
         /// Create a bounding box from six float values
         /// </summary>
-        /// <param name="fMinX">Minimum X coordinate</param>
-        /// <param name="fMinY">Minimum Y coordinate</param>
-        /// <param name="fMinZ">Minimum Z coordinate</param>
-        /// <param name="fMaxX">Maximum X coordinate</param>
-        /// <param name="fMaxY">Maximum Y coordinate</param>
-        /// <param name="fMaxZ">Maximum Z coordinate</param>
         public BBox3(   float fMinX,
                         float fMinY,
                         float fMinZ,
@@ -271,8 +252,6 @@ namespace PicoGK
         /// <summary>
         /// Create a Bounding Box based on the specified min/max vectors
         /// </summary>
-        /// <param name="vecSetMin">Minimum vector</param>
-        /// <param name="vecSetMax">Maximum vector</param>
         public BBox3(   in Vector3 vecSetMin,
                         in Vector3 vecSetMax)
         {
@@ -288,7 +267,6 @@ namespace PicoGK
         /// <summary>
         /// Size of the Bounding Box
         /// </summary>
-        /// <returns>A 3D Vector corresponding to width, height, depth of the box</returns>
         public Vector3 vecSize()
         {
             return vecMax - vecMin;
@@ -297,7 +275,6 @@ namespace PicoGK
         /// <summary>
         /// Is the Bounding Box empty>
         /// </summary>
-        /// <returns>True: Empty</returns>
         public bool bIsEmpty()
         {
             if (vecMin.X == float.MaxValue)
@@ -337,7 +314,6 @@ namespace PicoGK
         /// <summary>
         /// Include the specified vector in the Bounding Box
         /// </summary>
-        /// <param name="vec">Vector to include</param>
         public void Include(Vector3 vec)
         {
             Debug.Assert(!float.IsNaN(vec.X));
@@ -368,8 +344,6 @@ namespace PicoGK
         /// <summary>
         /// Include the specified 2D Bounding Box, with optional Z coord
         /// </summary>
-        /// <param name="oBox">2D Bounding Box to include</param>
-        /// <param name="fZ">At which Z coord</param>
         public void Include(BBox2 oBox, float fZ = 0.0f)
         {
             if (oBox.bIsEmpty())
@@ -383,7 +357,6 @@ namespace PicoGK
         /// Grows the bounding box by the specified value on each side
         /// I.E. the width, for example is width + 2*fGrowBy afterwards
         /// </summary>
-        /// <param name="fGrowBy"></param>
         public void Grow(float fGrowBy)
         {
             if (bIsEmpty())
@@ -407,9 +380,8 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Center of the Bounding Box
+        /// Return the center of the Bounding Box
         /// </summary>
-        /// <returns>The center vector of the Bounding Box</returns>
         public Vector3 vecCenter()
         {
             return vecMin + vecSize() / 2;
@@ -450,8 +422,7 @@ namespace PicoGK
         /// <summary>
         /// A function to return a random point in a Bounding Box
         /// </summary>
-        /// <param name="oRand">Random object</param>
-        /// <returns>A random vector inside of this Bounding Box</returns>
+        /// <param name="oRand">Random number generator to use</param>
         public Vector3 vecRandomVectorInside(ref Random oRand)
         {
             return new Vector3( vecMin.X + oRand.NextSingle() * (vecMax.X - vecMin.X),
@@ -463,7 +434,6 @@ namespace PicoGK
         /// <summary>
         /// Return the 2D extent of this Bounding Box
         /// </summary>
-        /// <returns>A 2D Bounding Box with the X/Y extent of this Bounding Box</returns>
         public BBox2 oAsBoundingBox2()
         {
             return new BBox2(   vecMin.X, vecMin.Y, 
@@ -473,7 +443,6 @@ namespace PicoGK
         /// <summary>
         /// Return the Bounding Box as string
         /// </summary>
-        /// <returns>String with the extent of the box</returns>
         public override string ToString()
         {
             return $"<Min: {vecMin} | Max: {vecMax}>";
