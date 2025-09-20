@@ -37,8 +37,6 @@ using SkiaSharp;
 
 namespace PicoGK
 {
-	
-
     public partial class Viewer
     {
         public SideBar oCreateSideBarLeft(  int nMin,
