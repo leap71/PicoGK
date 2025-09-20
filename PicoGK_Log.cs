@@ -38,7 +38,13 @@ using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
-    public class LogFile : IDisposable
+    public interface ILog
+    {
+        void Log(    in string strFormat,
+                     params object[] args);
+    }
+
+    public class LogFile : IDisposable, ILog
     {
         public LogFile( in string strFileName = "",
                         in bool bOutputToConsole = true)
