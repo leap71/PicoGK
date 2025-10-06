@@ -360,6 +360,9 @@ namespace PicoGK
                                 string strWindowTitle   = "PicoGK",
                                 string strLightsFile    = "")
         {
+            m_bAppExit      = false;
+            m_bContinueTask = true;
+
             lock (m_mtxGlobalLibrary)
             {
                 if (m_oGlobalLibrary != null)
