@@ -686,6 +686,12 @@ namespace PicoGK
                                                 IntPtr      hThis,
                                                 MshHandle   hMesh);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SetMeshMatrix")]
+        private static extern void _SetMeshMatrix(  LibHandle       hLib,
+                                                    IntPtr          hThis,
+                                                    MshHandle       hMesh,
+                                                    in Matrix4x4    mat);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_AddVoxels")]
         private static extern void _AddVoxels(  LibHandle   hLib,
                                                 IntPtr      hThis,
@@ -697,6 +703,12 @@ namespace PicoGK
                                                     IntPtr      hThis,
                                                     VoxHandle   hVox);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SetVoxelsMatrix")]
+        private static extern void _SetVoxelsMatrix(    LibHandle       hLib,
+                                                        IntPtr          hThis,
+                                                        VoxHandle       hVoxels,
+                                                        in Matrix4x4    mat);
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_AddPolyLine")]
         private static extern void _AddPolyLine(    LibHandle   hLib,
                                                     IntPtr      hThis,
@@ -707,6 +719,12 @@ namespace PicoGK
         private static extern void _RemovePolyLine( LibHandle   hLib,
                                                     IntPtr      hThis,
                                                     PolyHandle  hPolyLine);
+
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_SetPolyLineMatrix")]
+        private static extern void _SetPolyLineMatrix(  LibHandle       hLib,
+                                                        IntPtr          hThis,
+                                                        PolyHandle      hPolyLine,
+                                                        in Matrix4x4    mat);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_RemoveAllObjects")]
         private static extern void _RemoveAllObjects(IntPtr      hThis);

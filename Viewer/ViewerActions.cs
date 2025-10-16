@@ -223,6 +223,27 @@ namespace PicoGK
 
         }
 
+        class SetVoxelsMatrixAction : IViewerAction
+        {
+            public SetVoxelsMatrixAction(   Voxels vox,
+                                            in Matrix4x4 mat)
+            {
+                m_vox   = vox;
+                m_mat   = mat;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                _SetVoxelsMatrix(   m_vox.lib.hThis,
+                                    oViewer.hThis,
+                                    m_vox.hThis,
+                                    m_mat);
+            }
+
+            Voxels      m_vox;
+            Matrix4x4   m_mat;
+        }
+
         class AddMeshAction : IViewerAction
         {
             public AddMeshAction(   Mesh msh,
@@ -259,6 +280,27 @@ namespace PicoGK
             }
 
             Mesh m_msh;
+        }
+
+        class SetMeshMatrixAction : IViewerAction
+        {
+            public SetMeshMatrixAction(   Mesh msh,
+                                          in Matrix4x4 mat)
+            {
+                m_msh   = msh;
+                m_mat   = mat;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                _SetMeshMatrix( m_msh.lib.hThis,
+                                oViewer.hThis,
+                                m_msh.hThis,
+                                m_mat);
+            }
+
+            Mesh        m_msh;
+            Matrix4x4   m_mat;
         }
 
         class AddPolyLineAction : IViewerAction
@@ -298,6 +340,27 @@ namespace PicoGK
             }
 
             PolyLine m_poly;
+        }
+
+        class SetPolyLineMatrixAction : IViewerAction
+        {
+            public SetPolyLineMatrixAction( PolyLine poly,
+                                            in Matrix4x4 mat)
+            {
+                m_poly  = poly;
+                m_mat   = mat;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                _SetPolyLineMatrix( m_poly.lib.hThis,
+                                    oViewer.hThis,
+                                    m_poly.hThis,
+                                    m_mat);
+            }
+
+            PolyLine    m_poly;
+            Matrix4x4   m_mat;
         }
 
         class RemoveAllObjectsAction : IViewerAction

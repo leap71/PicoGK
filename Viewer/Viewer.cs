@@ -232,6 +232,15 @@ namespace PicoGK
             }
         }
 
+        public void SetObjectMatrix(    Voxels vox,
+                                        in Matrix4x4 mat)
+        {
+            lock (m_oActions)
+            {
+                m_oActions.Enqueue(new SetVoxelsMatrixAction(vox, mat));
+            }
+        }
+
         public void Add(    Mesh msh,
                             int nGroupID = 0)
         {
@@ -249,6 +258,15 @@ namespace PicoGK
             }
         }
 
+        public void SetObjectMatrix(    Mesh msh,
+                                        in Matrix4x4 mat)
+        {
+            lock (m_oActions)
+            {
+                m_oActions.Enqueue(new SetMeshMatrixAction(msh, mat));
+            }
+        }
+
         public void Add(    PolyLine oPoly,
                             int nGroupID = 0)
         {
@@ -263,6 +281,15 @@ namespace PicoGK
             lock (m_oActions)
             {
                 m_oActions.Enqueue(new RemovePolyLineAction(oPoly));
+            }
+        }
+
+        public void SetObjectMatrix(    PolyLine poly,
+                                        in Matrix4x4 mat)
+        {
+            lock (m_oActions)
+            {
+                m_oActions.Enqueue(new SetPolyLineMatrixAction(poly, mat));
             }
         }
 
