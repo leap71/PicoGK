@@ -306,12 +306,16 @@ namespace PicoGK
             {
                 for (int nX = 0; nX < img.nWidth - 1; ++nX)
                 {
+                    // Flip Y Axis
+                    int y0 = img.nHeight - 1 - nY;
+                    int y1 = y0 - 1;
+
                     float[] afCorners =
                     {
-                        img.fValue(nX, nY),
-                        img.fValue(nX + 1, nY),
-                        img.fValue(nX + 1, nY + 1),
-                        img.fValue(nX, nY + 1),
+                        img.fValue(nX, y0),
+                        img.fValue(nX + 1, y0),
+                        img.fValue(nX + 1, y1),
+                        img.fValue(nX, y1),
                     };
 
                     int nLutIndex = 0;
