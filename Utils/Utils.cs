@@ -56,6 +56,16 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Strips the extension from a filename
+        /// </summary>
+        static public string strStripExtension(string strPath)
+        {
+            return Path.Combine(
+                                    Path.GetDirectoryName(strPath) ?? "",
+                                    Path.GetFileNameWithoutExtension(strPath));
+        }
+
+        /// <summary>
         /// Wait for a file's creation
         /// </summary>
         /// <param name="strFile"></param>
