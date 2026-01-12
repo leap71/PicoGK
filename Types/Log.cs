@@ -38,10 +38,32 @@ using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// Logging interface which allows you to output diagnostics
+    /// </summary>
     public interface ILog
     {
+        /// <summary>
+        /// This function allows you to output information using the standard string functions,
+        ///  i.e. Log($"{strInformation} testing field value={nValue}"), or simply
+        /// Log("Hello World")
+        /// </summary>
         void Log(    in string strFormat,
                      params object[] args);
+    }
+
+    /// <summary>
+    /// A simple logging class which outputs to the console
+    /// </summary>
+    public class LogConsole : ILog
+    {
+        /// <summary>
+        /// Implementation of a simple logging class that outputs to the console
+        /// </summary>
+        public void Log(in string strFormat, params object[] args)
+        {
+            Console.WriteLine(string.Format(strFormat, args));
+        }
     }
 
     public class LogFile : IDisposable, ILog
