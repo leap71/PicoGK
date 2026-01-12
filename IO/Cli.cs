@@ -124,13 +124,17 @@ namespace PicoGK
         /// <param name="eFormat">Format options</param>
         /// <param name="strDate">Optional date (if empty, current date is used)</param>
         /// <param name="fUnitsInMM">Units to be used (in MM), 1000f results in coordinates to be written in meters</param>
+        /// <param name="xProgress">Optional progress reporting interface</param>
         /// <exception cref="Exception">Throws and exception if no valid slices or file IO issues were encountered</exception>
         public static void WriteSlicesToCliFile(    PolySliceStack oSlices,
                                                     string strFilePath,
                                                     EFormat eFormat,
                                                     string strDate = "",
-                                                    float fUnitsInMM = 0.0f)
+                                                    float fUnitsInMM = 0.0f,
+                                                    IProgress? xProgress = null)
         {
+            IProgress xProg = xProgress ?? new ProgressNoop();
+
             if ((oSlices.nCount() < 1) || oSlices.oBBox().bIsEmpty())
                 throw new Exception("No valid slices detected (empty)");
 
@@ -176,10 +180,14 @@ namespace PicoGK
                          // Add the zero layer at the bottom
                         oTextWriter.WriteLine("$$LAYER/0.0");
                     }
+
+                    ProgressCounter oProgress = new(xProg, oSlices.nCount());
                    
                     // Now add all the actual layers
                     for (int nLayer = 0; nLayer < oSlices.nCount(); nLayer++)
                     {
+                        oProgress++;
+
                         PolySlice oSlice = oSlices.oSliceAt(nLayer);
                         oTextWriter.WriteLine("$$LAYER/{0}", (oSlice.fZPos() / fUnitsInMM).ToString("0.00000"));
 
@@ -773,12 +781,15 @@ namespace PicoGK
         /// <param name="bUseAbsXYOrigin">By default the origin lies at 0/0 of the bounding box.
         /// If you set this parameter to true, the X/Y coordinates start at the actual position in space
         /// where the voxel field lies. This can be useful for display purposes.</param>
+        /// <param name="xProgress">Optional parameter that allows you to report the progress</param>
         /// <returns>The returned PolySliceStack object contains the vectorized layers.</returns>
         /// <exception cref="Exception">An exception is thrown if no slices are detected.</exception>
         public PolySliceStack oVectorize(   float fLayerHeight = 0f,
-                                            bool bUseAbsXYOrigin = false)
+                                            bool bUseAbsXYOrigin = false,
+                                            IProgress? xProgress = null)
 
         {
+            IProgress xProg = xProgress ?? new ProgressNoop();
             // Default to the voxel size as layer height, if not specified
             // usually your CLI slices should have a smaller height. The slices
             // are interpolated between voxel layers
@@ -812,7 +823,9 @@ namespace PicoGK
 
             while (fZ <= fLastLayer)
             {
-               GetInterpolatedVoxelSlice(   fZ,
+                xProg.Progress(fZ / nZSize);
+               
+                GetInterpolatedVoxelSlice(  fZ,
                                             ref img,
                                             ESliceMode.SignedDistance);
 
@@ -868,15 +881,22 @@ namespace PicoGK
         /// position in space in X/Y that the voxel field was in. By default
         /// the position of the CLI slices are relative to the voxel field
         /// boundaries.</param>
+        /// <param name="xProgress">Optional progress reporting interface</param>
         public void SaveToCliFile(  string strFileName,
                                     float fLayerHeight      = 0f,
                                     CliIo.EFormat eFormat   = CliIo.EFormat.FirstLayerWithContent,
-                                    bool bUseAbsXYOrigin    = false)
+                                    bool bUseAbsXYOrigin    = false,
+                                    IProgress? xProgress    = null)
         {
-            PolySliceStack oStack = oVectorize(fLayerHeight, bUseAbsXYOrigin);
+            SplitProgress oProgress = new(xProgress ?? new ProgressNoop(), 2);
+
+            PolySliceStack oStack = oVectorize(fLayerHeight, bUseAbsXYOrigin, oProgress);
+            oProgress++;
+
             CliIo.WriteSlicesToCliFile( oStack, 
                                         strFileName, 
-                                        eFormat);
+                                        eFormat,
+                                        xProgress: oProgress);
         }
     }
 }
