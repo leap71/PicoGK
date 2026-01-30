@@ -309,6 +309,11 @@ namespace PicoGK
             }
         }
 
+        public void EnableExperimental(bool bEnable)
+        {
+            _EnableExperimental(hThis, bEnable);
+        }
+
         public void SetGroupVisible(int nGroupID,
                                         bool bVisible)
         {

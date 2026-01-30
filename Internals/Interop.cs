@@ -665,6 +665,10 @@ namespace PicoGK
         private static extern bool _RequestScreenShot(  IntPtr hThis,
                                                         string strScreenShotPath);
 
+        [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_EnableExperimental")]
+        private static extern bool _EnableExperimental( IntPtr hThis,
+                                                        bool bEnable);                                            
+
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_bLoadLightSetup")]
         private static extern bool _bLoadLightSetup(    IntPtr  hThis,
                                                         byte [] abyDiffuseDdsBuffer,
