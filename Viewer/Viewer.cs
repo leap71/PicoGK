@@ -36,12 +36,17 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace PicoGK
 {
     public partial class Viewer
     {
+        /// <summary>
+        /// Initialize a new Viewer
+        /// </summary>
+        /// <param name="strTitle">Window title</param>
+        /// <param name="vecSize">Size in window units (pixels)</param>
+        /// <param name="xLog">Log interface to report status to</param>
         public Viewer(  string strTitle,
                         Vector2 vecSize,
                         ILog xLog)
@@ -97,6 +102,9 @@ namespace PicoGK
             Debug.Assert(hThis != IntPtr.Zero);
         }
 
+        /// <summary>
+        /// Run this function in your main thread while it returns true
+        /// </summary>
         public bool bPoll()
         {
             Debug.Assert(m_iMainThreadID == Environment.CurrentManagedThreadId);
@@ -146,6 +154,9 @@ namespace PicoGK
             return _bPoll(hThis);
         }
 
+        /// <summary>
+        /// Request a refresh of the viewer
+        /// </summary>
         public void RequestUpdate()
         {
             lock (m_oActions)
@@ -154,12 +165,18 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Load the IBL light setup from the specified ZIP file
+        /// </summary>
         public void LoadLightSetup(string strFilePath)
         {
             using Stream oStream = File.OpenRead(strFilePath);
             LoadLightSetup(oStream);
         }
 
+        /// <summary>
+        /// Load the IBL light setup from the specified stream
+        /// </summary>
         public void LoadLightSetup(Stream oStream)
         {
             using (ZipArchive oZip = new(oStream, ZipArchiveMode.Read))
@@ -215,6 +232,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Add the object to the viewer, using the specified viewer group
+        /// </summary>
         public void Add(    in Voxels vox,
                             int nGroupID = 0)
         {
@@ -224,6 +244,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Removes the object from the viewer
+        /// </summary>
         public void Remove(Voxels vox)
         {
             lock (m_oActions)
@@ -232,6 +255,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Set the transformation matrix for the specified object
+        /// </summary>
         public void SetObjectMatrix(    Voxels vox,
                                         in Matrix4x4 mat)
         {
@@ -241,6 +267,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Add the object to the viewer, using the specified viewer group
+        /// </summary>
         public void Add(    Mesh msh,
                             int nGroupID = 0)
         {
@@ -250,6 +279,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Removes the object from the viewer
+        /// </summary>
         public void Remove(Mesh msh)
         {
             lock (m_oActions)
@@ -258,6 +290,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Set the transformation matrix for the specified object
+        /// </summary>
         public void SetObjectMatrix(    Mesh msh,
                                         in Matrix4x4 mat)
         {
@@ -267,6 +302,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Add the object to the viewer, using the specified viewer group
+        /// </summary>
         public void Add(    PolyLine oPoly,
                             int nGroupID = 0)
         {
@@ -276,6 +314,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Removes the object from the viewer
+        /// </summary>
         public void Remove(PolyLine oPoly)
         {
             lock (m_oActions)
@@ -284,6 +325,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Set the transformation matrix for the specified object
+        /// </summary>
         public void SetObjectMatrix(    PolyLine poly,
                                         in Matrix4x4 mat)
         {
@@ -293,6 +337,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Remove all objects from the viewer
+        /// </summary>
         public void RemoveAllObjects()
         {
             lock (m_oActions)
@@ -301,6 +348,10 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Request screenshot (TGA), which will be saved to the
+        /// the specified location. Note, that the executation is asynchronous
+        /// </summary>
         public void RequestScreenShot(string strScreenShotPath)
         {
             lock (m_oActions)
@@ -309,11 +360,17 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Enable/disable experimental rendering features
+        /// </summary>
         public void EnableExperimental(bool bEnable)
         {
             _EnableExperimental(hThis, bEnable);
         }
 
+        /// <summary>
+        /// Enable or disable the display of a viewer group
+        /// </summary>
         public void SetGroupVisible(int nGroupID,
                                         bool bVisible)
         {
@@ -323,6 +380,13 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Set the material for this viewer group
+        /// </summary>
+        /// <param name="nGroupID">Group ID</param>
+        /// <param name="clr">Color of the meshes in this group</param>
+        /// <param name="fMetallic">Metallic factor 0..1</param>
+        /// <param name="fRoughness">Roughness factor 0..1</param>
         public void SetGroupMaterial    (int        nGroupID,
                                         ColorFloat  clr,
                                         float       fMetallic,
@@ -337,6 +401,9 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Set the group's transformation matrix
+        /// </summary>
         public void SetGroupMatrix( int nGroupID,
                                     Matrix4x4 mat)
         {
@@ -347,6 +414,12 @@ namespace PicoGK
             }
         }
 
+        /// <summary>
+        /// Enables overhang angle visualization for a viewer group
+        /// </summary>
+        /// <param name="nGroupID">Viewer group to apply the warning visualization to</param>
+        /// <param name="nWarningAngleDeg">Angle at which the warning color sets in</param>
+        /// <param name="nErrorAngleDeg">Angle at which the error color sets in</param>
         public void EnableOverhangWarning(  int nGroupID,
                                             int nWarningAngleDeg,
                                             int nErrorAngleDeg)
@@ -359,6 +432,9 @@ namespace PicoGK
             }   
         }
 
+        /// <summary>
+        /// Disables the overhang angle warning of the specified group
+        /// </summary>
         public void DisableOverhangWarning(int nGroupID)
         {
             lock (m_oActions)
@@ -367,6 +443,9 @@ namespace PicoGK
             }   
         }
 
+        /// <summary>
+        /// Returns the bounding box of all elements inside the view
+        /// </summary>
         public BBox3 oBBox()
         {
             BBox3 oBBox = new();
@@ -374,15 +453,21 @@ namespace PicoGK
             return oBBox;
         }
 
+        /// <summary>
+        /// Sets the background color of the viewer
+        /// </summary>
         public void SetBackgroundColor(ColorFloat clr)
         {
             m_clrBackground = clr;
             RequestUpdate();
         }
 
-        public void SetFov(float fAngle)
+        /// <summary>
+        /// Set Vertical Field of View in Degrees (i.e. 45º)
+        /// </summary>
+        public void SetFov(float fAngleDeg)
         {
-            m_oCamera.SetFov(fAngle);
+            m_oCamera.SetVerticalFov(fAngleDeg);
             RequestUpdate();
         }
 
@@ -440,8 +525,6 @@ namespace PicoGK
                         ref Matrix4x4   matVP,
                         ref Vector3     vecEye)
         {
-            m_oCamera.SetViewPort(vecViewport);
-            
             try
             {
                 Debug.Assert(hViewer == hThis);
@@ -450,13 +533,20 @@ namespace PicoGK
 
                 if (!oBox.bIsEmpty())
                 {
-                    if (    m_bEmptyViewer ||         // Viewer had no content before
+                    m_oCamera.SetViewPort(vecViewport, oBox.vecSize().Length() * .5f);
+
+                    if (    m_bEmptyViewer ||           // Viewer had no content before
                             (!m_bHadCamInteractions))   // Viewer was never interacted with
                     {
                         m_oCamera.ZoomToFit(oBox);
                     }
 
                     m_bEmptyViewer = false;
+                }
+                else
+                {
+                    // Default Scene radius of 10mm
+                    m_oCamera.SetViewPort(vecViewport, 10);
                 }
 
                 matVP           =   m_oCamera.matVP;
@@ -588,9 +678,7 @@ namespace PicoGK
                             in Vector2 vecWindowSize)
         {
             Debug.Assert(hViewer == hThis);
-
-            m_oCamera.SetViewPort(vecWindowSize);
-
+            // Vieport size will be updated in Update Callback
             RequestUpdate();
         }
     }

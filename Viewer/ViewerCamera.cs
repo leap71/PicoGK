@@ -48,7 +48,8 @@ namespace PicoGK
                 PAN
             };
 
-           public  abstract void SetViewPort(Vector2 vecSize);
+           public  abstract void SetViewPort(   Vector2 vecSize,
+                                                float fSceneDepth);
 
             public abstract void LookAt(Vector3 vec);
 
@@ -72,28 +73,31 @@ namespace PicoGK
 
         public class CamPerspectiveArcball : Camera
         {
-            public CamPerspectiveArcball(float fFovDeg = 45f)
+            public CamPerspectiveArcball(float fFovVerticalDeg = 45f)
             {
-                SetFov(fFovDeg);
+                SetVerticalFov(fFovVerticalDeg);
                 UpdateMatrices();
             }
 
-            public void SetFov(float fFovDeg)
+            public void SetVerticalFov(float fFovDeg)
             {
                 float f = fFovDeg * float.Pi / 180f;
-                if (f != m_fFoV)
+                if (f != m_fVerticalFoV)
                 {
-                    m_fFoV = f;
+                    m_fVerticalFoV = f;
                     UpdateMatrices();
                 }
             }
 
-            public override void SetViewPort(Vector2 vecSizePx)
+            public override void SetViewPort(   Vector2 vecSizePx,
+                                                float fSceneRadius)
             {
-                if (vecSizePx != m_vecViewport)
+                if (    (vecSizePx != m_vecViewport) ||
+                        (fSceneRadius != m_fSceneRadius))
                 {
                     m_fAspect = vecSizePx.X / float.Max(1f, vecSizePx.Y);
                     m_vecViewport = vecSizePx;
+                    m_fSceneRadius = fSceneRadius;
                     UpdateMatrices();
                 }
             }
@@ -107,13 +111,12 @@ namespace PicoGK
             public override void ZoomToFit(BBox3 oBBox)
             {
                 m_vecPivot = oBBox.vecCenter();
-                float r = oBBox.vecSize().Length() * 0.5f;
+                
+                float fDistVert         = m_fSceneRadius / float.Tan(m_fVerticalFoV * 0.5f);
+                float fHorizontalFovX   = 2f * float.Atan(MathF.Tan(m_fVerticalFoV * 0.5f) * m_fAspect);
+                float fDistH            = m_fSceneRadius / float.Tan(fHorizontalFovX * 0.5f);
 
-                float distVert = r / MathF.Tan(m_fFoV * 0.5f);
-                float fovX = 2f * MathF.Atan(MathF.Tan(m_fFoV * 0.5f) * m_fAspect);
-                float distH = r / MathF.Tan(fovX * 0.5f);
-
-                m_fDistance = MathF.Max(distVert, distH) * 1.1f;
+                m_fDistance = float.Max(fDistVert, fDistH) * 1.1f;
                 UpdateMatrices();
             }
 
@@ -155,7 +158,7 @@ namespace PicoGK
             void UpdateMatrices()
             {
                 // Camera eye from pivot + rotated local -Z axis at distance
-                Vector3 vecLocal = new Vector3(0, 0, m_fDistance);
+                Vector3 vecLocal = new(0, 0, m_fDistance);
                 Vector3 vecOffset = Vector3.Transform(vecLocal, m_qRotation);
                 m_vecEye = m_vecPivot + vecOffset;
 
@@ -163,8 +166,16 @@ namespace PicoGK
                 if (vecUp.LengthSquared() < 1e-10f) 
                     vecUp = Vector3.UnitY; // Safe fallback
 
+                float fHorizontalFov = 2f * float.Atan(float.Tan(m_fVerticalFoV * 0.5f) * m_fAspect);
+
+                float fFarPlaneSafe = float.Max(    m_fSceneRadius / float.Tan(m_fVerticalFoV/2), 
+                                                    m_fSceneRadius / float.Tan(fHorizontalFov/2) ) * 2f;
+
                 m_matV = Matrix4x4.CreateLookAt(m_vecEye, m_vecPivot, Vector3.Normalize(vecUp));
-                m_matP = Matrix4x4.CreatePerspectiveFieldOfView(m_fFoV, float.Max(1e-5f, m_fAspect), 0.1f, 1e6f);
+                m_matP = Matrix4x4.CreatePerspectiveFieldOfView(    m_fVerticalFoV, 
+                                                                    float.Max(1e-5f, m_fAspect), 
+                                                                    0.1f, 
+                                                                    fFarPlaneSafe);
             }
 
             // Build camera basis from view matrix (stable near poles)
@@ -193,8 +204,6 @@ namespace PicoGK
 
             void Rotate(Vector2 vecDeltaPx)
             {
-                // Small-angle trackball fallback (works without absolute cursor)
-                // Scale pixel delta into view-space arcball vector
                 if (vecDeltaPx.LengthSquared() < 1e-12f) 
                     return;
 
@@ -227,26 +236,29 @@ namespace PicoGK
                     return;
 
                 // Convert pixel motion to world units at the pivot depth:
-                float fWorldPerPixel = PAN_SPEED * float.Tan(m_fFoV * 0.5f) * m_fDistance / float.Max(1, m_vecViewport.X);
+                float fWorldPerPixel = PAN_SPEED * float.Tan(m_fVerticalFoV * 0.5f) * m_fDistance / float.Max(1, m_vecViewport.X);
 
-                CalculateBasis(out var right, out var up, out var back); // forward = -back
+                CalculateBasis( out Vector3 vecRight, 
+                                out Vector3 vecUp, 
+                                out _); // forward = -back
 
-                Vector3 vecDeltaWorld   = (-vecDeltaPx.X * fWorldPerPixel) * right
-                                        + ( vecDeltaPx.Y * fWorldPerPixel) * up;
+                Vector3 vecDeltaWorld   = (-vecDeltaPx.X * fWorldPerPixel) * vecRight
+                                        + ( vecDeltaPx.Y * fWorldPerPixel) * vecUp;
 
                 m_vecPivot += vecDeltaWorld;
                 m_vecEye   += vecDeltaWorld;
             }
 
-            Vector3     m_vecEye      = new Vector3(0, 0, 1);
-            Vector3     m_vecPivot    = Vector3.Zero;
-            Quaternion  m_qRotation   = Quaternion.Identity;
+            Vector3     m_vecEye        = new Vector3(0, 0, 1);
+            Vector3     m_vecPivot      = Vector3.Zero;
+            Quaternion  m_qRotation     = Quaternion.Identity;
 
-            float       m_fFoV        = 45f * float.Pi / 180f;
-            float       m_fAspect     = 1f;
-            float       m_fDistance   = 1f;
+            float       m_fVerticalFoV  = 45f * float.Pi / 180f;
+            float       m_fAspect       = 1f;
+            float       m_fDistance     = 1f;
 
             Vector2     m_vecViewport   = new (1920,1080);
+            float       m_fSceneRadius  = 1000;
 
             Matrix4x4   m_matV;
             Matrix4x4   m_matP;
