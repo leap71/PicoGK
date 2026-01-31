@@ -41,6 +41,8 @@ namespace PicoGK
     // the PicoGK C++ types. Do not add data members to these classes, even
     // if they are defined as "partial" to be extended with additional methods 
 
+    #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public readonly record struct LibHandle(long Value);
     public readonly record struct MshHandle(long Value);
     public readonly record struct VoxHandle(long Value);
@@ -115,5 +117,7 @@ namespace PicoGK
             this.C = c;
         }
     }
+
+    #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
 

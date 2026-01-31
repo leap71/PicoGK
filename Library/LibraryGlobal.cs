@@ -39,6 +39,7 @@ namespace PicoGK
 {
     public partial class Library
     {
+        #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public class GlobalInstance : IDisposable
         {
             public Viewer   oViewer     => m_oViewer;
@@ -492,5 +493,7 @@ namespace PicoGK
 
             return strLightsFile;
         }
+
+        #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
 }
