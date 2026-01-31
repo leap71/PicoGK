@@ -39,8 +39,15 @@ namespace PicoGK
 {
     public partial class Viewer
     {
+        /// <summary>
+        /// An abstract interface for viewer actions
+        /// </summary>
         public interface IViewerAction
         {
+            /// <summary>
+            /// Called from inside the main viewer thread to execute the action
+            /// </summary>
+            /// <param name="oViewer">Viewer object to work with</param>
             void Do(Viewer oViewer);
         };
 
@@ -399,7 +406,7 @@ namespace PicoGK
             byte [] m_abySpecularDds;
         }
 
-        public class RotateToNextRoundAngleAction : IViewerAction
+        class RotateToNextRoundAngleAction : IViewerAction
         {
             public enum EDir
             {

@@ -39,6 +39,9 @@ using System.Numerics;
 
 namespace PicoGK
 {
+    /// <summary>
+    /// PicoGK viewer
+    /// </summary>
     public partial class Viewer
     {
         /// <summary>
