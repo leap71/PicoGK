@@ -39,16 +39,31 @@ namespace PicoGK
 {
     public partial class Viewer
     {
+        /// <summary>
+        /// Abstract camera class to interact with the view
+        /// </summary>
         public abstract class Camera
         {
+            /// <summary>
+            /// Drag, Spin, Pan the camera
+            /// </summary>
             public enum EDragType
             {
-                ROTATE,
-                SPIN,
-                PAN
+                /// <summary>
+                /// Rotate the camera (up/down)
+                /// </summary>
+                Rotate,
+                /// <summary>
+                /// Spin the camera around the view vector
+                /// </summary>
+                Spin,
+                /// <summary>
+                /// Move the camera up/down
+                /// </summary>
+                Pan
             };
 
-           public  abstract void SetViewPort(   Vector2 vecSize,
+            public abstract void SetViewPort(   Vector2 vecSize,
                                                 float fSceneDepth);
 
             public abstract void LookAt(Vector3 vec);
@@ -57,7 +72,14 @@ namespace PicoGK
 
             public abstract void Scroll(Vector2 vecMouseRel);
 
-            public abstract void MouseDrag(Vector2 vecMouseRel, EDragType eType);
+            public abstract void MouseDrag( Vector2 vecMouseRel, 
+                                            EDragType eType);
+
+            public abstract Quaternion qOrientation
+            {
+                get;
+                set;
+            }
 
             public abstract Matrix4x4 matVP
             {
@@ -73,18 +95,16 @@ namespace PicoGK
 
         public class CamPerspectiveArcball : Camera
         {
-            public CamPerspectiveArcball(float fFovVerticalDeg = 45f)
+            public CamPerspectiveArcball(float fFovVertical = float.Pi / 4)
             {
-                SetVerticalFov(fFovVerticalDeg);
-                UpdateMatrices();
+                SetVerticalFov(fFovVertical);
             }
 
-            public void SetVerticalFov(float fFovDeg)
+            public void SetVerticalFov(float fFov)
             {
-                float f = fFovDeg * float.Pi / 180f;
-                if (f != m_fVerticalFoV)
+                if (fFov != m_fVerticalFoV)
                 {
-                    m_fVerticalFoV = f;
+                    m_fVerticalFoV = fFov;
                     UpdateMatrices();
                 }
             }
@@ -124,15 +144,15 @@ namespace PicoGK
             {
                 switch (eType)
                 {
-                case EDragType.ROTATE:
+                case EDragType.Rotate:
                     Rotate(vecMouseRel);
                     break;
 
-                case EDragType.SPIN:
+                case EDragType.Spin:
                     Spin(vecMouseRel);
                     break;
 
-                case EDragType.PAN:
+                case EDragType.Pan:
                     Pan(vecMouseRel);
                     break;
 
@@ -154,6 +174,17 @@ namespace PicoGK
 
             public override Matrix4x4   matVP => m_matV * m_matP;
             public override Vector3     vecEye => m_vecEye;
+
+            public override Quaternion qOrientation 
+            { 
+                get => m_qRotation;
+                
+                set
+                {
+                    m_qRotation = Quaternion.Normalize(value);
+                    UpdateMatrices();        
+                }
+            }
 
             void UpdateMatrices()
             {
@@ -249,24 +280,23 @@ namespace PicoGK
                 m_vecEye   += vecDeltaWorld;
             }
 
-            Vector3     m_vecEye        = new Vector3(0, 0, 1);
-            Vector3     m_vecPivot      = Vector3.Zero;
-            Quaternion  m_qRotation     = Quaternion.Identity;
+            Vector3         m_vecEye            = new Vector3(0, 0, 1);
+            Vector3         m_vecPivot          = Vector3.Zero;
+            Quaternion      m_qRotation         = Quaternion.Identity;
+            float           m_fVerticalFoV      = 45f * float.Pi / 180f;
+            float           m_fAspect           = 1f;
+            float           m_fDistance         = 1f;
 
-            float       m_fVerticalFoV  = 45f * float.Pi / 180f;
-            float       m_fAspect       = 1f;
-            float       m_fDistance     = 1f;
+            Vector2         m_vecViewport       = new (1920,1080);
+            float           m_fSceneRadius      = 1000;
 
-            Vector2     m_vecViewport   = new (1920,1080);
-            float       m_fSceneRadius  = 1000;
-
-            Matrix4x4   m_matV;
-            Matrix4x4   m_matP;
+            Matrix4x4       m_matV;
+            Matrix4x4       m_matP;
 
             const float ZOOM_SPEED      = 0.1f;
             const float ROTATE_SPEED    = 15f;
             const float PAN_SPEED       = 10f;
-            const float PIXELS_PER_SPIN = 900f; // 900 px ≈ 360°
+            const float PIXELS_PER_SPIN = 900f; // 900 px ≈ 360°  
         }
     }
 }

@@ -58,25 +58,109 @@ namespace PicoGK
 
             m_iMainThreadID = Environment.CurrentManagedThreadId;
 
+            float f45   = float.Pi/4;
+            float f90   = f45 * 2;
+            float f180  = f90 * 2;
+
+            qOrientationTop      = Quaternion.Identity;
+            qOrientationBottom   = Quaternion.CreateFromAxisAngle(Vector3.UnitY, f180)   * qOrientationTop;
+            qOrientationFront    = Quaternion.CreateFromAxisAngle(Vector3.UnitX, f90)    * qOrientationTop;
+            qOrientationRight    = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, f90)    * qOrientationFront;
+            qOrientationBack     = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, f90)    * qOrientationRight;
+            qOrientationLeft     = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, f90)    * qOrientationBack;
+
+            qOrientationHome     = qOrientationTop    
+                                    * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, f45)
+                                    * Quaternion.CreateFromAxisAngle(Vector3.UnitX, f45);
+
+            qOrientation = qOrientationHome;                    
+
             m_oHandler.AddAction(new KeyAction(
-                                    new RotateToNextRoundAngleAction(
-                                        RotateToNextRoundAngleAction.EDir.Dir_Down),
+                                    new RotateToAction(
+                                        qOrientationHome),
+                                        EKeys.Key_0));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new RotateToAction(
+                                        qOrientationFront),
+                                        EKeys.Key_1));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new RotateToAction(
+                                        qOrientationLeft),
+                                        EKeys.Key_2));
+
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new RotateToAction(
+                                        qOrientationBack),
+                                        EKeys.Key_3));
+
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new RotateToAction(
+                                        qOrientationRight),
+                                        EKeys.Key_4));
+
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new RotateToAction(
+                                        qOrientationTop),
+                                        EKeys.Key_5));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new RotateToAction(
+                                        qOrientationBottom),
+                                        EKeys.Key_6));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new SpinAction(
+                                        Vector3.UnitZ,
+                                        float.Pi),
+                                        EKeys.Key_7));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new SpinAction(
+                                        Vector3.UnitX,
+                                        float.Pi),
+                                        EKeys.Key_8));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new SpinAction(
+                                        Vector3.UnitY,
+                                        float.Pi),
+                                        EKeys.Key_9));
+
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new SpinAction(
+                                        Vector3.UnitX,
+                                        -float.Pi / 4),
                                         EKeys.Key_Down));
 
             m_oHandler.AddAction(new KeyAction(
-                                    new RotateToNextRoundAngleAction(
-                                        RotateToNextRoundAngleAction.EDir.Dir_Up),
+                                    new SpinAction(
+                                        Vector3.UnitX,
+                                        float.Pi / 4),
                                         EKeys.Key_Up));
 
             m_oHandler.AddAction(new KeyAction(
-                                    new RotateToNextRoundAngleAction(
-                                        RotateToNextRoundAngleAction.EDir.Dir_Left),
+                                    new SpinAction(
+                                        Vector3.UnitY,
+                                        float.Pi / 4),
                                         EKeys.Key_Left));
 
             m_oHandler.AddAction(new KeyAction(
-                                    new RotateToNextRoundAngleAction(
-                                        RotateToNextRoundAngleAction.EDir.Dir_Right),
+                                    new SpinAction(
+                                        Vector3.UnitY,
+                                        -float.Pi / 4),
                                         EKeys.Key_Right));
+
+            m_oHandler.AddAction(new KeyAction(
+                                    new ZoomToFitAction(qOrientationHome),
+                                        EKeys.Key_0,
+                                        false,
+                                        true));
 
             AddKeyHandler(m_oHandler);
 
@@ -466,14 +550,44 @@ namespace PicoGK
         }
 
         /// <summary>
-        /// Set Vertical Field of View in Degrees (i.e. 45º)
+        /// Zoom to fit the contents of the viewer
         /// </summary>
-        public void SetFov(float fAngleDeg)
+        public void ZoomToFit()
         {
-            m_oCamera.SetVerticalFov(fAngleDeg);
+            m_bForceZoomToFit = true;
             RequestUpdate();
         }
 
+        /// <summary>
+        /// Set Vertical Field of View in radians (i.e. 0..2*Pi)
+        /// </summary>
+        public void SetFov(float fAngle)
+        {
+            m_oCamera.SetVerticalFov(fAngle);
+            RequestUpdate();
+        }
+
+        /// <summary>
+        /// Access to the rotational component (orientation) of the viewer
+        /// </summary>
+        public Quaternion qOrientation
+        {
+            get => m_oCamera.qOrientation;
+            set
+            {
+                m_oCamera.qOrientation = value; 
+                RequestUpdate();
+            }
+        }
+
+        public readonly Quaternion qOrientationHome;
+        public readonly Quaternion qOrientationTop;
+        public readonly Quaternion qOrientationBottom;
+        public readonly Quaternion qOrientationFront;
+        public readonly Quaternion qOrientationLeft;
+        public readonly Quaternion qOrientationBack;
+        public readonly Quaternion qOrientationRight;
+       
         /// <summary>
         /// Allows you to query if all viewer actions are complete
         /// </summary>
@@ -507,8 +621,10 @@ namespace PicoGK
 
         ILog m_xLog;
 
-        CamPerspectiveArcball  m_oCamera               = new(45);
+        CamPerspectiveArcball  m_oCamera        = new();
         bool            m_bEmptyViewer          = true;
+
+        bool            m_bForceZoomToFit       = false;
         bool            m_bHadCamInteractions   = false;
 
         bool            m_bMouseDrag            = false;
@@ -538,10 +654,12 @@ namespace PicoGK
                 {
                     m_oCamera.SetViewPort(vecViewport, oBox.vecSize().Length() * .5f);
 
-                    if (    m_bEmptyViewer ||           // Viewer had no content before
+                    if (    m_bForceZoomToFit ||        // Zoom to fit requested?
+                            m_bEmptyViewer ||           // Viewer had no content before
                             (!m_bHadCamInteractions))   // Viewer was never interacted with
                     {
                         m_oCamera.ZoomToFit(oBox);
+                        m_bForceZoomToFit = false;
                     }
 
                     m_bEmptyViewer = false;
@@ -600,12 +718,12 @@ namespace PicoGK
             if (m_bMouseDrag)
             {
                 Vector2 vecDist         = vecMousePos - m_vecMousePos;
-                Camera.EDragType eType  = Camera.EDragType.ROTATE;
+                Camera.EDragType eType  = Camera.EDragType.Rotate;
 
                 if (bShift)
-                    eType = Camera.EDragType.PAN;
+                    eType = Camera.EDragType.Pan;
                 else if (bAlt)
-                    eType = Camera.EDragType.SPIN;
+                    eType = Camera.EDragType.Spin;
 
                 m_oCamera.MouseDrag(vecDist, eType);
                 m_bHadCamInteractions = true;
@@ -663,12 +781,12 @@ namespace PicoGK
             }
             else
             {
-                Camera.EDragType eType = Camera.EDragType.ROTATE;
+                Camera.EDragType eType = Camera.EDragType.Rotate;
 
                 if (bShift)
-                    eType = Camera.EDragType.PAN;
+                    eType = Camera.EDragType.Pan;
                 else if (bAlt)
-                    eType = Camera.EDragType.SPIN;
+                    eType = Camera.EDragType.Spin;
 
                 m_oCamera.MouseDrag(vecScrollWheel * 3, eType);
             }

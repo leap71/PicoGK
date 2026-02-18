@@ -406,67 +406,92 @@ namespace PicoGK
             byte [] m_abySpecularDds;
         }
 
-        class RotateToNextRoundAngleAction : IViewerAction
+        class RotateToAction : IViewerAction
         {
-            public enum EDir
+            public RotateToAction(Quaternion qTo)
             {
-                Dir_Up,
-                Dir_Down,
-                Dir_Left,
-                Dir_Right
-            }
-
-            public RotateToNextRoundAngleAction(EDir eDir)
-            {
-                m_eDir = eDir;
+                m_qTo = qTo;
             }
 
             public void Do(Viewer oViewer)
             {
                 oViewer.RemoveAllAnimations();
 
-                /// TODO
-
-                /*Vector2 vecTo = new Vector2(    oViewer.m_fOrbit,
-                                                oViewer.m_fElevation);
-
-                switch (m_eDir)
-                {
-                    case EDir.Dir_Left:
-                    case EDir.Dir_Right:
-                        {
-                            int iStep = (int)(vecTo.X / 45.0f);
-
-                            float fStep = (m_eDir == EDir.Dir_Left) ? 45f : -45f;
-                            vecTo.X = (float)iStep * 45f + fStep;
-                        }
-                        break;
-
-                    case EDir.Dir_Up:
-                    case EDir.Dir_Down:
-                        {
-                            int iStep = (int)(vecTo.Y / 45.0f);
-                            float fStep = (m_eDir == EDir.Dir_Up) ? 45f : -45f;
-                            vecTo.Y = (float)iStep * 45f + fStep;
-                        }
-                        break;
-                }
-
                 Animation.IAction xAction
                     = new AnimViewRotate(   oViewer,
-                                            new Vector2(    oViewer.m_fOrbit,
-                                                            oViewer.m_fElevation),
-                                            vecTo);
+                                            oViewer.qOrientation,
+                                            m_qTo);
 
                 Animation oAnim
                     = new Animation(    xAction, 0.7f,
                                         Animation.EType.Once,
                                         Easing.EEasing.CUBIC_OUT);
 
-                oViewer.AddAnimation(oAnim);*/
+                oViewer.AddAnimation(oAnim);
             }
 
-            EDir m_eDir;
+            Quaternion m_qTo;
+        }
+
+        class SpinAction : IViewerAction
+        {
+            public SpinAction(  Vector3 vecSpinAxis,
+                                float fSpinAngleRad = float.Pi)
+            {
+                m_vecSpinAxis   = vecSpinAxis;
+                m_fSpinAngle    = fSpinAngleRad;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                oViewer.RemoveAllAnimations();
+
+                Animation.IAction xAction
+                    = new AnimViewRotate(   oViewer,
+                                            oViewer.qOrientation,
+                                            oViewer.qOrientation * Quaternion.CreateFromAxisAngle(m_vecSpinAxis, m_fSpinAngle));
+
+                float fSpeed = 3f * float.Abs(m_fSpinAngle / float.Pi);
+
+                Animation oAnim
+                    = new Animation(    xAction, fSpeed,
+                                        Animation.EType.Once,
+                                        Easing.EEasing.SINE_OUT);
+
+                oViewer.AddAnimation(oAnim);
+            }
+
+            Vector3 m_vecSpinAxis;
+            float   m_fSpinAngle;
+        }
+
+        class ZoomToFitAction : IViewerAction
+        {
+            public ZoomToFitAction(Quaternion qSet)
+            {
+                m_qSet = qSet;
+            }
+
+            public void Do(Viewer oViewer)
+            {
+                oViewer.RemoveAllAnimations();
+
+                oViewer.ZoomToFit();
+
+                Animation.IAction xAction
+                    = new AnimViewRotate(   oViewer,
+                                            oViewer.qOrientation,
+                                            m_qSet);
+
+                Animation oAnim
+                    = new Animation(    xAction, 0.5f,
+                                        Animation.EType.Once,
+                                        Easing.EEasing.SINE_OUT);
+
+                oViewer.AddAnimation(oAnim);
+            }
+
+            Quaternion m_qSet;
         }
     }
 }

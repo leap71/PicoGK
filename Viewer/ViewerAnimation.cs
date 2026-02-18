@@ -41,7 +41,7 @@ namespace PicoGK
     {
         public class AnimGroupMatrixRotate : Animation.IAction
         {
-            public AnimGroupMatrixRotate(Viewer oViewer,
+            public AnimGroupMatrixRotate(   Viewer oViewer,
                                             int nGroup,
                                             Matrix4x4 matInit,
                                             Vector3 vecAxis,
@@ -71,29 +71,34 @@ namespace PicoGK
             int m_nGroup;
         }
 
+        /// <summary>
+        /// Animate view rotation
+        /// </summary>
         public class AnimViewRotate : Animation.IAction
         {
-            public AnimViewRotate(Viewer oViewer,
-                                    Vector2 vecFrom,
-                                    Vector2 vecTo)
+            /// <summary>
+            /// Animate movement to a viewer orientation
+            /// </summary>
+            /// <param name="oViewer">Viewer to use</param>
+            /// <param name="qFrom">Original orientation Quaternion Format</param>
+            /// <param name="qTo">New orientation in Quaternion format</param>
+            public AnimViewRotate(  Viewer oViewer,
+                                    Quaternion qFrom,
+                                    Quaternion qTo)
             {
-                m_oViewer = oViewer;
-                m_vecFrom = vecFrom;
-                m_vecTo = vecTo;
+                m_oViewer   = oViewer;
+                m_qFrom     = qFrom;
+                m_qTo       = qTo;
             }
 
             public void Do(float fFactor)
             {
-                Vector2 vec = (m_vecTo - m_vecFrom) * fFactor;
-                vec += m_vecFrom;
-
-                /// TODO
-                ///m_oViewer.SetViewAngles(vec.X, vec.Y);
+                m_oViewer.qOrientation = Quaternion.Slerp(m_qFrom, m_qTo, fFactor);
             }
 
-            Viewer m_oViewer;
-            Vector2 m_vecFrom;
-            Vector2 m_vecTo;
+            Viewer      m_oViewer;
+            Quaternion  m_qFrom;
+            Quaternion  m_qTo;
         }
 
         public void AddAnimation(Animation oAnim)
