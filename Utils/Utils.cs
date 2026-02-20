@@ -38,7 +38,7 @@ using System.Diagnostics;
 
 namespace PicoGK
 {
-    public class Utils
+    public partial class Utils
     {
         /// <summary>
         /// Strip quotes of a quoted path like "/usr/lib/" -> /usr/lib/
@@ -224,65 +224,6 @@ namespace PicoGK
             return str[..iMaxCharacters];
         }
 
-        static public void SetMatrixRow(    ref Matrix4x4 mat, uint n,
-                                            float f1, float f2, float f3, float f4)
-        {
-            // An insane person wrote Matrix4x4
-
-            switch (n)
-            {
-                case 0:
-                    mat.M11 = f1;
-                    mat.M12 = f2;
-                    mat.M13 = f3;
-                    mat.M14 = f4;
-                    break;
-                case 1:
-                    mat.M21 = f1;
-                    mat.M22 = f2;
-                    mat.M23 = f3;
-                    mat.M24 = f4;
-                    break;
-                case 2:
-                    mat.M31 = f1;
-                    mat.M32 = f2;
-                    mat.M33 = f3;
-                    mat.M34 = f4;
-                    break;
-                case 3:
-                    mat.M41 = f1;
-                    mat.M42 = f2;
-                    mat.M43 = f3;
-                    mat.M44 = f4;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("Matrix 4x4 row index i 0..3");
-            }
-        }
-
-        static public Matrix4x4 matLookAt(  Vector3 vecEye,
-                                            Vector3 vecLookAt)
-        {
-            Vector3 vecZ = new(0.0f, 0.0f, 1.0f);
-
-            Vector3 vecView = Vector3.Normalize(vecEye - vecLookAt);
-            Vector3 vecRight = Vector3.Normalize(Vector3.Cross(vecZ, vecView));
-            Vector3 vecUp = Vector3.Cross(vecView, vecRight);
-
-            Matrix4x4 mat = new Matrix4x4();
-
-            SetMatrixRow(ref mat, 0, vecRight.X, vecUp.X, vecView.X, 0f);
-            SetMatrixRow(ref mat, 1, vecRight.Y, vecUp.Y, vecView.Y, 0f);
-            SetMatrixRow(ref mat, 2, vecRight.Z, vecUp.Z, vecView.Z, 0f);
-
-            SetMatrixRow(ref mat, 3, -Vector3.Dot(vecRight, vecEye),
-                               -Vector3.Dot(vecUp, vecEye),
-                               -Vector3.Dot(vecView, vecEye),
-                               1.0f);
-
-            return mat;
-        }
-
         static public Mesh mshCreateCube(   Library lib,
                                             BBox3 oBox)
         {
@@ -336,325 +277,78 @@ namespace PicoGK
 
             return oMesh;
         }
-
-        static public Mesh mshCreateCylinder(   Library lib,
-                                                Vector3? vecScale     = null,
-                                                Vector3? vecOffsetMM  = null,
-                                                int iSides = 0)
-        {
-            Vector3 vecS        = vecScale ?? new Vector3(1.0f);
-            Vector3 vecOffset   = vecOffsetMM ?? new Vector3(0.0f);
-
-            float fA = vecS.X * 0.5f;
-            float fB = vecS.Y * 0.5f;
-
-            if (iSides <= 0)
-            {
-                float fVoxA = fA / lib.fVoxelSize;
-                float fVoxB = fB / lib.fVoxelSize;
-                //Ramanujan's ellipse perimeter
-                //P ≈ π [ 3 (a + b) - √[(3a + b) (a + 3b) ]]
-                //P ≈ π(a + b) [ 1 + (3h) / (10 + √(4 - 3h) ) ], where h = (a - b)2/(a + b)2
-
-                float fP    = float.Pi * (3.0f * (fVoxA + fVoxB)
-                                - float.Sqrt((3.0f * fVoxA + fVoxB)
-                                * (fVoxA + 3.0f * fVoxB)));
-
-                iSides      = 2 * (int) float.Ceiling(fP);
-            }
-
-            if (iSides < 3)
-            {
-                iSides = 3;
-            }
-
-            Mesh oMesh = new Mesh(lib);
-
-            Vector3 vecBottomCenter = vecOffset;
-            vecBottomCenter.Z      -= vecS.Z * 0.5f;
-            Vector3 vecTopCenter    = vecBottomCenter;
-            vecTopCenter.Z         += vecS.Z;
-            Vector3 vecPrevBottom   = new Vector3(fA, 0, 0) + vecBottomCenter;
-            Vector3 vecPrevTop      = vecPrevBottom;
-            vecPrevTop.Z           += vecS.Z;
-
-            float fStep             = MathF.PI * 2.0f / iSides;
-
-            for (int i = 1; i <= iSides; ++i)
-            {
-                float fAngle = i * fStep;
-
-                Vector3 vecThisBottom   = new Vector3(MathF.Cos(fAngle) * fA, MathF.Sin(fAngle) * fB, 0.0f) + vecBottomCenter;
-                Vector3 vecThisTop      = vecThisBottom;
-                vecThisTop.Z           += vecS.Z;
-
-                //top cap
-                oMesh.nAddTriangle(vecTopCenter, vecPrevTop, vecThisTop);
-
-                //side
-                oMesh.nAddTriangle(vecPrevBottom, vecThisBottom, vecPrevTop);
-                oMesh.nAddTriangle(vecThisBottom, vecThisTop, vecPrevTop);
-
-                //bottom cap
-                oMesh.nAddTriangle(vecBottomCenter, vecThisBottom, vecPrevBottom);
-
-                vecPrevBottom   = vecThisBottom;
-                vecPrevTop      = vecThisTop;
-            }
-
-            return oMesh;
-        }
-
-        static public Mesh mshCreateCone(   Library lib,
-                                            Vector3? vecScale = null,
-                                            Vector3? vecOffsetMM = null,
-                                            int iSides = 0)
-        {
-            Vector3 vecS        = vecScale ?? new Vector3(1.0f);
-            Vector3 vecOffset   = vecOffsetMM ?? new Vector3(0.0f);
-
-            float fA = vecS.X * 0.5f;
-            float fB = vecS.Y * 0.5f;
-
-            if (iSides <= 0)
-            {
-                float fVoxA = fA / lib.fVoxelSize;
-                float fVoxB = fB / lib.fVoxelSize;
-
-                float fP =  float.Pi * (3.0f * (fVoxA + fVoxB)
-                            - float.Sqrt((3.0f * fVoxA + fVoxB)
-                            * (fVoxA + 3.0f * fVoxB)));
-
-                iSides = 2 * (int)MathF.Ceiling(fP);
-            }
-
-            if (iSides < 3)
-            {
-                iSides = 3;
-            }
-
-            Mesh oMesh = new Mesh(lib);
-
-            Vector3 vecBottomCenter = vecOffset;
-            vecBottomCenter.Z      -= vecS.Z * 0.5f;
-            Vector3 vecTop          = vecBottomCenter;
-            vecTop.Z               += vecS.Z;
-            Vector3 vecPrevBottom   = new Vector3(fA, 0, 0) + vecBottomCenter;
-
-            float fStep = MathF.PI * 2.0f / iSides;
-
-            for (int i = 1; i <= iSides; ++i)
-            {
-                float fAngle = i * fStep;
-
-                Vector3 vecThisBottom = new Vector3(MathF.Cos(fAngle) * fA, MathF.Sin(fAngle) * fB, 0.0f) + vecBottomCenter;
-
-                //side
-                oMesh.nAddTriangle(vecPrevBottom, vecThisBottom, vecTop);
-   
-                //bottom cap
-                oMesh.nAddTriangle(vecBottomCenter, vecThisBottom, vecPrevBottom);
-
-                vecPrevBottom = vecThisBottom;
-            }
-
-            return oMesh;
-        }
-
-        static void GeoSphereTriangle(  Vector3 vecA,
-					                    Vector3 vecB,
-					                    Vector3 vecC,
-					                    Vector3 vecOffset,
-					                    Vector3 vecRadii,
-                                        int iRecursionDepth,
-					                    Mesh oTarget)
-        {
-	        if (iRecursionDepth > 0)
-	        {
-		        Vector3 vecAB = vecOffset + ((vecA + vecB) * 0.5f - vecOffset);
-                Vector3 vecBC = vecOffset + ((vecB + vecC) * 0.5f - vecOffset);
-                Vector3 vecCA = vecOffset + ((vecC + vecA) * 0.5f - vecOffset);
-
-                vecAB *= vecRadii / vecAB.Length();
-                vecBC *= vecRadii / vecBC.Length();
-                vecCA *= vecRadii / vecCA.Length();
-
-                GeoSphereTriangle(vecA, vecAB, vecCA, vecOffset, vecRadii, iRecursionDepth - 1, oTarget);
-                GeoSphereTriangle(vecAB, vecB, vecBC, vecOffset, vecRadii, iRecursionDepth - 1, oTarget);
-                GeoSphereTriangle(vecAB, vecBC, vecCA, vecOffset, vecRadii, iRecursionDepth - 1, oTarget);
-                GeoSphereTriangle(vecCA, vecBC, vecC, vecOffset, vecRadii, iRecursionDepth - 1, oTarget);
-            }
-	        else
-	        {
-                oTarget.nAddTriangle(vecA, vecB, vecC);
-            }
-        }
-
-        static float fSquared(float fX)
-        {
-            return fX * fX;
-        }
-
-        static float fApproxEllipsoidSurfaceArea(Vector3 vecABC)
-        {
-            return 4.0f * MathF.PI * MathF.Pow((
-                MathF.Pow(vecABC.X * vecABC.Y, 1.6f) +
-                MathF.Pow(vecABC.Y * vecABC.Z, 1.6f) +
-                MathF.Pow(vecABC.Z * vecABC.X, 1.6f)) / 3.0f, 1.0f / 1.6f);
-        }
-
-        static public Mesh mshCreateGeoSphere(  Library lib,
-                                                Vector3? vecScale = null,
-                                                Vector3? vecOffsetMM = null,
-                                                int iSubdivisions = 0)
-        {
-            Vector3 vecS        = vecScale ?? new Vector3(1.0f);
-            Vector3 vecOffset   = vecOffsetMM ?? new Vector3(0.0f);
-
-            Mesh oMesh          = new Mesh(lib);
-
-            Vector3 vecRadii    = vecS * 0.5f;
-            Vector3 vecRadii2   = vecRadii * vecRadii;
-
-            float fCoeff        = fSquared(2.0f * MathF.Sin(MathF.PI * 0.2f));
-            Vector3 vecPenta    = new Vector3(
-                (2.0f * MathF.Sqrt(fCoeff * vecRadii2.X - vecRadii2.X)) / fCoeff,
-                (2.0f * MathF.Sqrt(fCoeff * vecRadii2.Y - vecRadii2.Y)) / fCoeff,
-                (2.0f * MathF.Sqrt(fCoeff * vecRadii2.Z - vecRadii2.Z)) / fCoeff);
-
-            float fPentaDZ      = MathF.Sqrt(vecRadii2.Z - fSquared(vecPenta.Z));
-
-            Vector3[] avecPOffs = new Vector3[5];
-
-            for (int i = 0; i < 5; i++)
-            {
-                float fAngle = 0.4f * MathF.PI * i;
-                avecPOffs[i] = new Vector3(vecPenta.X * MathF.Cos(fAngle), vecPenta.Y * MathF.Sin(fAngle), fPentaDZ);
-            }
-
-            //estimate the number of subdivisions based on the sphere or ellipsoid surface area
             
-            if (iSubdivisions <= 0)
+
+        /// <summary>
+        /// Creates a temporary folder with an arbitrary filename
+        /// in the system's default temp directory, which is guaranteed to be
+        /// writable (we don't check this, but the system should guarantee it)
+        /// Use the "using" syntax to automatically cleanup after the object
+        /// runs out of scope. It will clean up all the files inside and then
+        /// delete the temporary folder.
+        /// Note: It intentionally doesn't delete any subdirectories you may
+        /// create. If you create subdirs, please clean them up yourself.
+        /// We intentionally do not recursively wipe out everything out of an
+        /// abundance of caution.
+        ///
+        /// Access the temp folder using oFolder.strFolder
+        /// 
+        /// </summary>
+        public class TempFolder : IDisposable
+        {
+            public TempFolder()
             {
-                int iTargetTriangles = (int) MathF.Ceiling(
-                                    fApproxEllipsoidSurfaceArea(vecRadii)
-                                    / lib.fVoxelSize
-                                    / lib.fVoxelSize);
+                strFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                Directory.CreateDirectory(strFolder);
+            }
 
-                iSubdivisions = 1;
-                int iTriangles = 80;
+            public string strFolder;
 
-                while (iSubdivisions < 8 && iTriangles < iTargetTriangles)
+            ~TempFolder()
+            {
+                Dispose(false);
+            }
+
+            public void Dispose()
+            {
+                // Dispose of unmanaged resources.
+                Dispose(true);
+                // Suppress finalization.
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool bDisposing)
+            {
+                if (m_bDisposed)
                 {
-                    ++iSubdivisions;
-                    iTriangles = 20 * (1 << (2 * iSubdivisions));
-                }
-            }
-            
-            //top cap
-            Vector3 vecCap = vecOffset;
-
-            vecCap.Z      += vecRadii.Z;
-
-            for (int i = 0; i < 5; i++)
-            {
-                GeoSphereTriangle(vecCap, vecOffset + avecPOffs[i], vecOffset + avecPOffs[(i + 1) % 5], vecOffset, vecRadii, iSubdivisions, oMesh);
-            }
-
-            //10 triangles around
-            GeoSphereTriangle(vecOffset + avecPOffs[4], vecOffset - avecPOffs[2], vecOffset + avecPOffs[0], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[4], vecOffset - avecPOffs[1], vecOffset - avecPOffs[2], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[3], vecOffset - avecPOffs[1], vecOffset + avecPOffs[4], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[3], vecOffset - avecPOffs[0], vecOffset - avecPOffs[1], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[2], vecOffset - avecPOffs[0], vecOffset + avecPOffs[3], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[2], vecOffset - avecPOffs[4], vecOffset - avecPOffs[0], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[1], vecOffset - avecPOffs[4], vecOffset + avecPOffs[2], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[1], vecOffset - avecPOffs[3], vecOffset - avecPOffs[4], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[0], vecOffset - avecPOffs[3], vecOffset + avecPOffs[1], vecOffset, vecRadii, iSubdivisions, oMesh);
-            GeoSphereTriangle(vecOffset + avecPOffs[0], vecOffset - avecPOffs[2], vecOffset - avecPOffs[3], vecOffset, vecRadii, iSubdivisions, oMesh);
-
-            //bottom cap
-            vecCap.Z = vecOffset.Z - vecRadii.Z;
-
-            for (int i = 0; i < 5; i++)
-            {
-                GeoSphereTriangle(vecCap, vecOffset - avecPOffs[(i + 1) % 5], vecOffset - avecPOffs[i], vecOffset, vecRadii, iSubdivisions, oMesh);
-            }
-
-            return oMesh;
-        }
-
-    }
-
-    /// <summary>
-    /// Creates a temporary folder with an arbitrary filename
-    /// in the system's default temp directory, which is guaranteed to be
-    /// writable (we don't check this, but the system should guarantee it)
-    /// Use the "using" syntax to automatically cleanup after the object
-    /// runs out of scope. It will clean up all the files inside and then
-    /// delete the temporary folder.
-    /// Note: It intentionally doesn't delete any subdirectories you may
-    /// create. If you create subdirs, please clean them up yourself.
-    /// We intentionally do not recursively wipe out everything out of an
-    /// abundance of caution.
-    ///
-    /// Access the temp folder using oFolder.strFolder
-    /// 
-    /// </summary>
-    public class TempFolder : IDisposable
-    {
-        public TempFolder()
-        {
-            strFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(strFolder);
-        }
-
-        public string strFolder;
-
-        ~TempFolder()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            // Dispose of unmanaged resources.
-            Dispose(true);
-            // Suppress finalization.
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool bDisposing)
-        {
-            if (m_bDisposed)
-            {
-                return;
-            }
-
-            try
-            {
-                // We will cleanup all files, but will not cleanup subfolders
-                // this would require recursive delete, and I am afraid it
-                // could wipe out an entire disk, if used erroneously,
-                // however unlikely
-
-                string[] astrFiles = Directory.GetFiles(strFolder);
-                foreach (string strFile in astrFiles)
-                {
-                    File.Delete(strFile);
+                    return;
                 }
 
-                // Remove the temp directory
-                Directory.Delete(strFolder);
-            }
-            catch (Exception)
-            {
-                // Failed to cleanup, hopefully the system will do it for us at some point
+                try
+                {
+                    // We will cleanup all files, but will not cleanup subfolders
+                    // this would require recursive delete, and I am afraid it
+                    // could wipe out an entire disk, if used erroneously,
+                    // however unlikely
+
+                    string[] astrFiles = Directory.GetFiles(strFolder);
+                    foreach (string strFile in astrFiles)
+                    {
+                        File.Delete(strFile);
+                    }
+
+                    // Remove the temp directory
+                    Directory.Delete(strFolder);
+                }
+                catch (Exception)
+                {
+                    // Failed to cleanup, hopefully the system will do it for us at some point
+                }
+
+                m_bDisposed = true;
             }
 
-            m_bDisposed = true;
+            bool m_bDisposed = false;
         }
-
-        bool m_bDisposed = false;
     }
 }
