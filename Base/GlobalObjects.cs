@@ -255,4 +255,24 @@ namespace PicoGK
             
         } 
     }
+
+    public partial class Utils
+    {
+        /// <summary>
+        /// Helper function to create simple box mesh from a bounding box
+        /// </summary>
+        static public Mesh mshCreateCube(BBox3 oBox)
+        {
+            return mshCreateCube(Library.oLibrary(), oBox);
+        }
+
+        /// <summary>
+        /// Helper function to create a simple box mesh with the optional specified size and location
+        /// </summary>
+        static public Mesh mshCreateCube(   Vector3? vecScale       = null,
+                                            Vector3? vecOffsetMM    = null)
+        {
+            return mshCreateCube(Library.oLibrary(), vecScale, vecOffsetMM);
+        }
+    }
 }
