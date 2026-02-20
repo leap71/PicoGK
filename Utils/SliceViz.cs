@@ -59,20 +59,20 @@ namespace PicoGK
             {
                 case Voxels.ESliceAxis.X:
                 vecPos.X = oBox.vecMin.X;
-                m_frm = LocalFrame.frmFromZX(vecPos, Vector3.UnitX, Vector3.UnitY);
+                m_frm = Frame3d.frmFromZX(vecPos, Vector3.UnitX, Vector3.UnitY);
                 m_bFlipY = true;
                 break;
 
                 case Voxels.ESliceAxis.Y:
                 vecPos.Y = oBox.vecMin.Y;
-                m_frm = LocalFrame.frmFromZX(vecPos, Vector3.UnitY, Vector3.UnitX);
+                m_frm = Frame3d.frmFromZX(vecPos, Vector3.UnitY, Vector3.UnitX);
                 m_bFlipY = false;
                 break;
 
                 case Voxels.ESliceAxis.Z:
                 default:
                 vecPos.Z = oBox.vecMin.Z;
-                m_frm = LocalFrame.frmFromZX(vecPos, Vector3.UnitZ, Vector3.UnitX);
+                m_frm = Frame3d.frmFromZX(vecPos, Vector3.UnitZ, Vector3.UnitX);
                 m_bFlipY = true;
                 break;
             }
@@ -110,7 +110,7 @@ namespace PicoGK
             if (m_poly != null)
                 m_oViewer.Remove(m_poly);
 
-            LocalFrame frm = m_frm.frmMovedLocalZ(nSlice * m_vox.lib.fVoxelSize);
+            Frame3d frm = m_frm.frmMovedLocalZ(nSlice * m_vox.lib.fVoxelSize);
 
             m_poly = new(m_vox.lib, "FF0000");
             m_poly.nAddVertex(  frm.vecPtToWorld(new Vector2( m_vecScale.X / 2,   m_vecScale.Y / 2)));
@@ -150,7 +150,7 @@ namespace PicoGK
         Voxels              m_vox;
         Voxels.ESliceAxis   m_eAxis;
         bool                m_bFlipY;
-        LocalFrame          m_frm;
+        Frame3d             m_frm;
         int                 m_nSlices;
         Vector3             m_vecScale;
         ImageGrayScale      m_img;

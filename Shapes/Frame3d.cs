@@ -40,21 +40,21 @@ using System.Runtime.CompilerServices;
 namespace PicoGK.Shapes
 {
     /// <summary>
-    /// The LocalFrame object stores a local coordinate system, i.e. a rigid
+    /// The Frame3d object stores a local coordinate system, i.e. a rigid
     /// transformation from a local coordinate to a world coordinate.
     /// The transformation consists of translation (move) and rotation, but not 
     /// scaling, shearing or other complex transformations.
     /// </summary>
     [DebuggerDisplay("O=({vecPos.X:n3},{vecPos.Y:n3},{vecPos.Z:n3})")]
-    public readonly struct LocalFrame : IEquatable<LocalFrame>
+    public readonly struct Frame3d : IEquatable<Frame3d>
     {
         /// <summary>
         /// Local frame representing the world coordinate system
         /// </summary>
-        public static readonly LocalFrame frmWorld = new(Vector3.Zero, Vector3.UnitZ, Vector3.UnitX);
+        public static readonly Frame3d frmWorld = new(Vector3.Zero, Vector3.UnitZ, Vector3.UnitX);
 
         /// <summary>
-        /// Position of the origin of the LocalFrame
+        /// Position of the origin of the Frame3d
         /// </summary>
         public Vector3 vecPos { get; }
 
@@ -74,23 +74,23 @@ namespace PicoGK.Shapes
         public Vector3 vecLz  { get; }
 
         /// <summary>
-        /// Create a LocalFrame at the specified position with axes
+        /// Create a Frame3d at the specified position with axes
         /// aligned with world X,Y,Z
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static LocalFrame frmFromPos(Vector3 vecPos)
+        public static Frame3d frmFromPos(Vector3 vecPos)
             => new(vecPos);
 
         /// <summary>
-        /// Create a LocalFrame at the specified position with
+        /// Create a Frame3d at the specified position with
         /// local axes aligned with the specified world Z and X
         /// directions. The function constructs a right-handed
         /// coordinate system that is orthogonal, even if the directions
         /// specified are only approximate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static LocalFrame frmFromZX(     Vector3 vecPos, 
+        public static Frame3d frmFromZX(     Vector3 vecPos, 
                                                 Vector3 vecApproxZ, 
                                                 Vector3 vecApproxX)
             => new(vecPos, vecApproxZ, vecApproxX);
@@ -101,7 +101,7 @@ namespace PicoGK.Shapes
         /// </summary>
         /// <param name="vecPos">Position of the origin</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame(Vector3 vecPos)
+        public Frame3d(Vector3 vecPos)
             : this(vecPos, Vector3.UnitZ, Vector3.UnitX) 
         { 
 
@@ -112,7 +112,7 @@ namespace PicoGK.Shapes
         /// enforces orthonormality and right-handedness.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame(  Vector3 vecOrigin, 
+        public Frame3d(  Vector3 vecOrigin, 
                             Vector3 vecApproxZ, 
                             Vector3 vecApproxX)
         {
@@ -130,16 +130,16 @@ namespace PicoGK.Shapes
         }
 
         /// <summary>
-        /// Creates a LocalFrame from a column-vector Matrix4x4.
+        /// Creates a Frame3d from a column-vector Matrix4x4.
         /// Rows convention: [X; Y; Z; Origin] with translation in last column.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static LocalFrame frmFromMatrix4x4(in Matrix4x4 mat)
+        public static Frame3d frmFromMatrix4x4(in Matrix4x4 mat)
         {
             Vector3 vecX = new(mat.M11, mat.M12, mat.M13);
             Vector3 vecZ = new(mat.M31, mat.M32, mat.M33);
             Vector3 vecP = new(mat.M14, mat.M24, mat.M34);
-            return new LocalFrame(vecP, vecZ, vecX);
+            return new Frame3d(vecP, vecZ, vecX);
         }
 
         /// <summary>
@@ -210,22 +210,22 @@ namespace PicoGK.Shapes
         }
 
         /// <summary>
-        /// Create a combined LocalFrame from this frame and another
+        /// Create a combined Frame3d from this frame and another
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmCompose(in LocalFrame frmOther)
+        public Frame3d frmCompose(in Frame3d frmOther)
         {
             Vector3 vecP = vecPtToWorld(frmOther.vecPos);
             Vector3 vecX = vecDirToWorld(frmOther.vecLx);
             Vector3 vecZ = vecDirToWorld(frmOther.vecLz);
-            return new LocalFrame(vecP, vecZ, vecX);
+            return new Frame3d(vecP, vecZ, vecX);
         }
 
         /// <summary>
-        /// Create an inverted LocalFrame object
+        /// Create an inverted Frame3d object
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmInverse()
+        public Frame3d frmInverse()
         {
             // Columns of R are {Lx, Ly, Lz}; R^T rows are those same vectors.
             Vector3 vecTInv = new ( -Vector3.Dot(vecLx, vecPos),
@@ -236,16 +236,16 @@ namespace PicoGK.Shapes
             // Reuse ctor’s orthonormalization to rebuild consistent handedness.
             Vector3 vecRtZ = new (vecLz.X, vecLz.Y, vecLz.Z);
             Vector3 vecRtX = new (vecLx.X, vecLx.Y, vecLx.Z);
-            return new LocalFrame(vecTInv, vecRtZ, vecRtX);
+            return new Frame3d(vecTInv, vecRtZ, vecRtX);
         }
 
         /// <summary>
-        /// Move the origin of the LocalFrame object by the specified distance in local space
+        /// Move the origin of the Frame3d object by the specified distance in local space
         /// </summary>
         /// <param name="vecDistance">Distance to move the origin</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedLocal(Vector3 vecDistance)
+        public Frame3d frmMovedLocal(Vector3 vecDistance)
             => new( vecPos  + vecDistance.X * vecLx 
                             + vecDistance.Y * vecLy 
                             + vecDistance.Z * vecLz, 
@@ -253,86 +253,86 @@ namespace PicoGK.Shapes
                     vecLx);
 
         /// <summary>
-        /// Move the LocalFrame origin by the specified distance in X in local space
+        /// Move the Frame3d origin by the specified distance in X in local space
         /// </summary>
         /// <param name="fDistanceX">Distance to move the origin in X local space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedLocalX(float fDistanceX)
+        public Frame3d frmMovedLocalX(float fDistanceX)
             => new(vecPos + fDistanceX * vecLx, vecLz, vecLx);
 
         /// <summary>
-        /// Move the LocalFrame origin by the specified distance in Y in local space
+        /// Move the Frame3d origin by the specified distance in Y in local space
         /// </summary>
         /// <param name="fDistanceY">Distance to move the origin in Y in local space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedLocalY(float fDistanceY)
+        public Frame3d frmMovedLocalY(float fDistanceY)
             => new(vecPos + fDistanceY * vecLy, vecLz, vecLx);
 
         /// <summary>
-        /// Move the LocalFrame origin by the specified distance in Z in local space
+        /// Move the Frame3d origin by the specified distance in Z in local space
         /// </summary>
         /// <param name="fDistanceZ">Distance to move the origin in Z in local space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedLocalZ(float fDistanceZ)
+        public Frame3d frmMovedLocalZ(float fDistanceZ)
             => new(vecPos + fDistanceZ * vecLz, vecLz, vecLx);
 
         /// <summary>
-        /// Rotate the LocalFrame around an arbitrary (world-space) axis through the frame’s origin.
+        /// Rotate the Frame3d around an arbitrary (world-space) axis through the frame’s origin.
         /// </summary>
         /// <param name="vecAxis">Rotation axis in world coordinates</param>
         /// <param name="fAngleRad">Rotation angle in radians</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmRotatedWorld(Vector3 vecAxis, float fAngleRad)
+        public Frame3d frmRotatedWorld(Vector3 vecAxis, float fAngleRad)
         {
             var q = Quaternion.CreateFromAxisAngle(vecSafeNormalize(vecAxis), fAngleRad);
             var x = Vector3.Transform(vecLx, q);
             var y = Vector3.Transform(vecLy, q);
             var z = Vector3.Transform(vecLz, q);
-            return new LocalFrame(vecPos, z, x);
+            return new Frame3d(vecPos, z, x);
         }
 
         /// <summary>
-        /// Move the origin of the LocalFrame object by the specified distance in world space
+        /// Move the origin of the Frame3d object by the specified distance in world space
         /// </summary>
         /// <param name="vecDistance">Distance to move the origin in world space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedWorld(Vector3 vecDistance)
+        public Frame3d frmMovedWorld(Vector3 vecDistance)
             => new(vecPos + vecDistance, vecLz, vecLx);
 
         /// <summary>
-        /// Move the LocalFrame origin by the specified distance in X in world space
+        /// Move the Frame3d origin by the specified distance in X in world space
         /// </summary>
         /// <param name="fDistanceX">Distance to move the origin in X in world space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedWorldX(float fDistanceX)
+        public Frame3d frmMovedWorldX(float fDistanceX)
             => new(vecPos + new Vector3(fDistanceX,0,0), vecLz, vecLx);
 
         /// <summary>
-        /// Move the LocalFrame origin by the specified distance in Y in world space
+        /// Move the Frame3d origin by the specified distance in Y in world space
         /// </summary>
         /// <param name="fDistanceY">Distance to move the origin in Y in world space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedWorldY(float fDistanceY)
+        public Frame3d frmMovedWorldY(float fDistanceY)
             => new(vecPos + new Vector3(0,fDistanceY,0), vecLz, vecLx);
 
         /// <summary>
-        /// Move the LocalFrame origin by the specified distance in Z in world space
+        /// Move the Frame3d origin by the specified distance in Z in world space
         /// </summary>
         /// <param name="fDistanceZ">Distance to move the origin in Z in world space</param>
-        /// <returns>A LocalFrame object that is moved by the specified distance</returns>
+        /// <returns>A Frame3d object that is moved by the specified distance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMovedWorldZ(float fDistanceZ)
+        public Frame3d frmMovedWorldZ(float fDistanceZ)
             => new(vecPos + new Vector3(0,0,fDistanceZ), vecLz, vecLx);
 
         /// <summary>
-        /// Mirror LocalFrame by flipping selected local axes.
+        /// Mirror Frame3d by flipping selected local axes.
         /// Note, it preserves right-handedness of the coordinate system
         /// so some transformations will be equivalent to a 180º rotation
         /// </summary>
@@ -340,15 +340,15 @@ namespace PicoGK.Shapes
         /// <param name="bMirrorX">Mirror local X axis</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LocalFrame frmMirrored(bool bMirrorZ, bool bMirrorX)
+        public Frame3d frmMirrored(bool bMirrorZ, bool bMirrorX)
         {
             Vector3 vecZ = bMirrorZ ? -vecLz : vecLz;
             Vector3 vecX = bMirrorX ? -vecLx : vecLx;
-            return new LocalFrame(vecPos, vecZ, vecX);
+            return new Frame3d(vecPos, vecZ, vecX);
         }
 
         /// <summary>
-        /// Convert the LocalFrame transformation to an equivalent
+        /// Convert the Frame3d transformation to an equivalent
         /// Matrix4x4 transform (basis in rows, translation last column)
         /// This layout is compatible with typical OpenGL shaders
         /// </summary>
@@ -375,7 +375,7 @@ namespace PicoGK.Shapes
 
         /// <summary>
         /// Helper function to drawing a scaled quad aligned to this
-        /// LocalFrame object
+        /// Frame3d object
         /// Model = Scale * Frame.M
         /// </summary>
         /// <param name="vecScale">Scale to apply</param>
@@ -388,31 +388,31 @@ namespace PicoGK.Shapes
         
         /// <summary>
         /// Convert local point to a world coordinate (same as vecToWorld)
-        /// Enables you to write vecWorld = vecLocal * frmLocalFrame
+        /// Enables you to write vecWorld = vecLocal * frmFrame3d
         /// </summary>
-        /// <param name="frm">LocalFrame</param>
+        /// <param name="frm">Frame3d</param>
         /// <param name="vecLocal">Local coordinate point</param>
         /// <returns>Point in vorld coordinates</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 operator *(in LocalFrame frm, Vector3 vecLocal) 
+        public static Vector3 operator *(in Frame3d frm, Vector3 vecLocal) 
             => frm.vecPtToWorld(vecLocal);
 
         /// <summary>
-        /// Combine the transformation of two LocalFrame objects into one
+        /// Combine the transformation of two Frame3d objects into one
         /// (indentical to frmCompose)
         /// </summary>
-        /// <param name="frmA">First LocalFrame object</param>
-        /// <param name="frmB">Second LocalFrame object</param>
-        /// <returns>LocalFrame object that combines both transformations</returns>
+        /// <param name="frmA">First Frame3d object</param>
+        /// <param name="frmB">Second Frame3d object</param>
+        /// <returns>Frame3d object that combines both transformations</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static LocalFrame operator *(in LocalFrame frmA, in LocalFrame frmB) 
+        public static Frame3d operator *(in Frame3d frmA, in Frame3d frmB) 
             => frmA.frmCompose(frmB);
 
 
         /// <summary>
         /// Test for equality (IEquatable)
         /// </summary>
-        public bool Equals(LocalFrame frm)
+        public bool Equals(Frame3d frm)
             =>  vecPos.Equals(frm.vecPos) 
                     && vecLx.Equals(frm.vecLx)
                     && vecLy.Equals(frm.vecLy) 
@@ -423,7 +423,7 @@ namespace PicoGK.Shapes
         /// Test for equality (IEquatable)
         /// </summary>
         public override bool Equals(object? obj) 
-            => obj is LocalFrame lf && Equals(lf);
+            => obj is Frame3d lf && Equals(lf);
 
         /// <summary>
         /// Create hash code (IEquatable)
