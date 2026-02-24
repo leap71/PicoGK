@@ -332,22 +332,6 @@ namespace PicoGK.Shapes
             => new(vecPos + new Vector3(0,0,fDistanceZ), vecLz, vecLx);
 
         /// <summary>
-        /// Mirror Frame3d by flipping selected local axes.
-        /// Note, it preserves right-handedness of the coordinate system
-        /// so some transformations will be equivalent to a 180º rotation
-        /// </summary>
-        /// <param name="bMirrorZ">Mirror local Z axis</param>
-        /// <param name="bMirrorX">Mirror local X axis</param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Frame3d frmMirrored(bool bMirrorZ, bool bMirrorX)
-        {
-            Vector3 vecZ = bMirrorZ ? -vecLz : vecLz;
-            Vector3 vecX = bMirrorX ? -vecLx : vecLx;
-            return new Frame3d(vecPos, vecZ, vecX);
-        }
-
-        /// <summary>
         /// Convert the Frame3d transformation to an equivalent
         /// Matrix4x4 transform (basis in rows, translation last column)
         /// This layout is compatible with typical OpenGL shaders
