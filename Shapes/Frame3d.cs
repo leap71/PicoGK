@@ -392,6 +392,38 @@ namespace PicoGK.Shapes
         public static Frame3d operator *(in Frame3d frmA, in Frame3d frmB) 
             => frmA.frmCompose(frmB);
 
+        /// <summary>
+        /// Interpolate between two Frame3d pos/orientations
+        /// </summary>
+        /// <param name="frm0">Frame at pos 0</param>
+        /// <param name="frm1">Frame at pos 1</param>
+        /// <param name="t">Interpolation parameter 0..1</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Frame3d frmInterpolate(   in Frame3d frm0, 
+                                                in Frame3d frm1, 
+                                                float t)
+        {
+            t = float.Clamp(t, 0f, 1f);
+
+            // Rotation: slerp in quaternion space
+            frm0.AsRigid(out Quaternion q0, out _);
+            frm1.AsRigid(out Quaternion q1, out _);
+
+            // Ensure shortest arc (avoid sudden flips)
+            if (Quaternion.Dot(q0, q1) < 0f)
+                q1 = new Quaternion(-q1.X, -q1.Y, -q1.Z, -q1.W);
+
+            Quaternion q = Quaternion.Slerp(q0, q1, t);
+
+            Vector3 vecX = Vector3.Transform(Vector3.UnitX, q);
+            Vector3 vecZ = Vector3.Transform(Vector3.UnitZ, q);
+
+            // Position: linear interpolation
+            Vector3 vecPos = Vector3.Lerp(frm0.vecPos, frm1.vecPos, t);
+            return new Frame3d(vecPos, vecZ, vecX);
+        }
+
 
         /// <summary>
         /// Test for equality (IEquatable)
