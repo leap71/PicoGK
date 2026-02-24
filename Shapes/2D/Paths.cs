@@ -38,14 +38,30 @@ using PicoGK.Numerics;
 
 namespace PicoGK.Shapes
 {
+    /// <summary>
+    /// A 2d line
+    /// </summary>
     public readonly struct Line2d : IPath2d
-    {    
+    {   
+        /// <summary>
+        /// Construct a line with the specified start and end coordinates
+        /// </summary>
         public Line2d(  Vector2 vecA,
                         Vector2 vecB)
         {
             m_vecA    = vecA;
             m_vecB    = vecB;
         }
+
+        /// <summary>
+        ///  Start coordinate
+        /// </summary>
+        public Vector2  vecA    => m_vecA;
+
+        /// <summary>
+        /// End coordinate
+        /// </summary>
+        public Vector2  vecB    => m_vecB;
 
         public Vector2 vecPtAtT(float fT)
         {
@@ -59,15 +75,20 @@ namespace PicoGK.Shapes
         }
 
         public float    fLength => (m_vecB - m_vecA).Length();
-        public Vector2  vecA    => m_vecA;
-        public Vector2  vecB    => m_vecB;
 
         readonly Vector2 m_vecA;
         readonly Vector2 m_vecB;
     }
 
+    /// <summary>
+    /// A circular arc in 2D space
+    /// </summary>
     public readonly struct Arc2d : IPath2d
     {
+        /// <summary>
+        /// Construct a new 2D arc with the specified start point,
+        /// around the specified center and with the supplied angle in radians
+        /// </summary>
         public Arc2d(   Vector2 vecStart,
                         Vector2 vecCenter,
                         float fAngle)
@@ -95,6 +116,26 @@ namespace PicoGK.Shapes
             m_vecEnd  = m_vecCenter + v1;
             m_fLength = m_fRadius * float.Abs(m_fAngle);
         }
+
+        /// <summary>
+        /// Start coordinate
+        /// </summary>
+        public Vector2 vecStart     => m_vecStart;
+
+        /// <summary>
+        /// End coordinate
+        /// </summary>
+        public Vector2 vecEnd       => m_vecEnd;
+
+        /// <summary>
+        /// Center point
+        /// </summary>
+        public Vector2 vecCenter    => m_vecCenter;
+
+        /// <summary>
+        /// Angle in radians (positive is counter clockwise)
+        /// </summary>
+        public float fAngle         => m_fAngle;
         
         public float fLength => m_fLength;
 
@@ -115,11 +156,6 @@ namespace PicoGK.Shapes
             return m_vecCenter + vt;
         }
 
-        public Vector2 vecStart     => m_vecStart;
-        public Vector2 vecEnd       => m_vecEnd;
-        public Vector2 vecCenter    => m_vecCenter;
-        public float fAngle         => m_fAngle;
-
         readonly Vector2 m_vecStart;
         readonly Vector2 m_vecEnd;
         readonly Vector2 m_vecCenter;
@@ -128,8 +164,16 @@ namespace PicoGK.Shapes
         readonly float   m_fLength;
     } 
 
+    /// <summary>
+    /// A compound path which consists of a list of other paths
+    /// </summary>
     public sealed class Path2d : IPath2d
     {
+        /// <summary>
+        /// Add another path to the compound path
+        /// Note, the start coordinate of the added path needs to be
+        /// exactly coincide with the current end point
+        /// </summary>
         public void Add(IPath2d xPath)
         {
             if (m_axPaths.Count > 0)
@@ -142,12 +186,18 @@ namespace PicoGK.Shapes
             m_fLength += xPath.fLength;
         }
 
+        /// <summary>
+        /// Append a line to the specified coordinate
+        /// </summary>
         public void AddLine(Vector2 vecTo)
         {
             Line2d oLine = new(vecPtAtT(1), vecTo);
             Add(oLine);
         }
 
+        /// <summary>
+        /// Append a line relative to current end point
+        /// </summary>
         public void AddLineRel(Vector2 vecRel)
         {
             Vector2 vecStart = vecPtAtT(1);
@@ -155,12 +205,21 @@ namespace PicoGK.Shapes
             Add(oLine);
         }
 
+        /// <summary>
+        /// Append an arc with the specified center and angle
+        /// The start coordinate is the current end coordinate
+        /// </summary>
         public void AddArc(Vector2 vecCenter, float fAngle)
         {
             Arc2d oArc = new(vecPtAtT(1), vecCenter, fAngle);
             Add(oArc);
         }
 
+        /// <summary>
+        /// Add an arc with the specified center, relative to the
+        /// current end point
+        /// The start coordinate is the current end coordinate
+        /// </summary>
         public void AddArcRel(Vector2 vecCenterRel, float fAngle)
         {
             Vector2 vecStart = vecPtAtT(1);
