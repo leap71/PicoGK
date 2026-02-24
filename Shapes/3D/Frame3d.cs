@@ -346,6 +346,15 @@ namespace PicoGK.Shapes
                     vecPos.X, vecPos.Y, vecPos.Z, 1f);
 
         /// <summary>
+        /// Return a frame which has been repositioned to the
+        /// supplied world coordinate.
+        /// </summary>
+        /// <param name="vecNewPos">New origin of the local frame</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Frame3d frmRepositioned(Vector3 vecNewPos)
+            => new(vecNewPos, vecLz, vecLx);
+
+        /// <summary>
         /// Return the transformation as Quaternion plus Origin
         /// </summary>
         /// <param name="q">Rotation component as Quaternion</param>
