@@ -128,7 +128,7 @@ namespace PicoGK.Shapes
         readonly float   m_fLength;
     } 
 
-    public class Path2d : IPath2d
+    public sealed class Path2d : IPath2d
     {
         public void Add(IPath2d xPath)
         {
