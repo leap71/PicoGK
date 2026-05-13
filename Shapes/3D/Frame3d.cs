@@ -187,7 +187,7 @@ namespace PicoGK.Shapes
         /// Return local coordinate from world coordinates
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 vecFromWorld(Vector3 vecWorld)
+        public Vector3 vecPtFromWorld(Vector3 vecWorld)
         {
             Vector3 vecR = vecWorld - vecPos;
             
