@@ -33,8 +33,8 @@
 // limitations under the License.   
 //
 
-using System.Diagnostics;
 using System.Numerics;
+using PicoGK.Numerics;
 
 namespace PicoGK
 {
