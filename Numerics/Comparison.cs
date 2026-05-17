@@ -53,8 +53,22 @@ namespace PicoGK.Numerics
         /// Default squared tolerance for fuzzy comparisons.
         /// </summary>
         public const float fDefSquared  = fDef * fDef;
+
+        /// <summary>
+        /// Default number regarded as zero for fuzzy zero check
+        /// Chosen to be relatively universal for float precision.
+        /// </summary>
+        public const float fZero         = 1e-8f;
+
+        /// <summary>
+        /// Default squared number regarded as zero for fuzzy zero check
+        /// </summary>
+        public const float fZeroSquared = fZero * fZero;
     }
 
+    /// <summary>
+    /// Extensions that allow for fuzzy comparisons of types
+    /// </summary>
     public static class ComparisonExtensions
     {
         /// <summary>
@@ -84,10 +98,8 @@ namespace PicoGK.Numerics
         /// The optional parameter determines the tolerance used for comparison
         /// </summary>
         public static bool bAlmostZero( this float f,
-                                        float fTol = Tolerances.fDef)
-        {
-            return float.Abs(f) <= fTol;
-        }
+                                        float fZero = Tolerances.fZero)
+            => float.Abs(f) <= fZero;
 
         /// <summary>
         /// Fuzzy comparison function to determine equality
@@ -101,15 +113,15 @@ namespace PicoGK.Numerics
             => Vector3.DistanceSquared(a, b) <= fDistSquared;
 
 
-        // <summary>
+        /// <summary>
         /// Fuzzy comparison function to determine whether the length of the vector
         /// is approximately 0. Can be used like this: vecA.bAlmostZero()
         /// The optional parameter determines the distance (squared!) used for comparison
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool bAlmostZero( this Vector3 vec,
-                                        float fTol = Tolerances.fDefSquared)
-            => vec.LengthSquared() <= fTol;
+                                        float fZeroSquared = Tolerances.fZeroSquared)
+            => vec.LengthSquared() <= fZeroSquared;
 
         /// <summary>
         /// Fuzzy comparison function to determine equality
@@ -121,5 +133,15 @@ namespace PicoGK.Numerics
                                             Vector2 b,
                                             float fDistSquared = Tolerances.fDefSquared)
             => Vector2.DistanceSquared(a, b) <= fDistSquared;
+
+        /// <summary>
+        /// Fuzzy comparison function to determine whether the length of the vector
+        /// is approximately 0. Can be used like this: vecA.bAlmostZero()
+        /// The optional parameter determines the distance (squared!) used for comparison
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool bAlmostZero( this Vector2 vec,
+                                        float fZeroSquared = Tolerances.fZeroSquared)
+            => vec.LengthSquared() <= fZeroSquared;
     }
 }
