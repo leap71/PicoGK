@@ -39,6 +39,9 @@ using PicoGK.Shapes;
 
 namespace PicoGK.Numerics
 {
+    /// <summary>
+    /// Extensions to the Vector2 and Vector3 System.Numerics types
+    /// </summary>
     public static class VectorExt
     {
         /// <summary>
@@ -161,5 +164,34 @@ namespace PicoGK.Numerics
         {
             return frm.vecDirFromWorld(vec);
         }
+
+         /// <summary>
+        /// Returns a matrix-transformed version of the vector.
+        /// </summary>
+		public static Vector3 vecTransformed(	this Vector3 vec,
+												Matrix4x4 mat)
+		{
+			return Vector3.Transform(vec, mat);
+		}
+
+        /// <summary>
+        /// Returns a mirrored version of the vector.
+        /// </summary>
+        /// <param name="vecPt">The point to be mirrored (this).</param>
+        /// <param name="vecPlanePoint">A point through which the mirror plane passes.</param>
+        /// <param name="vecPlaneNorma">The normal vector of the mirror plane,
+        /// expected to be a unit vector.</param>
+        /// <returns>The mirrored vector.</returns>
+		public static Vector3 vecMirrored(	this Vector3 vecPt,
+											Vector3 vecPlanePoint,
+											Vector3 vecPlaneNormal)
+		{
+            Vector3 vecPlaneNormalUnitVector = vecPlaneNormal.vecSafeNormalized();
+            
+			return  vecPt - 
+                    2 * Vector3.Dot(  vecPt - vecPlanePoint, 
+                                        vecPlaneNormalUnitVector) 
+                    * vecPlaneNormalUnitVector;
+		}
     }
 }
