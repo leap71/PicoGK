@@ -58,7 +58,7 @@ namespace PicoGK.Numerics
         public readonly float Theta;
 
         /// <summary>
-        /// Initializes a new Spherical coordinate
+        /// Initializes a new Spherical coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Spherical(float fR, float fPhi, float fTheta)
@@ -77,7 +77,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Initializes a new Spherical coordinate by converting from a cartesian coordinate
+        /// Initializes a new Spherical coordinate by converting from a cartesian coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Spherical(Vector3 vecCartesian)
@@ -97,7 +97,16 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Convert the spherical coordinate to a cartesian coordinate
+        /// Create a Spherical coordinate from a Cylindrical coordinate.
+        /// </summary>
+        public Spherical(Cylindrical oCylindrical)
+            : this(oCylindrical.vecAsCartesian())
+        {
+            
+        }
+
+        /// <summary>
+        /// Convert the spherical coordinate to a cartesian coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3 vecAsCartesian()
@@ -111,19 +120,42 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Convert the spherical coordinate to a string
+        /// Linear interpolation between two Spherical coordinates.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Spherical oLerp(Spherical oA, Spherical oB, float fT)
+        {
+            float fDeltaPhi = (oB.Phi - oA.Phi).fNormalizedAngleRad();
+
+            return new Spherical(
+                fR:     oA.R     + fT * (oB.R     - oA.R),
+                fPhi:   oA.Phi   + fT * fDeltaPhi,
+                fTheta: oA.Theta + fT * (oB.Theta - oA.Theta));
+        }
+
+        /// <summary>
+        /// Linear interpolation between this coordinate and another.
+        /// fT = 0: this coordinate;
+        /// fT = 1: the other coordinate
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Spherical oLerp(Spherical oOther, float fT)
+            => oLerp(this, oOther, fT);
+
+        /// <summary>
+        /// Convert the spherical coordinate to a string.
         /// </summary>
         public override string ToString()
             => $"(Radius={R}, Phi={Phi}, Theta={Theta})";
     }
 
     /// <summary>
-    /// A coordinate in a cylindrical coordinate system
+    /// A coordinate in a cylindrical coordinate system.
     /// </summary>
     public readonly struct Cylindrical
     {
         /// <summary>
-        /// Distance from the cylinder's axis
+        /// Distance from the cylinder's axis.
         /// </summary>
         public readonly float R;
         /// <summary>
@@ -136,7 +168,7 @@ namespace PicoGK.Numerics
         public readonly float Z;
 
         /// <summary>
-        /// Initialize a new cylindrical coordinate
+        /// Initialize a new cylindrical coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Cylindrical( float fR, 
@@ -154,7 +186,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Create a new cylindrical coordinate from a polar coordinate plus Z height
+        /// Create a new cylindrical coordinate from a polar coordinate plus Z height.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Cylindrical( Polar oPolar, 
@@ -166,7 +198,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Create a new cylindrical coordinate from a cartesian coordinate
+        /// Create a new cylindrical coordinate from a cartesian coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Cylindrical(Vector3 vecCartesian)
@@ -179,7 +211,16 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Convert a cylindrical coordinate into a cartesian coordinate
+        /// Create a cylindrical coordinate from a Spherical coordinate.
+        /// </summary>
+        /// <param name="oSpherical"></param>
+        public Cylindrical( Spherical oSpherical)
+            : this(oSpherical.vecAsCartesian())
+        {    
+        }
+        
+        /// <summary>
+        /// Convert a cylindrical coordinate into a cartesian coordinate.
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -192,7 +233,30 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Convert the cylindrical coordinate to a string
+        /// Linear interpolation between two Cylindrical coordinates.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Cylindrical oLerp(Cylindrical oA, Cylindrical oB, float fT)
+        {
+            float fDeltaPhi = (oB.Phi - oA.Phi).fNormalizedAngleRad();
+
+            return new Cylindrical(
+                fR:   oA.R + fT * (oB.R - oA.R),
+                fPhi: oA.Phi + fT * fDeltaPhi,
+                fZ:   oA.Z + fT * (oB.Z - oA.Z));
+        }
+
+        /// <summary>
+        /// Linear interpolation between this coordinate and another.
+        /// fT = 0: this coordinate;
+        /// fT = 1: the other coordinate
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Cylindrical oLerp(Cylindrical oOther, float fT)
+            => oLerp(this, oOther, fT);
+
+        /// <summary>
+        /// Convert the cylindrical coordinate to a string.
         /// </summary>
         public override string ToString()
             => $"(Radius={R}, Phi={Phi}, Z={Z})";
@@ -204,7 +268,7 @@ namespace PicoGK.Numerics
     public readonly struct Polar
     {
         /// <summary>
-        /// Distance from the center of the coordinate system
+        /// Distance from the center of the coordinate system.
         /// </summary>
         public readonly float R;
 
@@ -214,7 +278,7 @@ namespace PicoGK.Numerics
         public readonly float Phi;
 
         /// <summary>
-        /// Initialize a new polar coordinate
+        /// Initialize a new polar coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Polar(float fR, float fPhi)
@@ -229,7 +293,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Initialize a new polar coordinate from a 2D cartesian coordinate
+        /// Initialize a new polar coordinate from a 2D cartesian coordinate.
         /// </summary>
         /// <param name="vecCartesian"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -250,7 +314,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Return the polar coordinate as a cartesian coordinate
+        /// Return the polar coordinate as a cartesian coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 vecAsCartesian()
@@ -261,7 +325,29 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Convert the polar coordinate to a string
+        /// Linear interpolation between two polar coordinates.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Polar oLerp(Polar oA, Polar oB, float fT)
+        {
+            float fDeltaPhi = (oB.Phi - oA.Phi).fNormalizedAngleRad();
+
+            return new Polar(
+                fR:   oA.R + fT * (oB.R - oA.R),
+                fPhi: oA.Phi + fT * fDeltaPhi);
+        }
+
+        /// <summary>
+        /// Linear interpolation between this coordinate and another.
+        /// fT = 0: this coordinate;
+        /// fT = 1: the other coordinate
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Polar oLerp(Polar oOther, float fT)
+        => oLerp(this, oOther, fT);
+
+        /// <summary>
+        /// Convert the polar coordinate to a string.
         /// </summary>
         public override string ToString()
             => $"(Radius={R}, Phi={Phi})";
