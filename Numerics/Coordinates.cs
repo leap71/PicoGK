@@ -73,7 +73,7 @@ namespace PicoGK.Numerics
 
             Theta   = float.Clamp(fTheta, 0f, float.Pi);
             R       = fR;
-            Phi     = fPhi.fNormalizedAngleRad();
+            Phi     = fPhi;
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace PicoGK.Numerics
                 nameof(fR));
 
             R   = fR;
-            Phi = fPhi.fNormalizedAngleRad();
+            Phi = fPhi;
             Z   = fZ;
         }
 
@@ -289,7 +289,7 @@ namespace PicoGK.Numerics
                 nameof(fR));
 
             R   = fR;
-            Phi = fPhi.fNormalizedAngleRad();
+            Phi = fPhi;
         }
 
         /// <summary>
