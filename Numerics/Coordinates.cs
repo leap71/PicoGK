@@ -38,24 +38,24 @@ using System.Runtime.CompilerServices;
 
 namespace PicoGK.Numerics
 {    
-    public readonly struct Spherical
+    public struct Spherical
     {
         /// <summary>
         /// Distance from the sphere center.
         /// </summary>
-        public readonly float R;
+        public float R = 0;
 
         /// <summary>
         /// Azimuth angle in the XY plane, measured from +X toward +Y.
         /// Range from Cartesian conversion: [-π .. +π].
         /// </summary>
-        public readonly float Phi;
+        public float Phi = 0;
 
         /// <summary>
         /// Polar angle measured from +Z toward the XY plane and onward to -Z.
         /// Range: [0 .. π].
         /// </summary>
-        public readonly float Theta;
+        public float Theta = 0;
 
         /// <summary>
         /// Initializes a new Spherical coordinate.
@@ -68,10 +68,10 @@ namespace PicoGK.Numerics
                 "Radius must be finite and non-negative.",
                 nameof(fR));
 
-            if (fTheta < -Tolerances.fDef || fTheta > float.Pi + Tolerances.fDef)
+            if (fTheta < 0 || fTheta > float.Pi)
                 throw new ArgumentException("Theta must be in the range [0, π].", nameof(fTheta));
 
-            Theta   = float.Clamp(fTheta, 0f, float.Pi);
+            Theta   = fTheta;
             R       = fR;
             Phi     = fPhi;
         }
@@ -109,7 +109,7 @@ namespace PicoGK.Numerics
         /// Convert the spherical coordinate to a cartesian coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 vecAsCartesian()
+        public readonly Vector3 vecAsCartesian()
         {
             float fSinTheta = float.Sin(Theta);
 
@@ -120,7 +120,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Linear interpolation between two Spherical coordinates.
+        /// Linear interpolation between two Spherical coordinates (in Spherical coordinate space).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Spherical oLerp(Spherical oA, Spherical oB, float fT)
@@ -134,12 +134,12 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Linear interpolation between this coordinate and another.
+        /// Linear interpolation between this coordinate and another (in Spherical coordinate space).
         /// fT = 0: this coordinate;
         /// fT = 1: the other coordinate
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Spherical oLerp(Spherical oOther, float fT)
+        public readonly Spherical oLerp(Spherical oOther, float fT)
             => oLerp(this, oOther, fT);
 
         /// <summary>
@@ -152,20 +152,21 @@ namespace PicoGK.Numerics
     /// <summary>
     /// A coordinate in a cylindrical coordinate system.
     /// </summary>
-    public readonly struct Cylindrical
+    public struct Cylindrical
     {
         /// <summary>
         /// Distance from the cylinder's axis.
         /// </summary>
-        public readonly float R;
+        public float R = 0;
         /// <summary>
-        /// Azimuth angle in the XY plane in the range [-π .. +π].
+        /// Azimuth angle in the XY plane.
+        /// Range from cartesian conversion: [-π .. +π].
         /// </summary>
-        public readonly float Phi;
+        public float Phi = 0;
         /// <summary>
         /// Position along the Z axis
         /// </summary>
-        public readonly float Z;
+        public float Z = 0;
 
         /// <summary>
         /// Initialize a new cylindrical coordinate.
@@ -224,7 +225,7 @@ namespace PicoGK.Numerics
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector3 vecAsCartesian()
+        public readonly Vector3 vecAsCartesian()
         {
             return new Vector3(
                 R * float.Cos(Phi),
@@ -233,7 +234,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Linear interpolation between two Cylindrical coordinates.
+        /// Linear interpolation between two Cylindrical coordinates (in Cylindrical coordinate space).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Cylindrical oLerp(Cylindrical oA, Cylindrical oB, float fT)
@@ -247,12 +248,12 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Linear interpolation between this coordinate and another.
+        /// Linear interpolation between this coordinate and another (in Cylindrical coordinate space).
         /// fT = 0: this coordinate;
         /// fT = 1: the other coordinate
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Cylindrical oLerp(Cylindrical oOther, float fT)
+        public readonly Cylindrical oLerp(Cylindrical oOther, float fT)
             => oLerp(this, oOther, fT);
 
         /// <summary>
@@ -265,17 +266,18 @@ namespace PicoGK.Numerics
     /// <summary>
     /// A polar coordinate 
     /// </summary>
-    public readonly struct Polar
+    public struct Polar
     {
         /// <summary>
         /// Distance from the center of the coordinate system.
         /// </summary>
-        public readonly float R;
+        public float R = 0;
 
         /// <summary>
-        /// Azimuth angle in the XY plane in the range [-π .. +π].
+        /// Azimuth angle in the XY plane.
+        /// Range from cartesian conversion [-π .. +π].
         /// </summary>
-        public readonly float Phi;
+        public float Phi = 0;
 
         /// <summary>
         /// Initialize a new polar coordinate.
@@ -317,7 +319,7 @@ namespace PicoGK.Numerics
         /// Return the polar coordinate as a cartesian coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector2 vecAsCartesian()
+        public readonly Vector2 vecAsCartesian()
         {
             return new Vector2(
                 R * float.Cos(Phi),
@@ -325,7 +327,7 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Linear interpolation between two polar coordinates.
+        /// Linear interpolation between two polar coordinates (in Polar coordinate space).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Polar oLerp(Polar oA, Polar oB, float fT)
@@ -338,12 +340,12 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
-        /// Linear interpolation between this coordinate and another.
+        /// Linear interpolation between this coordinate and another (in Polar coordinate space).
         /// fT = 0: this coordinate;
         /// fT = 1: the other coordinate
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Polar oLerp(Polar oOther, float fT)
+        public readonly Polar oLerp(Polar oOther, float fT)
         => oLerp(this, oOther, fT);
 
         /// <summary>
