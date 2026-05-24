@@ -93,6 +93,16 @@ namespace PicoGK.Numerics
             return fDiff <= fMaxAbs * fRelTol;
         }
 
+        public static bool bAlmostLessOrEqual(  this float a,
+                                                float b,
+                                                float fTol = Tolerances.fDef)
+            => a <= (b+fTol);
+
+        public static bool bAlmostMoreOrEqual(  this float a,
+                                                float b,
+                                                float fTol = Tolerances.fDef)
+            => a >= (b-fTol);
+
         /// <summary>
         /// Fuzzy test for zero. Can be used like this: fValue.bAlmostZero()
         /// The optional parameter determines the tolerance used for comparison
