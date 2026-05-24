@@ -38,10 +38,15 @@ using System.Runtime.CompilerServices;
 namespace PicoGK.Numerics
 {    
     /// <summary>
-    /// This class implements helper functions to normalize angles
+    /// This class implements helper functions and constants relevant to angles in Radians
     /// </summary>
-    public static class AngleExt
+    public static class Rad
     {
+        /// <summary>
+        /// Defines 2*Pi, which is constantly being used in Rad angles
+        /// </summary>
+        public const float TwoPi = float.Pi * 2f;
+
         /// <summary>
         /// Ensure the passed angles is in the range [-π, +π]
         /// </summary>
