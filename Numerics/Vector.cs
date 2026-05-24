@@ -179,7 +179,7 @@ namespace PicoGK.Numerics
         /// </summary>
         /// <param name="vecPt">The point to be mirrored (this).</param>
         /// <param name="vecPlanePoint">A point through which the mirror plane passes.</param>
-        /// <param name="vecPlaneNorma">The normal vector of the mirror plane,
+        /// <param name="vecPlaneNormal">The normal vector of the mirror plane,
         /// expected to be a unit vector.</param>
         /// <returns>The mirrored vector.</returns>
 		public static Vector3 vecMirrored(	this Vector3 vecPt,

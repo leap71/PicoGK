@@ -38,7 +38,7 @@ using PicoGK.Numerics;
 
 namespace PicoGK.Shapes
 {
-    // <summary>
+    /// <summary>
     /// Class to represent an circle as a normalized path/contour
     /// </summary>
     public readonly struct Circle : IContour2d
