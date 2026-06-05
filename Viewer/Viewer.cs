@@ -36,6 +36,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Numerics;
+using PicoGK.Numerics;
 
 namespace PicoGK
 {
@@ -502,6 +503,25 @@ namespace PicoGK
         }
 
         /// <summary>
+        /// Enables overhang severity visualization for the specified viewer group
+        /// </summary>
+        /// <param name="nGroupID">Viewer group ID</param>
+        /// <param name="uWarning">Overhang at which the warning color sets in</param>
+        /// <param name="uError">Overhang at which the error color sets in</param>
+        public void EnableOverhangWarning(  int nGroupID,
+                                            Overhang uWarning,
+                                            Overhang uError)
+        {
+            lock (m_oActions)
+            {
+                m_oActions.Enqueue(new EnableGroupOverhangWarningAction(    nGroupID, 
+                                                                            uWarning, 
+                                                                            uError));
+            }   
+        }
+
+        [Obsolete("Use EnableOverhangWarning with Overhang type instead")]
+        /// <summary>
         /// Enables overhang angle visualization for a viewer group
         /// </summary>
         /// <param name="nGroupID">Viewer group to apply the warning visualization to</param>
@@ -511,12 +531,9 @@ namespace PicoGK
                                             int nWarningAngleDeg,
                                             int nErrorAngleDeg)
         {
-            lock (m_oActions)
-            {
-                m_oActions.Enqueue(new EnableGroupOverhangWarningAction(    nGroupID, 
-                                                                            nWarningAngleDeg, 
-                                                                            nErrorAngleDeg));
-            }   
+            EnableOverhangWarning(  nGroupID, 
+                                    Overhang.uFromDeg(nWarningAngleDeg),
+                                    Overhang.uFromDeg(nErrorAngleDeg));
         }
 
         /// <summary>

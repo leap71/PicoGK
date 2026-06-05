@@ -753,8 +753,8 @@ namespace PicoGK
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_EnableGroupWarnOverhang")]
         private static extern void _EnableGroupWarnOverhang(    IntPtr  hThis,
                                                                 int     nGroupID,
-                                                                int     nWarningAngleDeg,
-                                                                int     nErrorAngleDeg);
+                                                                float   fWarningSeverity,
+                                                                float   fErrorSeverity);
 
         [DllImport(Config.strPicoGKLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "Viewer_DisableGroupWarnOverhang")]
         private static extern void _DisableGroupWarnOverhang(   IntPtr  hThis,

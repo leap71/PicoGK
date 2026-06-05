@@ -34,6 +34,7 @@
 //
 
 using System.Numerics;
+using PicoGK.Numerics;
 
 namespace PicoGK
 {
@@ -124,25 +125,25 @@ namespace PicoGK
         class EnableGroupOverhangWarningAction : IViewerAction
         {
             public EnableGroupOverhangWarningAction(    int nGroupID,
-                                                        int nWarningAngleDeg,
-                                                        int nErrorAngleDeg)
+                                                        Overhang uWarning,
+                                                        Overhang uError)
             {
-                m_nGroupID      = nGroupID;
-                m_nWarningAngle = nWarningAngleDeg;
-                m_nErrorAngle   = nErrorAngleDeg;
+                m_nGroupID  = nGroupID;
+                m_uWarning  = uWarning;
+                m_uError    = uError;
             }
 
             public void Do(Viewer oViewer)
             {
                 _EnableGroupWarnOverhang(   oViewer.hThis,
                                             m_nGroupID,
-                                            m_nWarningAngle,
-                                            m_nErrorAngle);
+                                            m_uWarning.fNormalized,
+                                            m_uError.fNormalized);
             }
 
             int m_nGroupID;
-            int m_nWarningAngle;
-            int m_nErrorAngle;
+            Overhang m_uWarning;
+            Overhang m_uError;
         }
 
         class DisableGroupOverhangWarningAction : IViewerAction
