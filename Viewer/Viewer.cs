@@ -520,13 +520,14 @@ namespace PicoGK
             }   
         }
 
-        [Obsolete("Use EnableOverhangWarning with Overhang type instead")]
+        
         /// <summary>
         /// Enables overhang angle visualization for a viewer group
         /// </summary>
         /// <param name="nGroupID">Viewer group to apply the warning visualization to</param>
         /// <param name="nWarningAngleDeg">Angle at which the warning color sets in</param>
         /// <param name="nErrorAngleDeg">Angle at which the error color sets in</param>
+        [Obsolete("Use EnableOverhangWarning with Overhang type instead")]
         public void EnableOverhangWarning(  int nGroupID,
                                             int nWarningAngleDeg,
                                             int nErrorAngleDeg)
