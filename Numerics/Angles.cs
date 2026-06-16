@@ -34,6 +34,7 @@
 //
 
 using System.Globalization;
+using System.Numerics;
 
 namespace PicoGK.Numerics
 {    
@@ -194,6 +195,98 @@ namespace PicoGK.Numerics
         public bool bAlmostEqualPeriodic(Rad other, float fToleranceRad = Tolerances.fDef)
         {
             return float.Abs((this - other).rNormalizedSigned().m_fRad) <= fToleranceRad;
+        }
+
+        /// <summary>
+        /// Checks whether the angle value is finite, i.e. not NaN and not positive or negative infinity.
+        /// </summary>
+        public bool bIsFinite()
+        {
+            return float.IsFinite(m_fRad);
+        }
+
+        /// <summary>
+        /// Returns the sine of the angle
+        /// </summary>
+        public float fSin()
+        {
+            return float.Sin(m_fRad);
+        }
+
+        /// <summary>
+        /// Returns the cosine of the angle
+        /// </summary>
+        public float fCos()
+        {
+            return float.Cos(m_fRad);
+        }
+
+        /// <summary>
+        /// Returns the tangent of the angle.
+        /// </summary>
+        public float fTan()
+        {
+            return float.Tan(m_fRad);
+        }
+
+        /// <summary>
+        /// Computes the angle of the vector from the positive X axis,
+        /// using the signs of X and Y to determine the correct quadrant.
+        /// </summary>
+        public static Rad rAtan2(Vector2 vec)
+        {
+            return rAtan2(vec.Y, vec.X);
+        }
+
+        /// <summary>
+        /// Computes the angle of the vector from the positive X axis,
+        /// using the signs of X and Y to determine the correct quadrant.
+        /// </summary>
+        public static Rad rAtan2(float fY, float fX)
+        {
+            return new Rad(float.Atan2(fY, fX));
+        }
+
+        /// <summary>
+        /// Computes the arc tangent of the value
+        /// </summary>
+        public static Rad rAtan(float f)
+        {
+            return new Rad(float.Atan(f));
+        }
+        
+        /// <summary>
+        /// Returns the arc cosine of the value and returns the angle
+        /// </summary>
+        public static Rad rAcos(float fValue)
+        {
+            return new Rad(float.Acos(fValue));
+        }
+
+        /// <summary>
+        /// Returns the arc cosine of the value after clamping it to [-1, +1].
+        /// Useful for geometric calculations affected by floating-point drift.
+        /// </summary>
+        public static Rad rAcosClamped(float fValue)
+        {
+            return new Rad(float.Acos(float.Clamp(fValue, -1f, 1f)));
+        }
+
+        /// <summary>
+        /// Returns the arc sine of the value and returns the angle
+        /// </summary>
+        public static Rad rAsin(float fValue)
+        {
+            return new Rad(float.Asin(fValue));
+        }
+
+        /// <summary>
+        /// Returns the arc cosine of the value after clamping it to [-1, +1].
+        /// Useful for geometric calculations affected by floating-point drift.
+        /// </summary>
+        public static Rad rAsinClamped(float fValue)
+        {
+            return new Rad(float.Asin(float.Clamp(fValue, -1f, 1f)));
         }
 
         // Rad +/- Rad
