@@ -49,31 +49,31 @@ namespace PicoGK.Numerics
         /// Azimuth angle in the XY plane, measured from +X toward +Y.
         /// Range from Cartesian conversion: [-π .. +π].
         /// </summary>
-        public float Phi = 0;
+        public Rad Phi = Rad.Zero;
 
         /// <summary>
         /// Polar angle measured from +Z toward the XY plane and onward to -Z.
         /// Range: [0 .. π].
         /// </summary>
-        public float Theta = 0;
+        public Rad Theta = Rad.Zero;
 
         /// <summary>
         /// Initializes a new Spherical coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Spherical(float fR, float fPhi, float fTheta)
+        public Spherical(float fR, Rad rPhi, Rad rTheta)
         {
             if (!float.IsFinite(fR) || fR < 0f)
                 throw new ArgumentException(
                 "Radius must be finite and non-negative.",
                 nameof(fR));
 
-            if (fTheta < 0 || fTheta > float.Pi)
-                throw new ArgumentException("Theta must be in the range [0, π].", nameof(fTheta));
+            if (rTheta < 0 || rTheta > float.Pi)
+                throw new ArgumentException("Theta must be in the range [0, π].", nameof(rTheta));
 
-            Theta   = fTheta;
+            Theta   = rTheta;
             R       = fR;
-            Phi     = fPhi;
+            Phi     = rPhi;
         }
 
         /// <summary>
@@ -87,13 +87,13 @@ namespace PicoGK.Numerics
             if (R.bAlmostZero())
             {
                 R     = 0;
-                Phi   = 0;
-                Theta = 0;
+                Phi   = Rad.Zero;
+                Theta = Rad.Zero;
                 return;
             }
 
-            Phi   = float.Atan2(vecCartesian.Y, vecCartesian.X);
-            Theta = float.Acos(float.Clamp(vecCartesian.Z / R, -1f, 1f));
+            Phi   = (Rad) float.Atan2(vecCartesian.Y, vecCartesian.X);
+            Theta = (Rad) float.Acos(float.Clamp(vecCartesian.Z / R, -1f, 1f));
         }
 
         /// <summary>
@@ -125,12 +125,12 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Spherical oLerp(Spherical oA, Spherical oB, float fT)
         {
-            float fDeltaPhi = (oB.Phi - oA.Phi).fNormalizedAngleRad();
+            Rad rDeltaPhi = (oB.Phi - oA.Phi).rNormalizedSigned();
 
             return new Spherical(
                 fR:     oA.R     + fT * (oB.R     - oA.R),
-                fPhi:   oA.Phi   + fT * fDeltaPhi,
-                fTheta: oA.Theta + fT * (oB.Theta - oA.Theta));
+                rPhi:   oA.Phi   + fT * rDeltaPhi,
+                rTheta: oA.Theta + fT * (oB.Theta - oA.Theta));
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace PicoGK.Numerics
         /// Azimuth angle in the XY plane.
         /// Range from cartesian conversion: [-π .. +π].
         /// </summary>
-        public float Phi = 0;
+        public Rad Phi = Rad.Zero;
         /// <summary>
         /// Position along the Z axis
         /// </summary>
@@ -172,9 +172,9 @@ namespace PicoGK.Numerics
         /// Initialize a new cylindrical coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Cylindrical( float fR, 
-                            float fPhi, 
-                            float fZ)
+        public Cylindrical( float   fR, 
+                            Rad     rPhi, 
+                            float   fZ)
         {
             if (!float.IsFinite(fR) || fR < 0f)
                 throw new ArgumentException(
@@ -182,7 +182,7 @@ namespace PicoGK.Numerics
                 nameof(fR));
 
             R   = fR;
-            Phi = fPhi;
+            Phi = rPhi;
             Z   = fZ;
         }
 
@@ -239,11 +239,11 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Cylindrical oLerp(Cylindrical oA, Cylindrical oB, float fT)
         {
-            float fDeltaPhi = (oB.Phi - oA.Phi).fNormalizedAngleRad();
+            Rad rDeltaPhi = (oB.Phi - oA.Phi).rNormalizedSigned();
 
             return new Cylindrical(
                 fR:   oA.R + fT * (oB.R - oA.R),
-                fPhi: oA.Phi + fT * fDeltaPhi,
+                rPhi: oA.Phi + fT * rDeltaPhi,
                 fZ:   oA.Z + fT * (oB.Z - oA.Z));
         }
 
@@ -277,13 +277,13 @@ namespace PicoGK.Numerics
         /// Azimuth angle in the XY plane.
         /// Range from cartesian conversion [-π .. +π].
         /// </summary>
-        public float Phi = 0;
+        public Rad Phi = Rad.Zero;
 
         /// <summary>
         /// Initialize a new polar coordinate.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Polar(float fR, float fPhi)
+        public Polar(float fR, Rad rPhi)
         {
             if (!float.IsFinite(fR) || fR < 0f)
                 throw new ArgumentException(
@@ -291,7 +291,7 @@ namespace PicoGK.Numerics
                 nameof(fR));
 
             R   = fR;
-            Phi = fPhi;
+            Phi = rPhi;
         }
 
         /// <summary>
@@ -307,12 +307,12 @@ namespace PicoGK.Numerics
             if (fLenSq <= Tolerances.fZeroSquared)
             {
                 R   = 0;
-                Phi = 0;   // Azimuth is undefined at the origin
+                Phi = Rad.Zero;   // Azimuth is undefined at the origin
                 return;
             }
 
             R   = float.Sqrt(fLenSq);
-            Phi = float.Atan2(vecCartesian.Y, vecCartesian.X);
+            Phi = (Rad) float.Atan2(vecCartesian.Y, vecCartesian.X);
         }
 
         /// <summary>
@@ -332,11 +332,11 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Polar oLerp(Polar oA, Polar oB, float fT)
         {
-            float fDeltaPhi = (oB.Phi - oA.Phi).fNormalizedAngleRad();
+            Rad rDeltaPhi = (oB.Phi - oA.Phi).rNormalizedSigned();
 
             return new Polar(
                 fR:   oA.R + fT * (oB.R - oA.R),
-                fPhi: oA.Phi + fT * fDeltaPhi);
+                rPhi: oA.Phi + fT * rDeltaPhi);
         }
 
         /// <summary>
