@@ -34,35 +34,248 @@
 //
 
 using System.Globalization;
-using System.Runtime.CompilerServices;
 
 namespace PicoGK.Numerics
 {    
     /// <summary>
-    /// This class implements helper functions and constants relevant to angles in Radians
+    /// This type encapsulates an angle in Radians, with helper functions to convert from Degrees
     /// </summary>
-    public static class Rad
+    public readonly struct Rad :   IComparable<Rad>,
+                                   IEquatable<Rad>
     {
+        readonly float m_fRad = 0;
+
         /// <summary>
         /// Defines 2*Pi, which is constantly being used in Rad angles
         /// </summary>
-        public const float TwoPi = float.Pi * 2f;
+        public const float TwoPi = float.Tau;
 
         /// <summary>
-        /// Ensure the passed angles is in the range [-π, +π]
+        /// Zero degrees angles
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float fNormalizedAngleRad(this float fAngle)
+        public static readonly Rad Zero = new(0f);
+
+        /// <summary>
+        /// 360º angle
+        /// </summary>
+        public static readonly Rad Full = new(TwoPi);
+
+        /// <summary>
+        /// 180º angle
+        /// </summary>
+        public static readonly Rad Half = new(TwoPi / 2f);
+
+        /// <summary>
+        /// 90º angle
+        /// </summary>
+        public static readonly Rad Quarter = new(TwoPi / 4f);
+
+        /// <summary>
+        /// 0º angle
+        /// </summary>
+        public static readonly Rad Deg0 = Zero;
+
+        /// <summary>
+        /// 360º angle
+        /// </summary>
+        public static readonly Rad Deg360 = Full;
+
+        /// <summary>
+        /// 180º angle
+        /// </summary>
+        public static readonly Rad Deg180 = Half;
+
+        /// <summary>
+        /// 90º angle
+        /// </summary>
+        public static readonly Rad Deg90 = Quarter;
+
+        /// <summary>
+        /// 45º angle
+        /// </summary>
+        public static readonly Rad Deg45 = rFromDeg(45);
+
+        /// <summary>
+        /// Initialize a new Rad value from a float radians angle
+        /// </summary>
+        public Rad(float fRad)
         {
-            // Returns angle in the range [-π, +π]
-            float fNormalized = MathF.IEEERemainder(fAngle, 2f * float.Pi);
-
-            // Canonicalize negative zero
-            if (fNormalized == 0f)
-                return 0f;
-
-            return fNormalized;
+            m_fRad = fRad;
         }
+
+        /// <summary>
+        /// Create new Rad value from a float radians angle
+        /// </summary>
+        public static Rad rFromRad(float fRad)
+        {
+            return new Rad(fRad);
+        }
+
+        /// <summary>
+        /// Create a new Rad value from a floating point angle in degrees
+        /// </summary>
+        public static Rad rFromDeg(float fDegrees)
+        {
+            return new Rad(fDegrees * TwoPi / 360f);
+        }
+
+        /// <summary>
+        /// float value of the angle in radians
+        /// </summary>
+        public float fRad => m_fRad;
+
+        /// <summary>
+        /// angle in degrees 
+        /// </summary>
+        public float fDeg => m_fRad * 360f / TwoPi;
+
+        /// <summary>
+        /// Return the angle normalized to the range 
+        /// -π .. +π
+        /// </summary>
+        public Rad rNormalizedSigned()
+        {
+            float f = MathF.IEEERemainder(m_fRad, TwoPi);
+
+            if (f == 0f)
+                return Zero;
+
+            return new Rad(f);
+        }
+
+        /// <summary>
+        /// Return the angle normalized to the range [0, 2π)
+        /// </summary>
+        public Rad rNormalizedPositive()
+        {
+            float f = m_fRad % TwoPi;
+
+            if (f < 0f)
+                f += TwoPi;
+
+            if (f == 0f)
+                return Zero;
+
+            return new Rad(f);
+        }
+
+        /// <summary>
+        /// Implicit conversion from a Rad value into float
+        /// for seamless passing in to functions that require floats
+        /// float f=float.Cos(rAngle)
+        /// </summary>
+        public static implicit operator float(Rad r)
+        {
+            return r.m_fRad;
+        }
+
+        /// <summary>
+        /// Explicit conversion from float to Rad value.
+        /// Allows you to write Rad rAngle = (Rad) float.Pi;
+        /// Note the explicit cast to make it clear you are
+        /// expecting a radians value in the float.
+        /// </summary>
+        public static explicit operator Rad(float fRad)
+        {
+            return new Rad(fRad);
+        }
+
+        /// <summary>
+        /// Test for fuzzy equality
+        /// </summary>
+        public bool bAlmostEqual(Rad other, float fToleranceRad = Tolerances.fDef)
+        {
+            return float.Abs(m_fRad - other.m_fRad) <= fToleranceRad;
+        }
+
+        /// <summary>
+        /// Tests for fuzzy equality of the normalized angle (0º == 360º == 720º)
+        /// </summary>
+        public bool bAlmostEqualPeriodic(Rad other, float fToleranceRad = Tolerances.fDef)
+        {
+            return float.Abs((this - other).rNormalizedSigned().m_fRad) <= fToleranceRad;
+        }
+
+        // Rad +/- Rad
+
+        public static Rad operator +(Rad a, Rad b)
+        {
+            return new Rad(a.m_fRad + b.m_fRad);
+        }
+
+        public static Rad operator -(Rad a, Rad b)
+        {
+            return new Rad(a.m_fRad - b.m_fRad);
+        }
+
+        // Scaling
+
+        public static Rad operator *(Rad r, float fScale)
+        {
+            return new Rad(r.m_fRad * fScale);
+        }
+
+        public static Rad operator *(float fScale, Rad r)
+        {
+            return new Rad(fScale * r.m_fRad);
+        }
+
+        public static Rad operator /(Rad r, float fScale)
+        {
+            return new Rad(r.m_fRad / fScale);
+        }
+
+        // Dimensionless ratio
+
+        public static float operator /(Rad a, Rad b)
+        {
+            return a.m_fRad / b.m_fRad;
+        }
+
+        // Unary operators
+
+        public static Rad operator +(Rad r)
+        {
+            return r;
+        }
+
+        public static Rad operator -(Rad r)
+        {
+            return new Rad(-r.m_fRad);
+        }
+
+        public override string ToString()
+            => $"{fDeg.ToString("0.#", CultureInfo.InvariantCulture)}º";
+
+        public int CompareTo(Rad other)
+            => m_fRad.CompareTo(other.m_fRad);
+
+        public bool Equals(Rad other)
+            => m_fRad.Equals(other.m_fRad);
+
+        public override bool Equals(object? obj)
+            => obj is Rad other && Equals(other);
+
+        public override int GetHashCode()
+            => m_fRad.GetHashCode();
+
+        public static bool operator <(Rad left, Rad right)
+            => left.m_fRad < right.m_fRad;
+
+        public static bool operator >(Rad left, Rad right)
+            => left.m_fRad > right.m_fRad;
+
+        public static bool operator <=(Rad left, Rad right)
+            => left.m_fRad <= right.m_fRad;
+
+        public static bool operator >=(Rad left, Rad right)
+            => left.m_fRad >= right.m_fRad;
+
+        public static bool operator ==(Rad left, Rad right)
+            => left.Equals(right);
+
+        public static bool operator !=(Rad left, Rad right)
+            => !left.Equals(right);
     }
 
     public readonly struct Overhang :   IComparable<Overhang>,
