@@ -49,8 +49,15 @@ namespace PicoGK.Shapes
         public Line2d(  Vector2 vecA,
                         Vector2 vecB)
         {
-            m_vecA    = vecA;
-            m_vecB    = vecB;
+            if (!vecA.bIsFinite())
+                throw new ArgumentException("Start point must be finite.", nameof(vecA));
+
+            if (!vecB.bIsFinite())
+                throw new ArgumentException("End point must be finite.", nameof(vecB));
+
+            m_vecA      = vecA;
+            m_vecB      = vecB;
+            m_fLength   = (m_vecB - m_vecA).Length(); 
         }
 
         /// <summary>
@@ -74,10 +81,11 @@ namespace PicoGK.Shapes
             return Vector2.Lerp(m_vecA, m_vecB, fT);
         }
 
-        public float    fLength => (m_vecB - m_vecA).Length();
+        public float fLength    => m_fLength;
 
         readonly Vector2 m_vecA;
         readonly Vector2 m_vecB;
+        readonly float m_fLength;
     }
 
     /// <summary>
@@ -91,30 +99,42 @@ namespace PicoGK.Shapes
         /// </summary>
         public Arc2d(   Vector2 vecStart,
                         Vector2 vecCenter,
-                        float fAngle)
+                        Rad     rAngle)
         {
+            if (!vecStart.bIsFinite())
+                throw new ArgumentException("Start point must be finite.", nameof(vecStart));
+
+            if (!vecCenter.bIsFinite())
+                throw new ArgumentException("Center point must be finite.", nameof(vecCenter));
+
+            if (!rAngle.bIsFinite())
+                throw new ArgumentException("Angle must be finite.", nameof(rAngle));
+
             m_vecStart  = vecStart;
             m_vecCenter = vecCenter;
-            m_fAngle    = fAngle;
+            m_rAngle    = rAngle;
 
-            Vector2 v0  = m_vecStart - m_vecCenter;
-            m_fRadius   = v0.Length();
+            m_vec0      = m_vecStart - m_vecCenter;
+            m_fRadius   = m_vec0.Length();
 
             // Handle degenerate radius (start == center)
-            if (m_fRadius <= 1e-8f)
+            if (m_fRadius.bAlmostZero())
             {
-                m_vecEnd  = m_vecStart;
-                m_fLength = 0f;
+                m_bDegenerate   = true;
+                m_vecEnd        = m_vecStart;
+                m_fLength       = 0f;
                 return;
             }
 
-            // Rotate start-around-center by fAngle to get end
-            float c = float.Cos(m_fAngle);
-            float s = float.Sin(m_fAngle);
-            Vector2 v1 = new (v0.X * c - v0.Y * s, v0.X * s + v0.Y * c);
+            m_bDegenerate = false;
+            
+            // Rotate start-around-center by m_rAngle to get end
+            float c = m_rAngle.fCos();
+            float s = m_rAngle.fSin();
+            Vector2 v1 = new (m_vec0.X * c - m_vec0.Y * s, m_vec0.X * s + m_vec0.Y * c);
 
             m_vecEnd  = m_vecCenter + v1;
-            m_fLength = m_fRadius * float.Abs(m_fAngle);
+            m_fLength = m_fRadius * float.Abs(m_rAngle.fRad);
         }
 
         /// <summary>
@@ -135,33 +155,44 @@ namespace PicoGK.Shapes
         /// <summary>
         /// Angle in radians (positive is counter clockwise)
         /// </summary>
-        public float fAngle         => m_fAngle;
+        public Rad rAngle           => m_rAngle;
+
+        /// <summary>
+        /// Radius of the arc
+        /// </summary>
+        public float fRadius        => m_fRadius;
         
-        public float fLength => m_fLength;
+        public float fLength        => m_fLength;
 
-        public Vector2 vecPtAtT(float t)
+        public Vector2 vecPtAtT(float fT)
         {
-            t = float.Clamp(t, 0f, 1f);
-
-            Vector2 v0 = m_vecStart - m_vecCenter;
-
-            if (m_fRadius <= 1e-8f)
+            if (fT <= 0f)
                 return m_vecStart;
 
-            float ang = m_fAngle * t;
-            float c = float.Cos(ang);
-            float s = float.Sin(ang);
+            if (fT >= 1f)
+                return m_vecEnd;
 
-            Vector2 vt = new (v0.X * c - v0.Y * s, v0.X * s + v0.Y * c);
+            if (m_bDegenerate)
+                return m_vecStart;
+
+            Rad rAng = m_rAngle * fT;
+            float c = rAng.fCos();
+            float s = rAng.fSin();
+
+            Vector2 vt = new (m_vec0.X * c - m_vec0.Y * s, m_vec0.X * s + m_vec0.Y * c);
             return m_vecCenter + vt;
         }
 
-        readonly Vector2 m_vecStart;
-        readonly Vector2 m_vecEnd;
-        readonly Vector2 m_vecCenter;
-        readonly float   m_fRadius;
-        readonly float   m_fAngle;
-        readonly float   m_fLength;
+        readonly Vector2    m_vecStart;
+        readonly Vector2    m_vecEnd;
+        readonly Vector2    m_vecCenter;
+        readonly float      m_fRadius;
+        readonly Rad        m_rAngle;
+        readonly float      m_fLength;
+
+        readonly bool       m_bDegenerate;
+
+        readonly Vector2    m_vec0;
     } 
 
     /// <summary>
@@ -172,14 +203,16 @@ namespace PicoGK.Shapes
         /// <summary>
         /// Add another path to the compound path
         /// Note, the start coordinate of the added path needs to be
-        /// exactly coincide with the current end point
+        /// coincide with the current end point
         /// </summary>
         public void Add(IPath2d xPath)
         {
             if (m_axPaths.Count > 0)
             {
-                if (!m_axPaths[^1].vecPtAtT(1).bAlmostEqual(xPath.vecPtAtT(0)))
-                    throw new Exception("Added path needs to begin exactly at the end of the previous path");
+                if (!m_axPaths[^1].vecPtAtT(1f).bAlmostEqual(xPath.vecPtAtT(0f)))
+                    throw new ArgumentException(
+                        "Added path must begin at the end of the previous path.",
+                        nameof(xPath));
             }
 
             m_axPaths.Add(xPath);
@@ -209,9 +242,9 @@ namespace PicoGK.Shapes
         /// Append an arc with the specified center and angle
         /// The start coordinate is the current end coordinate
         /// </summary>
-        public void AddArc(Vector2 vecCenter, float fAngle)
+        public void AddArc(Vector2 vecCenter, Rad rAngle)
         {
-            Arc2d oArc = new(vecPtAtT(1), vecCenter, fAngle);
+            Arc2d oArc = new(vecPtAtT(1), vecCenter, rAngle);
             Add(oArc);
         }
 
@@ -220,41 +253,47 @@ namespace PicoGK.Shapes
         /// current end point
         /// The start coordinate is the current end coordinate
         /// </summary>
-        public void AddArcRel(Vector2 vecCenterRel, float fAngle)
+        public void AddArcRel(Vector2 vecCenterRel, Rad rAngle)
         {
             Vector2 vecStart = vecPtAtT(1);
-            Arc2d oArc = new(vecStart, vecStart + vecCenterRel, fAngle);
+            Arc2d oArc = new(vecStart, vecStart + vecCenterRel, rAngle);
             Add(oArc);
         }
 
-        public Vector2 vecPtAtT(float t)
+        public Vector2 vecPtAtT(float fT)
         {
-            Vector2 vecLast = Vector2.Zero;
+            if (m_axPaths.Count == 0)
+                return Vector2.Zero;
 
-            t = float.Clamp(t, 0f, 1f);
+            fT = float.Clamp(fT, 0f, 1f);
 
-            float fCurrent = t * m_fLength;
+            float fCurrent = fT * m_fLength;
+            Vector2 vecLast = m_axPaths[0].vecPtAtT(0f);
 
             foreach (IPath2d xPath in m_axPaths)
             {
-                if (xPath.fLength <= 0)
+                if (xPath.fLength <= 0f)
+                {
+                    vecLast = xPath.vecPtAtT(1f);
                     continue;
+                }
 
                 if (fCurrent <= xPath.fLength)
                 {
-                    float fT = fCurrent / xPath.fLength;
-                    return xPath.vecPtAtT(fT);
+                    float fLocalT = fCurrent / xPath.fLength;
+                    return xPath.vecPtAtT(fLocalT);
                 }
 
                 fCurrent -= xPath.fLength;
-                vecLast = xPath.vecPtAtT(1);
+                vecLast = xPath.vecPtAtT(1f);
             }
 
             return vecLast;
         }
 
-        public float fLength => m_fLength;
-        List<IPath2d> m_axPaths = new();
+        public float fLength    => m_fLength;
+        
+        readonly List<IPath2d> m_axPaths = [];
         float m_fLength = 0; 
     }
 }
