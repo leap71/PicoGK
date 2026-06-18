@@ -63,13 +63,16 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Spherical(float fR, Rad rPhi, Rad rTheta)
         {
-            if (!float.IsFinite(fR) || fR < 0f)
+            if (!fR.bIsFinite() || fR < 0f)
                 throw new ArgumentException(
                 "Radius must be finite and non-negative.",
                 nameof(fR));
 
-            if (rTheta < 0 || rTheta > float.Pi)
-                throw new ArgumentException("Theta must be in the range [0, π].", nameof(rTheta));
+            if (!rPhi.bIsFinite())
+                throw new ArgumentException("Phi must be finite.", nameof(rPhi));
+
+            if (!rTheta.bIsFinite() || rTheta < Rad.Zero || rTheta > Rad.Half)
+                throw new ArgumentException("Theta must be finite and in the range [0, π].", nameof(rTheta));
 
             Theta   = rTheta;
             R       = fR;
@@ -82,6 +85,11 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Spherical(Vector3 vecCartesian)
         {
+            if (!vecCartesian.bIsFinite())
+                throw new ArgumentException(
+                "Cartesian vector must be finite.",
+                nameof(vecCartesian));
+            
             R = vecCartesian.Length();
 
             if (R.bAlmostZero())
@@ -92,8 +100,8 @@ namespace PicoGK.Numerics
                 return;
             }
 
-            Phi   = (Rad) float.Atan2(vecCartesian.Y, vecCartesian.X);
-            Theta = (Rad) float.Acos(float.Clamp(vecCartesian.Z / R, -1f, 1f));
+            Phi   = Rad.rAtan2(vecCartesian.vecStripZ());
+            Theta = Rad.rAcosClamped(vecCartesian.Z / R);
         }
 
         /// <summary>
@@ -111,12 +119,12 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector3 vecAsCartesian()
         {
-            float fSinTheta = float.Sin(Theta);
+            float fSinTheta = Theta.fSin();
 
             return new Vector3(
-                R * fSinTheta * float.Cos(Phi),
-                R * fSinTheta * float.Sin(Phi),
-                R * float.Cos(Theta));
+                R * fSinTheta * Phi.fCos(),
+                R * fSinTheta * Phi.fSin(),
+                R * Theta.fCos());
         }
 
         /// <summary>
@@ -176,10 +184,16 @@ namespace PicoGK.Numerics
                             Rad     rPhi, 
                             float   fZ)
         {
-            if (!float.IsFinite(fR) || fR < 0f)
+            if (!fR.bIsFinite() || fR < 0f)
                 throw new ArgumentException(
                 "Radius must be finite and non-negative.",
                 nameof(fR));
+
+            if (!rPhi.bIsFinite())
+                throw new ArgumentException("Phi must be finite.", nameof(rPhi));
+
+            if (!fZ.bIsFinite())
+                throw new ArgumentException("Z must be finite.", nameof(fZ));
 
             R   = fR;
             Phi = rPhi;
@@ -192,10 +206,8 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Cylindrical( Polar oPolar, 
                             float fZ)
+            : this(oPolar.R, oPolar.Phi, fZ)
         {
-            R   = oPolar.R;
-            Phi = oPolar.Phi;
-            Z   = fZ;
         }
 
         /// <summary>
@@ -203,12 +215,8 @@ namespace PicoGK.Numerics
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Cylindrical(Vector3 vecCartesian)
+            : this(new Polar(vecCartesian.vecStripZ()), vecCartesian.Z)
         {
-            Polar oPolar = new(vecCartesian.vecStripZ());
-
-            R   = oPolar.R;
-            Phi = oPolar.Phi;
-            Z   = vecCartesian.Z;
         }
 
         /// <summary>
@@ -228,8 +236,8 @@ namespace PicoGK.Numerics
         public readonly Vector3 vecAsCartesian()
         {
             return new Vector3(
-                R * float.Cos(Phi),
-                R * float.Sin(Phi),
+                R * Phi.fCos(),
+                R * Phi.fSin(),
                 Z);
         }
 
@@ -242,9 +250,9 @@ namespace PicoGK.Numerics
             Rad rDeltaPhi = (oB.Phi - oA.Phi).rNormalizedSigned();
 
             return new Cylindrical(
-                fR:   oA.R + fT * (oB.R - oA.R),
+                fR:   oA.R   + fT * (oB.R - oA.R),
                 rPhi: oA.Phi + fT * rDeltaPhi,
-                fZ:   oA.Z + fT * (oB.Z - oA.Z));
+                fZ:   oA.Z   + fT * (oB.Z - oA.Z));
         }
 
         /// <summary>
@@ -285,10 +293,13 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Polar(float fR, Rad rPhi)
         {
-            if (!float.IsFinite(fR) || fR < 0f)
+            if (!fR.bIsFinite() || fR < 0f)
                 throw new ArgumentException(
                 "Radius must be finite and non-negative.",
                 nameof(fR));
+
+            if (!rPhi.bIsFinite())
+                throw new ArgumentException("Phi must be finite.", nameof(rPhi));
 
             R   = fR;
             Phi = rPhi;
@@ -301,6 +312,11 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Polar(Vector2 vecCartesian)
         {
+            if (!vecCartesian.bIsFinite())
+                throw new ArgumentException(
+                "Cartesian vector must be finite.",
+                nameof(vecCartesian));
+
             float fLenSq    =   vecCartesian.X * vecCartesian.X +
                                 vecCartesian.Y * vecCartesian.Y;
 
@@ -312,7 +328,7 @@ namespace PicoGK.Numerics
             }
 
             R   = float.Sqrt(fLenSq);
-            Phi = (Rad) float.Atan2(vecCartesian.Y, vecCartesian.X);
+            Phi = Rad.rAtan2(vecCartesian);
         }
 
         /// <summary>
@@ -321,9 +337,8 @@ namespace PicoGK.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector2 vecAsCartesian()
         {
-            return new Vector2(
-                R * float.Cos(Phi),
-                R * float.Sin(Phi));
+            return new Vector2( R * Phi.fCos(),
+                                R * Phi.fSin());
         }
 
         /// <summary>
@@ -335,7 +350,7 @@ namespace PicoGK.Numerics
             Rad rDeltaPhi = (oB.Phi - oA.Phi).rNormalizedSigned();
 
             return new Polar(
-                fR:   oA.R + fT * (oB.R - oA.R),
+                fR:   oA.R   + fT * (oB.R - oA.R),
                 rPhi: oA.Phi + fT * rDeltaPhi);
         }
 
