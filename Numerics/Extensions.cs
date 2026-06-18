@@ -193,5 +193,36 @@ namespace PicoGK.Numerics
                                         vecPlaneNormalUnitVector) 
                     * vecPlaneNormalUnitVector;
 		}
+
+        /// <summary>
+        /// Checks whether all vector coordinate values are finite, i.e. not NaN and not positive or negative infinity.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool bIsFinite(this Vector2 vec)
+        {
+            return vec.X.bIsFinite() && vec.Y.bIsFinite();
+        }
+
+        /// <summary>
+        /// Checks whether all vector coordinate values are finite, i.e. not NaN and not positive or negative infinity.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool bIsFinite(this Vector3 vec)
+        {
+            return vec.X.bIsFinite() && vec.Y.bIsFinite() && vec.Z.bIsFinite();
+        }
+    }
+
+    public static class FloatExt
+    {
+        /// <summary>
+        /// Checks whether the value is finite, i.e. not NaN and not positive or negative infinity.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool bIsFinite(this float f)
+        {
+            return float.IsFinite(f);
+        }
+        
     }
 }
