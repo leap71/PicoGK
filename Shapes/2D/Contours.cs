@@ -60,10 +60,10 @@ namespace PicoGK.Shapes
 
         public Vector2 vecPtAtT(float t)
         {
-            float fAngle = float.Clamp(t, 0, 1) * float.Pi * 2;
+            Rad rAngle = Rad.rFromNormalized(t);
             
-            return  new (   float.Cos(fAngle) * fR,
-                            float.Sin(fAngle) * fR);
+            return  new (   rAngle.fCos() * fR,
+                            rAngle.fSin() * fR);
         }
 
         public void PtAtT(  in float t, 
@@ -97,11 +97,11 @@ namespace PicoGK.Shapes
             if (a == 0) 
                 throw new ArgumentException("Major axis cannot be zero.");
             
-            m_fPhi = float.Atan2(vecAxisA.Y, vecAxisA.X);
+            m_rPhi = Rad.rAtan2(vecAxisA.Y, vecAxisA.X);
             m_fA = a;
             m_fB = fLengthB;
-            m_fCosPhi = float.Cos(m_fPhi);
-            m_fSinPhi = float.Sin(m_fPhi);
+            m_fCosPhi = m_rPhi.fCos();
+            m_fSinPhi = m_rPhi.fSin();
 
             m_oSampler = new(this);
         }
@@ -118,9 +118,9 @@ namespace PicoGK.Shapes
         {
             m_fA = a;
             m_fB = b;
-            m_fPhi      = fAngle;
-            m_fCosPhi   = float.Cos(fAngle);
-            m_fSinPhi   = float.Sin(fAngle);
+            m_rPhi      = (Rad) fAngle;
+            m_fCosPhi   = m_rPhi.fCos();
+            m_fSinPhi   = m_rPhi.fSin();
 
             m_oSampler = new(this);
         }
@@ -128,25 +128,30 @@ namespace PicoGK.Shapes
         /// <summary>
         /// Rotation angle of the ellipse
         /// </summary>
-        public float fPhi => m_fPhi;
+        public float fPhi   => m_rPhi.fRad;
+
+        /// <summary>
+        /// Rotation angle of the ellipse
+        /// </summary>
+        public Rad rPhi     => m_rPhi;
 
         /// <summary>
         /// Half-length of the ellipse in A
         /// </summary>
-        public float fA => m_fA;
+        public float fA     => m_fA;
 
         /// <summary>
         /// Half-length of the ellipse in B
         /// </summary>
-        public float fB => m_fB;
+        public float fB     => m_fB;
 
         public float fLength => m_oSampler.fTotalLength;
 
         public Vector2 vecPtAtTLinear(float t)
         {
-            float theta = float.Clamp(t, 0f, 1f) * 2f * float.Pi;
-            float x = m_fA * float.Cos(theta);
-            float y = m_fB * float.Sin(theta);
+            Rad theta = Rad.rFromNormalized(t);
+            float x = m_fA * theta.fCos();
+            float y = m_fB * theta.fSin();
             
             return new Vector2( x * m_fCosPhi - y * m_fSinPhi, 
                                 x * m_fSinPhi + y * m_fCosPhi);
@@ -158,7 +163,7 @@ namespace PicoGK.Shapes
         }
 
         readonly ContourSampler2d   m_oSampler;
-        readonly float              m_fPhi;
+        readonly Rad                m_rPhi;
         readonly float              m_fA;
         readonly float              m_fB;
         readonly float              m_fCosPhi;
