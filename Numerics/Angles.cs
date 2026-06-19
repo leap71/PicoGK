@@ -121,6 +121,21 @@ namespace PicoGK.Numerics
         }
 
         /// <summary>
+        /// Create a new Rad value from a normalized value 0..1, mapped to 0..360º.
+        /// Values outside the range are clamped.
+        /// </summary>
+        public static Rad rFromNormalized(float fNormalized)
+        {
+            if (fNormalized <= 0f)
+                return Zero;
+
+            if (fNormalized >= 1f)
+                return Full;
+
+            return Full * fNormalized;
+        }
+
+        /// <summary>
         /// float value of the angle in radians
         /// </summary>
         public float fRad => m_fRad;
