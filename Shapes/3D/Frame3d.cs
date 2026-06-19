@@ -36,6 +36,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using PicoGK.Numerics;
 
 namespace PicoGK.Shapes
 {
@@ -283,12 +284,12 @@ namespace PicoGK.Shapes
         /// Rotate the Frame3d around an arbitrary (world-space) axis through the frame’s origin.
         /// </summary>
         /// <param name="vecAxis">Rotation axis in world coordinates</param>
-        /// <param name="fAngleRad">Rotation angle in radians</param>
+        /// <param name="rAngle">Rotation angle in radians</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Frame3d frmRotatedWorld(Vector3 vecAxis, float fAngleRad)
+        public Frame3d frmRotatedWorld(Vector3 vecAxis, Rad rAngle)
         {
-            var q = Quaternion.CreateFromAxisAngle(vecSafeNormalize(vecAxis), fAngleRad);
+            var q = Quaternion.CreateFromAxisAngle(vecSafeNormalize(vecAxis), rAngle.fRad);
             var x = Vector3.Transform(vecLx, q);
             var y = Vector3.Transform(vecLy, q);
             var z = Vector3.Transform(vecLz, q);
