@@ -273,7 +273,7 @@ namespace PicoGK
         {
             Vector3 vecResult   = Vector3.Zero;
 
-            _VoxelsToMm(    hThis,
+            _MmToVoxels(    hThis,
                             vecMm,
                             ref vecResult);
 
