@@ -311,22 +311,31 @@ namespace PicoGK
         /// </summary>
         /// <param name="bDisposing">True if called from explict Dispose</param>
         protected virtual void Dispose(bool bDisposing)
-        {   
-            if (m_bDisposed)
-            {
-                return;
-            }
-
-            Console.WriteLine("Disposing Library");
-
+        {
+            // Stop scheduling new callbacks during explicit disposal.
+            // A callback already queued may still execute, so synchronization
+            // with MonitorMemory() is required below.
             if (bDisposing)
+                m_oTimerMemCheck.Dispose();
+
+            lock (m_mtxMemory)
             {
-                m_oTimerMemCheck?.Dispose();
+                if (m_bDisposed)
+                    return;
+
+                m_bDisposed = true;
+
+                // Balance all memory pressure previously registered for this
+                // Library before releasing the corresponding native memory.
+                if (m_nUsedMemory > 0)
+                {
+                    GC.RemoveMemoryPressure(m_nUsedMemory);
+                    m_nUsedMemory = 0;
+                }
+
+                // unmanaged resources -- ALWAYS
                 _DestroyInstance(hThis);
             }
-
-            Console.WriteLine("Done Disposing Library");
-            m_bDisposed = true;
         }
 
         bool m_bDisposed = false;
@@ -335,7 +344,8 @@ namespace PicoGK
         internal readonly Timer     m_oTimerMemCheck;
         static readonly TimeSpan    m_oInterval = TimeSpan.FromSeconds(10);
 
-        long m_nUsedMemory = 0;
+        readonly object m_mtxMemory = new();
+        long            m_nUsedMemory = 0;
 
         void MonitorMemory()
         {
@@ -346,20 +356,27 @@ namespace PicoGK
             // potentially gigabytes of memory allocated
             // by the PicoGK runtime (the C# objects are all tiny)
 
-            long nNew = nTotalMemUsage();
-            
-            long nDiff = nNew - m_nUsedMemory;
+            lock (m_mtxMemory)
+            {
+                // A Timer callback may already have been queued when Dispose()
+                // was called. Never access the native instance after disposal.
+                if (m_bDisposed)
+                    return;
 
-            if (nDiff > 0)
-            {
-                GC.AddMemoryPressure(nDiff);
-            }   
-            else if (nDiff < 0)
-            {
-                GC.RemoveMemoryPressure(-nDiff);
+                long nNew  = nTotalMemUsage();
+                long nDiff = nNew - m_nUsedMemory;
+
+                if (nDiff > 0)
+                {
+                    GC.AddMemoryPressure(nDiff);
+                }
+                else if (nDiff < 0)
+                {
+                    GC.RemoveMemoryPressure(-nDiff);
+                }
+
+                m_nUsedMemory = nNew;
             }
-
-            m_nUsedMemory = nNew;
         }
     }
 }
