@@ -131,15 +131,15 @@ namespace PicoGK.Shapes
         }
 
         /// <summary>
-        /// Creates a Frame3d from a column-vector Matrix4x4.
-        /// Rows convention: [X; Y; Z; Origin] with translation in last column.
+        /// Creates a Frame3d from a System.Numerics row-vector rigid transform.
+        /// The basis and translation occupy the matrix rows.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Frame3d frmFromMatrix4x4(in Matrix4x4 mat)
         {
             Vector3 vecX = new(mat.M11, mat.M12, mat.M13);
             Vector3 vecZ = new(mat.M31, mat.M32, mat.M33);
-            Vector3 vecP = new(mat.M14, mat.M24, mat.M34);
+            Vector3 vecP = new(mat.M41, mat.M42, mat.M43);
             return new Frame3d(vecP, vecZ, vecX);
         }
 
@@ -233,10 +233,10 @@ namespace PicoGK.Shapes
                                     -Vector3.Dot(vecLy, vecPos),
                                     -Vector3.Dot(vecLz, vecPos));
 
-            // Inverse maps world to local; its Z/X are rows of R (i.e., original basis as world dirs).
-            // Reuse ctor’s orthonormalization to rebuild consistent handedness.
-            Vector3 vecRtZ = new (vecLz.X, vecLz.Y, vecLz.Z);
-            Vector3 vecRtX = new (vecLx.X, vecLx.Y, vecLx.Z);
+            // The inverse rotation is R^T. Its basis rows are the columns
+            // of the original rotation matrix.
+            Vector3 vecRtZ = new(vecLx.Z, vecLy.Z, vecLz.Z);
+            Vector3 vecRtX = new(vecLx.X, vecLy.X, vecLz.X);
             return new Frame3d(vecTInv, vecRtZ, vecRtX);
         }
 
