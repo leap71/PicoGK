@@ -132,8 +132,6 @@ namespace PicoGK
                     oFile.Seek(lPos, 0);
                 }
 
-                float fScale = 1.0f; // 1mm default
-
                 if (eLoadUnit == EStlUnit.AUTO)
                 {
                     // See if there is the inofficial "UNIT" tag inside the header
@@ -172,7 +170,7 @@ namespace PicoGK
                 {
                     oMesh.DoReadMeshFromBinaryStl(  oReader,
                                                     eLoadUnit,
-                                                    fScale,
+                                                    fPostScale,
                                                     vecOffset);
                 }
 
@@ -335,10 +333,18 @@ namespace PicoGK
 
             SStlTriangle sTriangle = new SStlTriangle();
             var oTriangleSpan = MemoryMarshal.CreateSpan(ref sTriangle, 1);
+            Span<byte> abyTriangle = MemoryMarshal.AsBytes(oTriangleSpan);
+
+            // Validate the triangle count against the remaining file length
+            long lRequiredBytes = (long)nNumberOfTriangles * abyTriangle.Length;
+            long lAvailableBytes = oReader.BaseStream.Length - oReader.BaseStream.Position;
+
+            if (lRequiredBytes > lAvailableBytes)
+                throw new InvalidDataException("Invalid STL file: triangle count exceeds available data");
 
             while (nNumberOfTriangles > 0)
             {
-                oReader.Read(MemoryMarshal.AsBytes(oTriangleSpan));
+                oReader.BaseStream.ReadExactly(abyTriangle);
 
                 Vector3 v1 = new Vector3(sTriangle.V1X, sTriangle.V1Y, sTriangle.V1Z);
                 Vector3 v2 = new Vector3(sTriangle.V2X, sTriangle.V2Y, sTriangle.V2Z);
@@ -347,6 +353,11 @@ namespace PicoGK
                 TransformFromUnit(ref v1, eLoadUnit, fPostScale, vecPostOffsetMM);
                 TransformFromUnit(ref v2, eLoadUnit, fPostScale, vecPostOffsetMM);
                 TransformFromUnit(ref v3, eLoadUnit, fPostScale, vecPostOffsetMM);
+
+                if (!float.IsFinite(v1.X) || !float.IsFinite(v1.Y) || !float.IsFinite(v1.Z) ||
+                    !float.IsFinite(v2.X) || !float.IsFinite(v2.Y) || !float.IsFinite(v2.Z) ||
+                    !float.IsFinite(v3.X) || !float.IsFinite(v3.Y) || !float.IsFinite(v3.Z))
+                    throw new InvalidDataException("Invalid STL file: non-finite vertex coordinates");
 
                 nAddTriangle(v1, v2, v3);
 
