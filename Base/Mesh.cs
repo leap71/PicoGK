@@ -352,10 +352,37 @@ namespace PicoGK
         public BBox3 oBoundingBox()
         {
             BBox3 oBBox = new BBox3();
-            _GetBoundingBox(    lib.hThis, 
-                                hThis, 
+            _GetBoundingBox(    lib.hThis,
+                                hThis,
                                 ref oBBox);
             return oBBox;
+        }
+
+        /// <summary>
+        /// Return the enclosed volume of a closed mesh in cubic millimeters,
+        /// using the divergence theorem (sum of signed tetrahedra to the origin).
+        /// Inner shells (sealed cavities) subtract correctly as long as their
+        /// triangles face into the cavity, which is how meshes from voxels are built.
+        /// The result is only meaningful for closed (watertight) meshes.
+        /// </summary>
+        /// <returns>Enclosed volume in cubic millimeters</returns>
+        public float fVolume()
+        {
+            double dVolume = 0.0;
+            for (int n=0; n<nTriangleCount(); n++)
+            {
+                GetTriangle(    n,
+                                out Vector3 vecA,
+                                out Vector3 vecB,
+                                out Vector3 vecC);
+
+                // Accumulate in double: large meshes have millions of small terms
+                dVolume +=  (double) vecA.X * ((double) vecB.Y * vecC.Z - (double) vecB.Z * vecC.Y)
+                          - (double) vecA.Y * ((double) vecB.X * vecC.Z - (double) vecB.Z * vecC.X)
+                          + (double) vecA.Z * ((double) vecB.X * vecC.Y - (double) vecB.Y * vecC.X);
+            }
+
+            return (float) Math.Abs(dVolume / 6.0);
         }
     }
 
